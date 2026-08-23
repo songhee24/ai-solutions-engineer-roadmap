@@ -1,4 +1,4 @@
-> Status: ✅ Implemented (branch `main`, первый коммит)
+> Status: ✅ Implemented (repo songhee24/ai-solutions-engineer-roadmap, ветка `main`, живёт на GitHub Pages)
 
 # Сайт-дорожная карта «С нуля до AI Solutions Engineer»
 
