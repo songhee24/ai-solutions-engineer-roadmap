@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Путь с нуля до AI Solutions Engineer — дорожная карта</title>
+<meta name="description" content="Интерактивная дорожная карта: от нуля до AI Solutions Engineer. Data Science как уверенная база, AI Engineering как глубокая специализация. Проверенные ссылки, часы, критерии готовности и отслеживание прогресса.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="./styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234338ca'/%3E%3Ctext x='50' y='68' font-size='54' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip-link" href="#main">Перейти к содержанию</a>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">T</span>
+      <span>AI Solutions Engineer</span>
+    </div>
+
+    <div class="header-controls">
+      <div class="segmented" role="group" aria-label="Стартовый уровень">
+        <button type="button" data-profile="novice" aria-pressed="true">Новичок</button>
+        <button type="button" data-profile="dev" aria-pressed="false">Разработчик</button>
+      </div>
+
+      <label class="visually-hidden" for="pace-select">Часов в неделю</label>
+      <select id="pace-select" class="btn" aria-describedby="pace-hint">
+        <option value="8">8 ч/нед — спокойный</option>
+        <option value="15" selected>15 ч/нед — основной</option>
+        <option value="25">25 ч/нед — интенсивный</option>
+        <option value="5">5 ч/нед</option>
+        <option value="10">10 ч/нед</option>
+        <option value="20">20 ч/нед</option>
+        <option value="30">30 ч/нед</option>
+        <option value="40">40 ч/нед</option>
+      </select>
+      <span id="pace-hint" class="visually-hidden">Сроки на странице пересчитываются автоматически</span>
+
+      <button type="button" id="theme-toggle" class="btn" aria-label="Переключить тему">
+        <span id="theme-icon" aria-hidden="true">◐</span><span id="theme-label">Тема</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ================= ГЛАВНЫЙ ЭКРАН ================= -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <h1 id="hero-title">Путь с нуля до AI Solutions Engineer</h1>
+        <p class="lede" id="hero-lede">Data Science — уверенная средняя база. AI Engineering и проектирование AI-решений — глубокая техническая специализация. Solutions Engineering — умение понять клиента, собрать систему и доказать её ценность.</p>
+
+        <div class="hero-stats" id="hero-stats"></div>
+
+        <div class="progress-track" role="img" aria-labelledby="progress-label">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <p id="progress-label" class="visually-hidden">Общий прогресс: 0%</p>
+
+        <div class="hero-actions">
+          <button type="button" class="btn btn-primary" id="continue-btn">Продолжить обучение</button>
+          <a class="btn" href="#diagnostics">Пройти диагностику</a>
+          <a class="btn" href="#roadmap">Вся карта</a>
+        </div>
+      </div>
+
+      <figure class="tshape">
+        <svg viewBox="0 0 420 300" role="img" aria-labelledby="tshape-title tshape-desc">
+          <title id="tshape-title">T-shaped профиль AI Solutions Engineer</title>
+          <desc id="tshape-desc">Горизонтальная перекладина — широкая база: данные, машинное обучение, backend, облако, безопасность, бизнес. Вертикальная ножка — глубина: AI Engineering, архитектура решений, интеграции.</desc>
+
+          <rect x="10" y="24" width="400" height="74" rx="12" fill="rgba(255,255,255,.10)" stroke="rgba(255,255,255,.28)"/>
+          <text x="210" y="18" text-anchor="middle" font-size="12" fill="#a8b1de" font-family="sans-serif">ШИРОКАЯ БАЗА — понимаю всю систему</text>
+
+          <g font-family="sans-serif" font-size="11" fill="#eef1ff" text-anchor="middle">
+            <rect x="20"  y="38" width="60" height="46" rx="8" fill="rgba(45,212,191,.18)"/><text x="50"  y="59">Данные</text><text x="50"  y="73" font-size="9" fill="#9fe9dd">SQL</text>
+            <rect x="86"  y="38" width="60" height="46" rx="8" fill="rgba(45,212,191,.18)"/><text x="116" y="59">ML</text>        <text x="116" y="73" font-size="9" fill="#9fe9dd">классика</text>
+            <rect x="152" y="38" width="60" height="46" rx="8" fill="rgba(45,212,191,.18)"/><text x="182" y="59">Backend</text>   <text x="182" y="73" font-size="9" fill="#9fe9dd">API</text>
+            <rect x="218" y="38" width="60" height="46" rx="8" fill="rgba(45,212,191,.18)"/><text x="248" y="59">Cloud</text>     <text x="248" y="73" font-size="9" fill="#9fe9dd">MLOps</text>
+            <rect x="284" y="38" width="60" height="46" rx="8" fill="rgba(45,212,191,.18)"/><text x="314" y="59">Security</text>  <text x="314" y="73" font-size="9" fill="#9fe9dd">риски</text>
+            <rect x="350" y="38" width="50" height="46" rx="8" fill="rgba(45,212,191,.18)"/><text x="375" y="59">Business</text> <text x="375" y="73" font-size="9" fill="#9fe9dd">ROI</text>
+          </g>
+
+          <rect x="150" y="110" width="120" height="176" rx="12" fill="rgba(129,140,248,.22)" stroke="rgba(129,140,248,.55)"/>
+          <g font-family="sans-serif" font-size="11.5" fill="#fff" text-anchor="middle">
+            <text x="210" y="136">AI Engineering</text>
+            <text x="210" y="162">RAG</text>
+            <text x="210" y="186">Агенты · Tools</text>
+            <text x="210" y="210">MCP · Интеграции</text>
+            <text x="210" y="234">Evals · Безопасность</text>
+            <text x="210" y="258">Архитектура решения</text>
+            <text x="210" y="278" font-size="9.5" fill="#c7cdff">ГЛУБИНА — за этим приходят ко мне</text>
+          </g>
+        </svg>
+        <figcaption>Перекладина даёт разговор с любым специалистом. Ножка даёт причину нанять именно вас.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================= СЕЙЧАС / ДАЛЕЕ / ПОЗЖЕ ================= -->
+  <section class="section" id="horizons">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Сейчас · Далее · Позже</h2>
+        <p>Сотни тем одновременно — верный способ не начать. Здесь только то, что имеет смысл делать сегодня, что идёт следом и что подождёт.</p>
+      </div>
+      <div class="horizon-grid" id="horizon-grid"></div>
+    </div>
+  </section>
+
+  <!-- ================= ДИАГНОСТИКА ================= -->
+  <section class="section" id="diagnostics">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Диагностика: что можно пропустить</h2>
+        <p>Ответьте честно. «Знаю» отмечает связанные темы как пройденные и сокращает срок. Самообман здесь стоит месяцев, потраченных зря на этапе 3.</p>
+      </div>
+      <div class="diag-grid" id="diag-grid"></div>
+    </div>
+  </section>
+
+  <!-- ================= КАРТА ================= -->
+  <section class="section" id="roadmap">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Дорожная карта</h2>
+        <p>Десять этапов и два параллельных трека. Треки (математика и английский) идут фоном всё время, а не блокируют программирование.</p>
+      </div>
+
+      <div class="controls" role="search">
+        <div class="search-row">
+          <label class="visually-hidden" for="search">Поиск по темам</label>
+          <input type="search" id="search" class="search-input" placeholder="Поиск по темам, ресурсам и заданиям…" autocomplete="off">
+          <button type="button" class="btn" id="expand-all">Раскрыть всё</button>
+          <button type="button" class="btn" id="collapse-all">Свернуть всё</button>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label" id="lbl-need">Важность</span>
+          <div role="group" aria-labelledby="lbl-need" id="filter-need"></div>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label" id="lbl-cost">Стоимость</span>
+          <div role="group" aria-labelledby="lbl-cost" id="filter-cost"></div>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label" id="lbl-kind">Формат</span>
+          <div role="group" aria-labelledby="lbl-kind" id="filter-kind"></div>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label" id="lbl-track">Направление</span>
+          <div role="group" aria-labelledby="lbl-track" id="filter-track"></div>
+        </div>
+      </div>
+
+      <p id="filter-status" role="status" aria-live="polite" class="stage-sub" style="margin-top:14px"></p>
+
+      <div id="stages" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- ================= TUTORIAL HELL ================= -->
+  <section class="section" id="tutorial-hell">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="th-title">Не попади в tutorial hell</h2>
+        <p id="th-intro"></p>
+      </div>
+      <div class="rules">
+        <ol id="th-rules"></ol>
+        <div class="callout" id="th-split"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ГОТОВНОСТЬ К ВАКАНСИЯМ ================= -->
+  <section class="section" id="job-readiness">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Готовность к вакансиям</h2>
+        <p>Что обязательно, что желательно и какие пробелы допустимы на каждом уровне. Сроки в этой карте не обещают трудоустройство — они показывают только объём материала.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th scope="col">Роль</th><th scope="col">Обязательно</th><th scope="col">Желательно</th><th scope="col">Допустимые пробелы</th></tr>
+          </thead>
+          <tbody id="jobs-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ЧЕСТНЫЕ ОГОВОРКИ ================= -->
+  <section class="section" id="honesty">
+    <div class="wrap">
+      <div class="section-head"><h2>Честно о сроках и ожиданиях</h2></div>
+      <div class="rules">
+        <ul id="honest-list"></ul>
+        <div class="callout">
+          Указанные часы — это объём материала, а не гарантия. Реальный срок зависит от того, сколько вы пишете кода сами, а не от того, сколько курсов открыли.
+          Все ссылки на этом сайте открывались и проверялись вручную; у каждой указана дата проверки. Курсы переезжают — если ссылка сломалась, ищите официальную замену и обновите дату.
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-actions">
+      <button type="button" class="btn" id="export-btn">Экспорт прогресса (JSON)</button>
+      <button type="button" class="btn" id="import-btn">Импорт из JSON</button>
+      <input type="file" id="import-file" accept="application/json,.json" hidden>
+      <button type="button" class="btn btn-danger" id="reset-btn">Сбросить прогресс</button>
+    </div>
+    <p id="footer-meta"></p>
+    <p>Прогресс хранится только в вашем браузере (localStorage) и никуда не отправляется. Чтобы перенести его на другое устройство — используйте экспорт и импорт.</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="./roadmap-data.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
