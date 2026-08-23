@@ -182,6 +182,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Google Machine Learning Crash Course — Introduction to ML", url: "https://developers.google.com/machine-learning/intro-to-ml",
           cost: "free", lang: "en", level: "База", hours: 2, required: true,
+          scope: "Модуль Introduction to ML — не весь Crash Course",
           study: "Первые два раздела: что такое ML, чем оно отличается от обычного кода.",
           skip: "Пока не углубляйтесь в упражнения — вернётесь на этапе 3.", checked: "2026-08-23" }
       ],
@@ -199,10 +200,12 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "uv — установка Python и управление проектами", url: "https://docs.astral.sh/uv/",
           cost: "free", lang: "en", level: "База", hours: 1, required: true,
+          scope: "Разделы Installation и Getting started",
           study: "Разделы Installation и Getting started: установка uv, создание проекта, запуск скрипта.",
           skip: "Publishing packages, workspaces — вернётесь позже.", checked: "2026-08-23" },
         { title: "Git — официальная книга Pro Git", url: "https://git-scm.com/book/en/v2",
           cost: "free", lang: "en", level: "База", hours: 2, required: false,
+          scope: "Главы 1–2 из 10",
           study: "Главы 1–2: установка, первый репозиторий, коммиты.",
           skip: "Всё после главы 3 — на этапе 1.", checked: "2026-08-23" }
       ],
@@ -239,68 +242,129 @@ window.ROADMAP.stages.push(
   subtitle: "Параллельно с программированием, а не до него. 3–5 часов в неделю постоянно.",
   why: "Без математики вы не поймёте, почему модель ошибается и что означает метрика, которую вы показываете клиенту. Но доказательства теорем вам не нужны: нужен уровень «понимаю смысл, считаю простой пример, объясняю словами».",
   prereq: ["stage-0"],
+  courseNote: "НИ ОДИН курс Khan Academy здесь не проходится целиком. Ниже у каждой темы указано, сколько в курсе юнитов и какие именно из них нужны. Всего по треку: Arithmetic — 11 юнитов из 19, Pre-algebra — 6 из 15, Algebra basics — 6 из 8, Algebra 1 — 4 из 16, Algebra 2 — 1 из 12, Statistics and probability — 11 из 16, Linear algebra — 2 из 3, Differential calculus — 3 из 6, Multivariable calculus — 1 из 5.",
   topics: [
-    /* ---------- A1. Арифметика и pre-algebra ---------- */
+    /* ---------- A1. Арифметика: дроби, десятичные, отрицательные ---------- */
     {
-      id: "track-math-a1", title: "A1. Дроби, десятичные и отрицательные числа", en: "Fractions, decimals, negatives",
-      track: "math", kind: "theory", hours: { novice: 36, dev: 29 }, required: true,
+      id: "track-math-a1", title: "A1.1 Дроби", en: "Fractions",
+      track: "math", kind: "theory", hours: { novice: 24, dev: 19 }, required: true,
+      courseNote: "Курс Arithmetic — 19 юнитов, целиком он НЕ нужен. Для дробей берите ровно 5 юнитов: 4, 9, 10, 13, 15 — и в этом порядке. Юниты 1–3, 5–8, 14 (умножение, деление и разряды целых чисел) пропустите, если умеете считать столбиком; если нет — пройдите их перед дробями.",
       resources: [
-        { title: "Khan Academy — Arithmetic: Understand fractions", url: "https://www.khanacademy.org/math/arithmetic/fraction-arithmetic",
+        { title: "Khan Academy — Arithmetic, Unit 4: Understand fractions", url: "https://www.khanacademy.org/math/arithmetic/fraction-arithmetic",
           cost: "free", lang: "en", level: "База", hours: 6, required: true,
-          study: "Смысл дроби, эквивалентные дроби, сравнение.",
+          scope: "Unit 4 из 19 — только этот юнит",
+          study: "Смысл дроби, эквивалентные дроби, сравнение дробей.",
           skip: "Ничего — это фундамент.", checked: "2026-08-23" },
-        { title: "Khan Academy — Add and subtract fractions (different denominators)", url: "https://www.khanacademy.org/math/arithmetic/x18ca194a:add-and-subtract-fractions-different-denominators",
-          cost: "free", lang: "en", level: "База", hours: 6, required: true,
-          study: "Общий знаменатель, сложение и вычитание.",
-          skip: "Смешанные числа можно пройти быстро.", checked: "2026-08-23" },
-        { title: "Khan Academy — Multiply and divide fractions", url: "https://www.khanacademy.org/math/arithmetic/x18ca194a:multiply-fractions",
-          cost: "free", lang: "en", level: "База", hours: 5, required: true,
-          study: "Умножение дробей и деление через обратную дробь.",
+        { title: "Khan Academy — Arithmetic, Unit 9: Add and subtract fractions (like denominators)", url: "https://www.khanacademy.org/math/arithmetic/x18ca194a:add-and-subtract-fraction-like-denominators",
+          cost: "free", lang: "en", level: "База", hours: 4, required: true,
+          scope: "Unit 9 из 19 — только этот юнит",
+          study: "Сложение и вычитание при одинаковом знаменателе. Идёт ПЕРЕД юнитом 13.",
+          skip: "—", checked: "2026-08-23" },
+        { title: "Khan Academy — Arithmetic, Unit 10: Multiply fractions", url: "https://www.khanacademy.org/math/arithmetic/x18ca194a:multiply-fractions",
+          cost: "free", lang: "en", level: "База", hours: 4, required: true,
+          scope: "Unit 10 из 19 — только этот юнит",
+          study: "Умножение дроби на дробь и на целое число.",
           skip: "Задачи на площадь — по желанию.", checked: "2026-08-23" },
-        { title: "Khan Academy — Decimals and place value", url: "https://www.khanacademy.org/math/arithmetic/arith-decimals",
-          cost: "free", lang: "en", level: "База", hours: 5, required: true,
+        { title: "Khan Academy — Arithmetic, Unit 13: Add and subtract fractions (different denominators)", url: "https://www.khanacademy.org/math/arithmetic/x18ca194a:add-and-subtract-fractions-different-denominators",
+          cost: "free", lang: "en", level: "База", hours: 6, required: true,
+          scope: "Unit 13 из 19 — только этот юнит",
+          study: "Общий знаменатель, сложение и вычитание разных дробей.",
+          skip: "Смешанные числа можно пройти быстро.", checked: "2026-08-23" },
+        { title: "Khan Academy — Arithmetic, Unit 15: Divide fractions", url: "https://www.khanacademy.org/math/arithmetic/x18ca194a:divide-fractions",
+          cost: "free", lang: "en", level: "База", hours: 4, required: true,
+          scope: "Unit 15 из 19 — только этот юнит",
+          study: "Деление через обратную дробь и почему это работает.",
+          skip: "—", checked: "2026-08-23" }
+      ],
+      task: "Напишите в Python функции add_fractions(a, b, c, d) и to_decimal(num, den) без модуля fractions. Проверьте на 10 примерах, которые сначала решили на бумаге."
+    },
+    {
+      id: "track-math-a1d", title: "A1.2 Десятичные дроби", en: "Decimals",
+      track: "math", kind: "theory", hours: { novice: 12, dev: 10 }, required: true,
+      courseNote: "Тот же курс Arithmetic (19 юнитов). Здесь нужны 3 юнита: 11, 12, 16. Между ними в курсе стоят юниты 13–15 про дроби — они уже пройдены в теме A1.1.",
+      resources: [
+        { title: "Khan Academy — Arithmetic, Unit 11: Decimals and place value", url: "https://www.khanacademy.org/math/arithmetic/arith-decimals",
+          cost: "free", lang: "en", level: "База", hours: 4, required: true,
+          scope: "Unit 11 из 19 — только этот юнит",
           study: "Разряды, округление, перевод дробь ↔ десятичная.",
           skip: "—", checked: "2026-08-23" },
-        { title: "Khan Academy — Add and subtract negative numbers", url: "https://www.khanacademy.org/math/arithmetic/arith-review-negative-numbers",
-          cost: "free", lang: "en", level: "База", hours: 7, required: true,
-          study: "Числовая прямая, знаки, модуль.",
+        { title: "Khan Academy — Arithmetic, Unit 12: Add and subtract decimals", url: "https://www.khanacademy.org/math/arithmetic/x18ca194a:add-and-subtract-decimals",
+          cost: "free", lang: "en", level: "База", hours: 4, required: true,
+          scope: "Unit 12 из 19 — только этот юнит",
+          study: "Сложение и вычитание в столбик, выравнивание по запятой.",
           skip: "—", checked: "2026-08-23" },
-        { title: "Khan Academy — Multiply and divide negative numbers", url: "https://www.khanacademy.org/math/arithmetic/x18ca194a:multiply-and-divide-negative-numbers",
-          cost: "free", lang: "en", level: "База", hours: 7, required: true,
+        { title: "Khan Academy — Arithmetic, Unit 16: Multiply and divide decimals", url: "https://www.khanacademy.org/math/arithmetic/x18ca194a:multiply-and-divide-decimals",
+          cost: "free", lang: "en", level: "База", hours: 4, required: true,
+          scope: "Unit 16 из 19 — только этот юнит",
+          study: "Умножение и деление, куда уезжает запятая.",
+          skip: "—", checked: "2026-08-23" }
+      ],
+      task: "Посчитайте в Python ставку за милю по 20 рейсам, округлите до двух знаков и объясните в заметке, почему 0.1 + 0.2 != 0.3 в float. Этот же вопрос вам зададут на собеседовании."
+    },
+    {
+      id: "track-math-a1e", title: "A1.3 Отрицательные числа", en: "Negative numbers",
+      track: "math", kind: "theory", hours: { novice: 12, dev: 10 }, required: true,
+      courseNote: "Последние 2 юнита курса Arithmetic: 18 и 19. На них курс для вас заканчивается — всего из 19 юнитов вы возьмёте 11 (4, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19), а юниты 1–3, 5–8, 14 не нужны, если умеете умножать и делить целые числа.",
+      resources: [
+        { title: "Khan Academy — Arithmetic, Unit 18: Add and subtract negative numbers", url: "https://www.khanacademy.org/math/arithmetic/arith-review-negative-numbers",
+          cost: "free", lang: "en", level: "База", hours: 6, required: true,
+          scope: "Unit 18 из 19 — только этот юнит",
+          study: "Числовая прямая, знаки, модуль числа.",
+          skip: "—", checked: "2026-08-23" },
+        { title: "Khan Academy — Arithmetic, Unit 19: Multiply and divide negative numbers", url: "https://www.khanacademy.org/math/arithmetic/x18ca194a:multiply-and-divide-negative-numbers",
+          cost: "free", lang: "en", level: "База", hours: 6, required: true,
+          scope: "Unit 19 из 19 — последний юнит курса",
           study: "Правила знаков при умножении и делении.",
           skip: "—", checked: "2026-08-23" }
       ],
-      task: "Напишите в Python функции add_fractions(a, b, c, d) и to_decimal(num, den) без использования модуля fractions. Проверьте на 10 примерах, которые сначала решили на бумаге."
+      task: "Реализуйте функцию, которая считает маржу рейса (доход минус расходы) и корректно работает с убытком. Проверьте на трёх убыточных рейсах — знак должен сохраняться во всех агрегатах."
     },
     {
-      id: "track-math-a1b", title: "A1. Проценты, отношения, пропорции", en: "Percentages, ratios, proportions",
-      track: "math", kind: "theory", hours: { novice: 12, dev: 10 }, required: true,
+      id: "track-math-a1b", title: "A1.4 Проценты, отношения, пропорции", en: "Percentages, ratios, proportions",
+      track: "math", kind: "theory", hours: { novice: 14, dev: 12 }, required: true,
+      courseNote: "Курс Pre-algebra — 15 юнитов. Здесь нужны 4: 3, 4, 8, 9. ⚠ Обратите внимание: дробей, десятичных и отрицательных чисел в Pre-algebra НЕТ — они в курсе Arithmetic (темы A1.1–A1.3). Этот курс начинается сразу с множителей и отношений.",
       resources: [
-        { title: "Khan Academy — Pre-algebra: Ratios and rates", url: "https://www.khanacademy.org/math/pre-algebra/pre-algebra-ratios-rates",
+        { title: "Khan Academy — Pre-algebra, Unit 3: Ratios and rates", url: "https://www.khanacademy.org/math/pre-algebra/pre-algebra-ratios-rates",
           cost: "free", lang: "en", level: "База", hours: 5, required: true,
+          scope: "Unit 3 из 15 — только этот юнит",
           study: "Отношения, единичные скорости, сравнение ставок.",
           skip: "Двойные числовые прямые — быстро.", checked: "2026-08-23" },
-        { title: "Khan Academy — Pre-algebra: Percentages", url: "https://www.khanacademy.org/math/pre-algebra/xb4832e56:percentages",
+        { title: "Khan Academy — Pre-algebra, Unit 4: Percentages", url: "https://www.khanacademy.org/math/pre-algebra/xb4832e56:percentages",
           cost: "free", lang: "en", level: "База", hours: 4, required: true,
+          scope: "Unit 4 из 15 — только этот юнит",
           study: "Процент от числа, число по проценту, процентное изменение.",
           skip: "—", checked: "2026-08-23" },
-        { title: "Khan Academy — Proportional relationships", url: "https://www.khanacademy.org/math/pre-algebra/xb4832e56:proportional-relationships",
+        { title: "Khan Academy — Pre-algebra, Unit 8: Percent & rational number word problems", url: "https://www.khanacademy.org/math/pre-algebra/xb4832e56:percent-rational-number-word-problems",
+          cost: "free", lang: "en", level: "База", hours: 3, required: true,
+          scope: "Unit 8 из 15 — только этот юнит",
+          study: "Текстовые задачи: наценка, скидка, комиссия. Это ровно та арифметика, что в брокерских ставках.",
+          skip: "—", checked: "2026-08-23" },
+        { title: "Khan Academy — Pre-algebra, Unit 9: Proportional relationships", url: "https://www.khanacademy.org/math/pre-algebra/xb4832e56:proportional-relationships",
           cost: "free", lang: "en", level: "База", hours: 3, required: false,
+          scope: "Unit 9 из 15 — дополнительно",
           study: "Коэффициент пропорциональности — он же будущий «вес» в линейной модели.",
           skip: "Графики можно пройти обзорно.", checked: "2026-08-23" }
       ],
       task: "Возьмите открытый датасет по грузоперевозкам (или сгенерируйте синтетический). Посчитайте в Python: долю рейсов с задержкой, изменение средней ставки за милю месяц к месяцу в процентах, отношение пустого пробега к общему."
     },
     {
-      id: "track-math-a1c", title: "A1. Степени, корни и научная запись", en: "Exponents, roots, scientific notation",
-      track: "math", kind: "theory", hours: { novice: 7, dev: 6 }, required: true,
+      id: "track-math-a1c", title: "A1.5 Степени, корни и научная запись", en: "Exponents, roots, scientific notation",
+      track: "math", kind: "theory", hours: { novice: 10, dev: 8 }, required: true,
+      courseNote: "Добираем три юнита из двух курсов: Arithmetic юнит 17 и Pre-algebra юниты 5 и 11. После этой темы курс Arithmetic закрыт полностью (11 юнитов из 19), а из Pre-algebra остаётся ещё юнит 11 — он здесь же.",
       resources: [
-        { title: "Khan Academy — Exponents intro and order of operations", url: "https://www.khanacademy.org/math/pre-algebra/xb4832e56:exponents-intro-and-order-of-operations",
+        { title: "Khan Academy — Arithmetic, Unit 17: Exponents and powers of ten", url: "https://www.khanacademy.org/math/arithmetic/x18ca194a:exponents-and-powers-of-ten",
+          cost: "free", lang: "en", level: "База", hours: 3, required: true,
+          scope: "Unit 17 из 19 (Arithmetic) — только этот юнит",
+          study: "Степени, степени десятки — основа научной записи.",
+          skip: "—", checked: "2026-08-23" },
+        { title: "Khan Academy — Pre-algebra, Unit 5: Exponents intro and order of operations", url: "https://www.khanacademy.org/math/pre-algebra/xb4832e56:exponents-intro-and-order-of-operations",
           cost: "free", lang: "en", level: "База", hours: 4, required: true,
+          scope: "Unit 5 из 15 (Pre-algebra) — только этот юнит",
           study: "Степени, порядок действий (PEMDAS).",
           skip: "—", checked: "2026-08-23" },
-        { title: "Khan Academy — Roots, exponents, & scientific notation", url: "https://www.khanacademy.org/math/pre-algebra/pre-algebra-exponents-radicals",
+        { title: "Khan Academy — Pre-algebra, Unit 11: Roots, exponents, & scientific notation", url: "https://www.khanacademy.org/math/pre-algebra/pre-algebra-exponents-radicals",
           cost: "free", lang: "en", level: "База", hours: 3, required: true,
+          scope: "Unit 11 из 15 (Pre-algebra) — последний нужный юнит этого курса",
           study: "Квадратные и кубические корни, отрицательные степени, научная запись.",
           skip: "Задачи на приближение степенями 10 — обзорно.", checked: "2026-08-23" }
       ],
@@ -309,141 +373,194 @@ window.ROADMAP.stages.push(
 
     /* ---------- A2. Алгебра ---------- */
     {
-      id: "track-math-a2", title: "A2. Переменные, выражения, линейные уравнения", en: "Variables, expressions, linear equations",
+      id: "track-math-a2", title: "A2.1 Переменные, выражения, линейные уравнения", en: "Variables, expressions, linear equations",
       track: "math", kind: "theory", hours: { novice: 30, dev: 26 }, required: true,
+      courseNote: "Курс Algebra basics — 8 юнитов, по треку нужны 6 (1, 2, 3, 4, 5, 6), из них здесь — первые три. Юниты 7 и 8 (квадратные уравнения и многочлены, геометрия) для ML не нужны. Курс Algebra 1 — 16 юнитов, целиком НЕ нужен: по треку берём 4 юнита (2, 5, 8, 12), здесь — юнит 2, и то как дополнение, если после Algebra basics осталась неуверенность.",
       resources: [
-        { title: "Khan Academy — Algebra basics: Algebraic expressions", url: "https://www.khanacademy.org/math/algebra-basics/alg-basics-algebraic-expressions",
+        { title: "Khan Academy — Algebra basics, Unit 1: Foundations", url: "https://www.khanacademy.org/math/algebra-basics/basic-alg-foundations",
+          cost: "free", lang: "en", level: "База", hours: 6, required: true,
+          scope: "Unit 1 из 8 — только этот юнит",
+          study: "Повторение арифметики в алгебраическом виде: отрицательные числа, дроби, порядок действий.",
+          skip: "Если A1 далась легко — пройдите юнит быстро, как проверку.", checked: "2026-08-23" },
+        { title: "Khan Academy — Algebra basics, Unit 2: Algebraic expressions", url: "https://www.khanacademy.org/math/algebra-basics/alg-basics-algebraic-expressions",
           cost: "free", lang: "en", level: "База", hours: 8, required: true,
+          scope: "Unit 2 из 8 — только этот юнит",
           study: "Переменные, подстановка, приведение подобных, раскрытие скобок.",
           skip: "—", checked: "2026-08-23" },
-        { title: "Khan Academy — Algebra basics: Linear equations and inequalities", url: "https://www.khanacademy.org/math/algebra-basics/alg-basics-linear-equations-and-inequalities",
+        { title: "Khan Academy — Algebra basics, Unit 3: Linear equations and inequalities", url: "https://www.khanacademy.org/math/algebra-basics/alg-basics-linear-equations-and-inequalities",
           cost: "free", lang: "en", level: "База", hours: 12, required: true,
+          scope: "Unit 3 из 8 — только этот юнит",
           study: "Уравнения в одну и две операции, уравнения со скобками, неравенства.",
           skip: "Задачи на геометрию отложите.", checked: "2026-08-23" },
-        { title: "Khan Academy — Algebra 1: Solving equations & inequalities", url: "https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:solve-equations-inequalities",
+        { title: "Khan Academy — Algebra 1, Unit 2: Solving equations & inequalities", url: "https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:solve-equations-inequalities",
           cost: "free", lang: "en", level: "Средний", hours: 10, required: false,
-          study: "Более сложные уравнения — если после algebra-basics осталась неуверенность.",
-          skip: "Если базовый курс дался легко — пропускайте.", checked: "2026-08-23" }
+          scope: "Unit 2 из 16 (Algebra 1) — дополнительно, если нужна практика",
+          study: "Более сложные уравнения — берите, только если после Algebra basics осталась неуверенность.",
+          skip: "Если базовый курс дался легко — пропускайте юнит целиком.", checked: "2026-08-23" }
       ],
       task: "Реализуйте в Python solve_linear(a, b) для уравнения ax + b = 0 с корректной обработкой a = 0. Напишите к ней тесты на pytest (вернётесь к этому после этапа 1)."
     },
     {
-      id: "track-math-a2b", title: "A2. Координаты, графики, наклон", en: "Coordinates, graphs, slope",
+      id: "track-math-a2b", title: "A2.2 Координаты, графики, наклон", en: "Coordinates, graphs, slope",
       track: "math", kind: "theory", hours: { novice: 16, dev: 14 }, required: true,
+      courseNote: "Algebra basics юнит 4 — обязательный. Algebra 1 юнит 5 — дополнительный. Юниты Algebra 1 про неравенства систем (7), последовательности (9), модуль (10) и квадратные уравнения (13, 14) не нужны.",
       resources: [
-        { title: "Khan Academy — Algebra basics: Graphing lines and slope", url: "https://www.khanacademy.org/math/algebra-basics/alg-basics-graphing-lines-and-slope",
+        { title: "Khan Academy — Algebra basics, Unit 4: Graphing lines and slope", url: "https://www.khanacademy.org/math/algebra-basics/alg-basics-graphing-lines-and-slope",
           cost: "free", lang: "en", level: "База", hours: 10, required: true,
+          scope: "Unit 4 из 8 — только этот юнит",
           study: "Координатная плоскость, наклон (slope), пересечения с осями, форма y = kx + b.",
           skip: "—", checked: "2026-08-23" },
-        { title: "Khan Academy — Algebra 1: Forms of linear equations", url: "https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:forms-of-linear-equations",
+        { title: "Khan Academy — Algebra 1, Unit 5: Forms of linear equations", url: "https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:forms-of-linear-equations",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: false,
+          scope: "Unit 5 из 16 (Algebra 1) — дополнительно",
           study: "Разные формы записи прямой и переход между ними.",
           skip: "Point-slope можно обзорно.", checked: "2026-08-23" }
       ],
       task: "Постройте в matplotlib график y = 2x + 3 и подпишите на нём наклон и точку пересечения с осью Y. Затем объясните в заметке: почему линейная регрессия — это по сути подбор k и b."
     },
     {
-      id: "track-math-a2c", title: "A2. Функции и системы уравнений", en: "Functions and systems of equations",
+      id: "track-math-a2c", title: "A2.3 Функции и системы уравнений", en: "Functions and systems of equations",
       track: "math", kind: "theory", hours: { novice: 20, dev: 17 }, required: true,
+      courseNote: "Ключевой юнит всего трека по алгебре — Algebra 1 юнит 8 (Functions): именно понятие функции лежит под всем машинным обучением. Плюс Algebra basics юнит 5.",
       resources: [
-        { title: "Khan Academy — Algebra 1: Functions", url: "https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:functions",
+        { title: "Khan Academy — Algebra 1, Unit 8: Functions", url: "https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:functions",
           cost: "free", lang: "en", level: "Средний", hours: 12, required: true,
+          scope: "Unit 8 из 16 (Algebra 1) — только этот юнит",
           study: "Что такое функция, область определения, чтение графика, запись f(x).",
           skip: "Кусочные функции — обзорно.", checked: "2026-08-23" },
-        { title: "Khan Academy — Algebra basics: Systems of equations", url: "https://www.khanacademy.org/math/algebra-basics/alg-basics-systems-of-equations",
+        { title: "Khan Academy — Algebra basics, Unit 5: Systems of equations", url: "https://www.khanacademy.org/math/algebra-basics/alg-basics-systems-of-equations",
           cost: "free", lang: "en", level: "База", hours: 8, required: true,
+          scope: "Unit 5 из 8 — только этот юнит",
           study: "Решение подстановкой и графически.",
           skip: "Метод сложения можно бегло.", checked: "2026-08-23" }
       ],
       task: "Напишите функцию Python, которая принимает список точек и возвращает k и b прямой через первые две точки. Постройте её вместе с точками."
     },
     {
-      id: "track-math-a2d", title: "A2. Степени, экспонента и логарифмы", en: "Exponents, exponentials, logarithms",
+      id: "track-math-a2d", title: "A2.4 Степени, экспонента и логарифмы", en: "Exponents, exponentials, logarithms",
       track: "math", kind: "theory", hours: { novice: 14, dev: 13 }, required: true,
+      courseNote: "⚠ Главное про Algebra 2: курс из 12 юнитов, и из него нужен РОВНО ОДИН — юнит 8 (Logarithms). Многочлены, комплексные числа, деление многочленов, преобразования, тригонометрия и моделирование из Algebra 2 не нужны совсем. Плюс Algebra basics юнит 6 и Algebra 1 юнит 12 — на этом алгебра закрывается: Algebra basics 6 из 8, Algebra 1 4 из 16, Algebra 2 1 из 12.",
       resources: [
-        { title: "Khan Academy — Algebra 1: Exponential growth & decay", url: "https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:exponential-growth-decay",
-          cost: "free", lang: "en", level: "Средний", hours: 7, required: true,
+        { title: "Khan Academy — Algebra basics, Unit 6: Expressions with exponents", url: "https://www.khanacademy.org/math/algebra-basics/alg-basics-expressions-with-exponents",
+          cost: "free", lang: "en", level: "База", hours: 4, required: true,
+          scope: "Unit 6 из 8 — последний нужный юнит Algebra basics",
+          study: "Свойства степеней, отрицательные и дробные показатели.",
+          skip: "—", checked: "2026-08-23" },
+        { title: "Khan Academy — Algebra 1, Unit 12: Exponential growth & decay", url: "https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:exponential-growth-decay",
+          cost: "free", lang: "en", level: "Средний", hours: 5, required: true,
+          scope: "Unit 12 из 16 (Algebra 1) — последний нужный юнит этого курса",
           study: "Экспоненциальный рост и затухание — интуиция, а не вывод формул.",
           skip: "Финансовые задачи на сложный процент — по желанию.", checked: "2026-08-23" },
-        { title: "Khan Academy — Algebra 2: Logarithms", url: "https://www.khanacademy.org/math/algebra2/x2ec2f6f830c9fb89:logs",
-          cost: "free", lang: "en", level: "Средний", hours: 7, required: true,
+        { title: "Khan Academy — Algebra 2, Unit 8: Logarithms", url: "https://www.khanacademy.org/math/algebra2/x2ec2f6f830c9fb89:logs",
+          cost: "free", lang: "en", level: "Средний", hours: 6, required: true,
+          scope: "Unit 8 из 12 — ЕДИНСТВЕННЫЙ нужный юнит курса Algebra 2",
           study: "Что такое логарифм, свойства, логарифмическая шкала. Дальше он встретится в log loss и в графиках latency.",
-          skip: "Решение сложных логарифмических уравнений — не нужно.", checked: "2026-08-23" }
+          skip: "Решение сложных логарифмических уравнений — не нужно. Остальные 11 юнитов Algebra 2 не открывайте.", checked: "2026-08-23" }
       ],
       task: "Постройте два графика одних и тех же данных: в обычной и в логарифмической шкале. Объясните в заметке, когда логарифмическая шкала честнее."
     },
 
     /* ---------- A3. Статистика и вероятность ---------- */
     {
-      id: "track-math-a3", title: "A3. Описательная статистика", en: "Descriptive statistics",
+      id: "track-math-a3", title: "A3.1 Описательная статистика", en: "Descriptive statistics",
       track: "math", kind: "theory", hours: { novice: 14, dev: 12 }, required: true,
+      courseNote: "Курс Statistics and probability — 16 юнитов, по треку нужны 11 (1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12). Здесь — первые три. Юниты 8 (комбинаторика), 13 (две выборки), 14 (хи-квадрат), 15 (продвинутая регрессия) и 16 (ANOVA) не нужны.",
       resources: [
-        { title: "Khan Academy — Summarizing quantitative data", url: "https://www.khanacademy.org/math/statistics-probability/summarizing-quantitative-data",
-          cost: "free", lang: "en", level: "База", hours: 10, required: true,
+        { title: "Khan Academy — Statistics, Unit 3: Summarizing quantitative data", url: "https://www.khanacademy.org/math/statistics-probability/summarizing-quantitative-data",
+          cost: "free", lang: "en", level: "База", hours: 8, required: true,
+          scope: "Unit 3 из 16 — главный юнит темы",
           study: "Среднее, медиана, мода, размах, дисперсия, стандартное отклонение, выбросы, box plot.",
           skip: "—", checked: "2026-08-23" },
+        { title: "Khan Academy — Statistics, Unit 1: Analyzing categorical data", url: "https://www.khanacademy.org/math/statistics-probability/analyzing-categorical-data",
+          cost: "free", lang: "en", level: "База", hours: 3, required: false,
+          scope: "Unit 1 из 16 — дополнительно, быстрый проход",
+          study: "Таблицы частот, двумерные таблицы — пригодятся в confusion matrix на этапе 3.",
+          skip: "—", checked: "2026-08-23" },
+        { title: "Khan Academy — Statistics, Unit 2: Displaying and comparing quantitative data", url: "https://www.khanacademy.org/math/statistics-probability/displaying-describing-data",
+          cost: "free", lang: "en", level: "База", hours: 3, required: false,
+          scope: "Unit 2 из 16 — дополнительно, быстрый проход",
+          study: "Гистограммы, диаграммы, сравнение распределений.",
+          skip: "Stem-and-leaf plots — не нужны.", checked: "2026-08-23" },
         { title: "StatQuest — указатель видео", url: "https://statquest.org/video_index.html",
           cost: "free", lang: "en", level: "База", hours: 4, required: false,
-          study: "Раздел Statistics Fundamentals: mean/median/mode, variance, standard deviation.",
+          scope: "Раздел Statistics Fundamentals — не весь сайт",
+          study: "Видео про mean/median/mode, variance, standard deviation.",
           skip: "Всё про ML — вернётесь на этапе 3.", checked: "2026-08-23" }
       ],
       task: "Возьмите колонку ставок из своего датасета. Посчитайте вручную (в Python, без describe()) среднее, медиану, стандартное отклонение. Затем сверьте с pandas describe(). Объясните, почему среднее и медиана разошлись."
     },
     {
-      id: "track-math-a3b", title: "A3. Распределения и связи между переменными", en: "Distributions and correlation",
+      id: "track-math-a3b", title: "A3.2 Распределения и связи между переменными", en: "Distributions and correlation",
       track: "math", kind: "theory", hours: { novice: 12, dev: 10 }, required: true,
+      courseNote: "Statistics юниты 4 и 5. Оба обязательны: нормальное распределение и корреляция — то, о чём вы будете говорить с клиентом каждый раз, когда покажете график.",
       resources: [
-        { title: "Khan Academy — Modeling data distributions", url: "https://www.khanacademy.org/math/statistics-probability/modeling-distributions-of-data",
+        { title: "Khan Academy — Statistics, Unit 4: Modeling data distributions", url: "https://www.khanacademy.org/math/statistics-probability/modeling-distributions-of-data",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: true,
+          scope: "Unit 4 из 16 — только этот юнит",
           study: "Перцентили, z-оценки, нормальное распределение.",
           skip: "—", checked: "2026-08-23" },
-        { title: "Khan Academy — Exploring bivariate numerical data", url: "https://www.khanacademy.org/math/statistics-probability/describing-relationships-quantitative-data",
+        { title: "Khan Academy — Statistics, Unit 5: Exploring bivariate numerical data", url: "https://www.khanacademy.org/math/statistics-probability/describing-relationships-quantitative-data",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: true,
+          scope: "Unit 5 из 16 — только этот юнит",
           study: "Диаграмма рассеяния, корреляция, линия тренда. Отдельно — почему корреляция не равна причинности.",
           skip: "Остатки регрессии — обзорно.", checked: "2026-08-23" }
       ],
       task: "Найдите в своих данных две коррелирующие колонки и напишите абзац, объясняющий, почему корреляция здесь может не быть причинно-следственной связью. Это ровно тот разговор, который вы будете вести с клиентом."
     },
     {
-      id: "track-math-a3c", title: "A3. Вероятность и теорема Байеса", en: "Probability and Bayes",
+      id: "track-math-a3c", title: "A3.3 Вероятность и теорема Байеса", en: "Probability and Bayes",
       track: "math", kind: "theory", hours: { novice: 14, dev: 12 }, required: true,
+      courseNote: "Statistics юнит 7 — обязательный, юнит 9 — дополнительный. ⚠ Юнит 8 (Counting, permutations, combinations) намеренно пропускаем: комбинаторика в этой профессии не нужна.",
       resources: [
-        { title: "Khan Academy — Probability", url: "https://www.khanacademy.org/math/statistics-probability/probability-library",
-          cost: "free", lang: "en", level: "Средний", hours: 10, required: true,
+        { title: "Khan Academy — Statistics, Unit 7: Probability", url: "https://www.khanacademy.org/math/statistics-probability/probability-library",
+          cost: "free", lang: "en", level: "Средний", hours: 8, required: true,
+          scope: "Unit 7 из 16 — только этот юнит",
           study: "Базовая вероятность, независимые и зависимые события, условная вероятность, правило Байеса.",
-          skip: "Комбинаторику в глубину — не обязательно.", checked: "2026-08-23" },
-        { title: "3Blue1Brown — визуальная интуиция", url: "https://www.3blue1brown.com/?topic=probability",
+          skip: "Комбинаторику в глубину — не нужно.", checked: "2026-08-23" },
+        { title: "Khan Academy — Statistics, Unit 9: Random variables", url: "https://www.khanacademy.org/math/statistics-probability/random-variables-stats-library",
           cost: "free", lang: "en", level: "Средний", hours: 4, required: false,
-          study: "Видео про теорему Байеса — лучшая визуальная интуиция, какая есть.",
+          scope: "Unit 9 из 16 — дополнительно",
+          study: "Случайная величина, матожидание — понадобится, когда будете считать ожидаемую стоимость запроса к LLM.",
+          skip: "Биномиальное и геометрическое распределения — обзорно.", checked: "2026-08-23" },
+        { title: "3Blue1Brown — Probability", url: "https://www.3blue1brown.com/?topic=probability",
+          cost: "free", lang: "en", level: "Средний", hours: 4, required: false,
+          scope: "Только видео про теорему Байеса — не весь раздел",
+          study: "Лучшая визуальная интуиция по Байесу, какая есть.",
           skip: "Остальные темы раздела — по желанию.", checked: "2026-08-23" }
       ],
       task: "Решите классическую задачу: тест на болезнь с точностью 99% при распространённости болезни 0.1%. Посчитайте вероятность болезни при положительном тесте. Объясните результат нетехническими словами — это тренировка для разговора с клиентом про precision и recall."
     },
     {
-      id: "track-math-a3d", title: "A3. Выборки, дизайн исследований, смещение", en: "Sampling and study design",
+      id: "track-math-a3d", title: "A3.4 Выборки, дизайн исследований, смещение", en: "Sampling and study design",
       track: "math", kind: "theory", hours: { novice: 12, dev: 10 }, required: true,
+      courseNote: "Statistics юнит 6 — обязательный, юнит 10 — дополнительный.",
       resources: [
-        { title: "Khan Academy — Study design", url: "https://www.khanacademy.org/math/statistics-probability/designing-studies",
+        { title: "Khan Academy — Statistics, Unit 6: Study design", url: "https://www.khanacademy.org/math/statistics-probability/designing-studies",
           cost: "free", lang: "en", level: "Средний", hours: 7, required: true,
+          scope: "Unit 6 из 16 — только этот юнит",
           study: "Выборка и генеральная совокупность, случайная выборка, смещение выборки, наблюдение против эксперимента.",
           skip: "—", checked: "2026-08-23" },
-        { title: "Khan Academy — Sampling distributions", url: "https://www.khanacademy.org/math/statistics-probability/sampling-distributions-library",
+        { title: "Khan Academy — Statistics, Unit 10: Sampling distributions", url: "https://www.khanacademy.org/math/statistics-probability/sampling-distributions-library",
           cost: "free", lang: "en", level: "Средний", hours: 5, required: false,
+          scope: "Unit 10 из 16 — дополнительно",
           study: "Почему среднее по выборке скачет и что такое стандартная ошибка.",
           skip: "Формальные доказательства ЦПТ — не нужны.", checked: "2026-08-23" }
       ],
       task: "Опишите в заметке, как бы вы собрали выборку заявок для оценки качества AI-ассистента поддержки так, чтобы она не была смещена в сторону жалоб."
     },
     {
-      id: "track-math-a3e", title: "A3. Проверка гипотез, доверительные интервалы, A/B-тесты", en: "Hypothesis testing and A/B tests",
+      id: "track-math-a3e", title: "A3.5 Проверка гипотез, доверительные интервалы, A/B-тесты", en: "Hypothesis testing and A/B tests",
       track: "math", kind: "theory", hours: { novice: 18, dev: 16 }, required: true,
+      courseNote: "Statistics юниты 11 и 12 — на них курс для вас заканчивается: 11 юнитов из 16. Юниты 13–16 (две выборки, хи-квадрат, продвинутая регрессия, ANOVA) не нужны — если понадобятся, вернётесь точечно.",
       resources: [
-        { title: "Khan Academy — Confidence intervals", url: "https://www.khanacademy.org/math/statistics-probability/confidence-intervals-one-sample",
+        { title: "Khan Academy — Statistics, Unit 11: Confidence intervals", url: "https://www.khanacademy.org/math/statistics-probability/confidence-intervals-one-sample",
           cost: "free", lang: "en", level: "Средний", hours: 8, required: true,
+          scope: "Unit 11 из 16 — только этот юнит",
           study: "Что такое доверительный интервал и как его читать.",
           skip: "Ручные вычисления по таблицам — достаточно понимания.", checked: "2026-08-23" },
-        { title: "Khan Academy — Significance tests (hypothesis testing)", url: "https://www.khanacademy.org/math/statistics-probability/significance-tests-one-sample",
+        { title: "Khan Academy — Statistics, Unit 12: Significance tests (hypothesis testing)", url: "https://www.khanacademy.org/math/statistics-probability/significance-tests-one-sample",
           cost: "free", lang: "en", level: "Средний", hours: 10, required: true,
+          scope: "Unit 12 из 16 — последний нужный юнит курса",
           study: "Нулевая гипотеза, p-value, ошибки первого и второго рода.",
           skip: "Все виды тестов — достаточно одного-двух.", checked: "2026-08-23" }
       ],
@@ -452,31 +569,37 @@ window.ROADMAP.stages.push(
 
     /* ---------- A4. Линейная алгебра ---------- */
     {
-      id: "track-math-a4", title: "A4. Векторы и пространства", en: "Vectors and spaces",
+      id: "track-math-a4", title: "A4.1 Векторы и пространства", en: "Vectors and spaces",
       track: "math", kind: "theory", hours: { novice: 12, dev: 11 }, required: true,
+      courseNote: "Курс Linear algebra — всего 3 юнита, и это единственный курс трека, который вы проходите почти целиком: нужны юниты 1 и 2, юнит 3 (Alternate coordinate systems) не нужен. Внутри юнита 1 берите только векторы и скалярное произведение — подпространства и нуль-пространство пропускайте.",
       resources: [
         { title: "3Blue1Brown — Essence of linear algebra", url: "https://www.3blue1brown.com/?topic=linear-algebra",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: true,
-          study: "Видео 1–5: вектор, линейная комбинация, базис, линейное преобразование. Смотрите ДО Khan — интуиция важнее техники.",
+          scope: "Видео 1–5 из серии — смотреть ДО Khan",
+          study: "Вектор, линейная комбинация, базис, линейное преобразование. Интуиция важнее техники.",
           skip: "Определители и смену базиса можно на втором проходе.", checked: "2026-08-23" },
-        { title: "Khan Academy — Linear algebra: Vectors and spaces", url: "https://www.khanacademy.org/math/linear-algebra/vectors-and-spaces",
+        { title: "Khan Academy — Linear algebra, Unit 1: Vectors and spaces", url: "https://www.khanacademy.org/math/linear-algebra/vectors-and-spaces",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: true,
+          scope: "Unit 1 из 3 — но внутри только векторы, скалярное произведение и длина",
           study: "Векторы, скалярное произведение, длина вектора.",
-          skip: "Подпространства и нуль-пространство — не нужны.", checked: "2026-08-23" }
+          skip: "Подпространства, нуль-пространство, линейная независимость — не нужны.", checked: "2026-08-23" }
       ],
       task: "Реализуйте в NumPy косинусное сходство двух векторов вручную (через скалярное произведение и нормы). Это буквально ядро семантического поиска, который вы будете строить на этапе 6."
     },
     {
-      id: "track-math-a4b", title: "A4. Матрицы и преобразования", en: "Matrices and transformations",
+      id: "track-math-a4b", title: "A4.2 Матрицы и преобразования", en: "Matrices and transformations",
       track: "math", kind: "theory", hours: { novice: 18, dev: 17 }, required: true,
+      courseNote: "Linear algebra юнит 2 — последний нужный. Юнит 3 не открывайте. Итого 2 юнита из 3.",
       resources: [
-        { title: "Khan Academy — Matrix transformations", url: "https://www.khanacademy.org/math/linear-algebra/matrix-transformations",
+        { title: "Khan Academy — Linear algebra, Unit 2: Matrix transformations", url: "https://www.khanacademy.org/math/linear-algebra/matrix-transformations",
           cost: "free", lang: "en", level: "Средний", hours: 10, required: true,
+          scope: "Unit 2 из 3 — последний нужный юнит курса",
           study: "Умножение матриц, матрица как преобразование, размерности.",
           skip: "Обратные матрицы в глубину, определители — обзорно.", checked: "2026-08-23" },
         { title: "3Blue1Brown — Eigenvectors (интуиция)", url: "https://www.3blue1brown.com/?topic=linear-algebra",
           cost: "free", lang: "en", level: "Средний", hours: 3, required: false,
-          study: "Только видео про собственные векторы — на уровне «что это значит визуально».",
+          scope: "Только видео про собственные векторы",
+          study: "Собственные векторы на уровне «что это значит визуально».",
           skip: "Вычисление собственных значений вручную — точно не нужно.", checked: "2026-08-23" }
       ],
       task: "Возьмите таблицу 100×5 в NumPy. Проверьте на бумаге и в коде, какие размерности допустимы при умножении на матрицу 5×3. Объясните в заметке, что означает «эмбеддинг размерности 1536»."
@@ -484,42 +607,55 @@ window.ROADMAP.stages.push(
 
     /* ---------- A5. Минимальный calculus ---------- */
     {
-      id: "track-math-a5", title: "A5. Производная: смысл изменения", en: "Derivatives",
+      id: "track-math-a5", title: "A5.1 Производная: смысл изменения", en: "Derivatives",
       track: "math", kind: "theory", hours: { novice: 12, dev: 10 }, required: true,
+      courseNote: "Курс Differential calculus — 6 юнитов, нужны 3: юниты 1, 2, 3. Юниты 4 (приложения производной), 5 (анализ функций) и 6 (параметрические и полярные) не нужны совсем. Юнит 1 проходите обзорно — предел нужен только как интуиция.",
       resources: [
         { title: "3Blue1Brown — Essence of calculus", url: "https://www.3blue1brown.com/?topic=calculus",
           cost: "free", lang: "en", level: "Средний", hours: 5, required: true,
-          study: "Видео 1–4: что такое производная и почему это скорость изменения.",
+          scope: "Видео 1–4 из серии — не вся серия",
+          study: "Что такое производная и почему это скорость изменения.",
           skip: "Интегралы — вам они не понадобятся.", checked: "2026-08-23" },
-        { title: "Khan Academy — Derivatives: definition and basic rules", url: "https://www.khanacademy.org/math/differential-calculus/dc-diff-intro",
+        { title: "Khan Academy — Differential calculus, Unit 1: Limits and continuity", url: "https://www.khanacademy.org/math/differential-calculus/dc-limits",
+          cost: "free", lang: "en", level: "Средний", hours: 3, required: false,
+          scope: "Unit 1 из 6 — только обзорно, интуиция предела",
+          study: "Что такое предел на пальцах. Дальше первых разделов не заходите.",
+          skip: "Формальное определение через эпсилон-дельта, все техники вычисления пределов.", checked: "2026-08-23" },
+        { title: "Khan Academy — Differential calculus, Unit 2: Derivatives: definition and basic rules", url: "https://www.khanacademy.org/math/differential-calculus/dc-diff-intro",
           cost: "free", lang: "en", level: "Средний", hours: 7, required: true,
+          scope: "Unit 2 из 6 — главный юнит темы",
           study: "Определение производной, правила для степеней, суммы, произведения.",
           skip: "Тригонометрические производные — пропускайте.", checked: "2026-08-23" }
       ],
       task: "Посчитайте численную производную функции f(x) = x² в точке x = 3 через (f(x+h) - f(x)) / h при уменьшающемся h. Сравните с аналитическим ответом 6."
     },
     {
-      id: "track-math-a5b", title: "A5. Chain rule, частные производные, градиент", en: "Chain rule, partial derivatives, gradient",
+      id: "track-math-a5b", title: "A5.2 Chain rule, частные производные, градиент", en: "Chain rule, partial derivatives, gradient",
       track: "math", kind: "theory", hours: { novice: 8, dev: 7 }, required: true,
+      courseNote: "Differential calculus юнит 3 — последний нужный (итого 3 из 6). Из курса Multivariable calculus (5 юнитов) нужен РОВНО ОДИН — юнит 2, и в нём только частные производные и градиент. Юниты 1, 3, 4, 5 (интегрирование по поверхностям, теоремы Грина и Стокса) не нужны категорически.",
       resources: [
-        { title: "Khan Academy — Derivatives: chain rule", url: "https://www.khanacademy.org/math/differential-calculus/dc-chain",
+        { title: "Khan Academy — Differential calculus, Unit 3: Chain rule", url: "https://www.khanacademy.org/math/differential-calculus/dc-chain",
           cost: "free", lang: "en", level: "Средний", hours: 4, required: true,
+          scope: "Unit 3 из 6 — последний нужный юнит курса",
           study: "Правило цепочки — именно оно превращается в backpropagation.",
           skip: "Неявное дифференцирование — не нужно.", checked: "2026-08-23" },
-        { title: "Khan Academy — Derivatives of multivariable functions", url: "https://www.khanacademy.org/math/multivariable-calculus/multivariable-derivatives",
+        { title: "Khan Academy — Multivariable calculus, Unit 2: Derivatives of multivariable functions", url: "https://www.khanacademy.org/math/multivariable-calculus/multivariable-derivatives",
           cost: "free", lang: "en", level: "Продвинутый", hours: 4, required: true,
-          study: "Только частные производные и градиент. Дальше в курс не заходите.",
-          skip: "Дивергенция, ротор, кратные интегралы — категорически не нужны.", checked: "2026-08-23" }
+          scope: "Unit 2 из 5 — ЕДИНСТВЕННЫЙ нужный юнит курса, и внутри только 2 первых раздела",
+          study: "Частные производные и градиент. Дальше в юнит не заходите.",
+          skip: "Дивергенция, ротор, якобиан, кратные интегралы — не нужны.", checked: "2026-08-23" }
       ],
       task: "Разложите руками производную f(x) = (3x + 1)² через chain rule. Затем напишите на бумаге, почему обучение нейросети — это многократное применение того же правила."
     },
     {
-      id: "track-math-a5c", title: "A5. Градиентный спуск своими руками", en: "Gradient descent",
+      id: "track-math-a5c", title: "A5.3 Градиентный спуск своими руками", en: "Gradient descent",
       track: "math", kind: "practice", hours: { novice: 5, dev: 5 }, required: true,
+      courseNote: "Здесь курсов Khan нет — только одно видео и ваш код. Это финальная точка всего математического трека.",
       resources: [
         { title: "3Blue1Brown — Gradient descent (Neural networks, ч.2)", url: "https://www.3blue1brown.com/?topic=neural-networks",
           cost: "free", lang: "en", level: "Средний", hours: 2, required: true,
-          study: "Видео про градиентный спуск: как модель «скатывается» в минимум.",
+          scope: "Только второе видео серии",
+          study: "Как модель «скатывается» в минимум.",
           skip: "Backpropagation в деталях — вернётесь на этапе 5.", checked: "2026-08-23" }
       ],
       task: "Реализуйте градиентный спуск на чистом Python для линейной регрессии по одной переменной: 20 точек, 200 итераций, вывод loss каждые 20 шагов. Никаких библиотек ML. Это ваш личный момент «я понял, как учатся модели»."
@@ -562,10 +698,12 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "British Council — LearnEnglish", url: "https://learnenglish.britishcouncil.org/",
           cost: "free", lang: "en", level: "База", hours: 25, required: true,
+          scope: "Разделы Grammar, Vocabulary и Reading по своему уровню",
           study: "Разделы Grammar и Vocabulary по своему уровню, плюс Skills → Reading. Начните с A2, не с B1.",
           skip: "Exams (IELTS) — не ваша цель.", checked: "2026-08-23" },
         { title: "Cambridge Dictionary", url: "https://dictionary.cambridge.org/",
           cost: "free", lang: "en", level: "База", hours: 5, required: true,
+          scope: "Справочник — используется постоянно, не «проходится»",
           study: "Используйте как основной словарь: смотрите примеры употребления, а не только перевод.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -577,10 +715,12 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Google — Technical Writing One", url: "https://developers.google.com/tech-writing/one",
           cost: "free", lang: "en", level: "Средний", hours: 8, required: true,
+          scope: "Курс Technical Writing One целиком",
           study: "Весь курс: короткие предложения, активный залог, списки. Это же правило пригодится в русских README.",
           skip: "—", checked: "2026-08-23" },
         { title: "Google — Technical Writing (весь набор курсов)", url: "https://developers.google.com/tech-writing",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: false,
+          scope: "Только Technical Writing Two",
           study: "Technical Writing Two — если понравился первый.",
           skip: "Курсы про иллюстрации — по желанию.", checked: "2026-08-23" }
       ],
@@ -592,6 +732,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "British Council — LearnEnglish, раздел Listening", url: "https://learnenglish.britishcouncil.org/",
           cost: "free", lang: "en", level: "Средний", hours: 12, required: true,
+          scope: "Раздел Listening, уровни B1+",
           study: "Skills → Listening, уровни B1 и выше. Плюс любые технические доклады с английскими субтитрами.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -620,22 +761,27 @@ window.ROADMAP.stages.push(
   title: "Python и основы Computer Science",
   subtitle: "2–3 месяца. Один основной курс, много своего кода.",
   why: "Python — это язык, на котором вы будете собирать всё остальное: пайплайны данных, ML-модели, RAG, агентов и сервисы. Solutions Engineer пишет прототипы сам, а не ждёт разработчика.",
+  courseNote: "Здесь два взаимозаменяемых основных курса: CS50P (бесплатный, жёстче) и 100 Days of Code на Udemy (платный, мягче, больше мелких проектов). Возьмите ОДИН. CS50x — отдельный курс по Computer Science, из него нужны 4 лекции из 10, и он не обязателен.",
   prereq: ["stage-0"],
   topics: [
     {
       id: "stage-1-basics", title: "Синтаксис, типы, коллекции, функции", en: "Python fundamentals",
       track: "python", kind: "practice", hours: { novice: 45, dev: 10 }, required: true,
+      courseNote: "Курс CS50P — 9 лекций. Здесь нужны лекции 0–5 и задачи к ним; оставшиеся разбиты по темам ниже. ⚠ CS50P и Udemy 100 Days of Code — ВЗАИМОЗАМЕНЯЕМЫЕ основные курсы, не проходите оба: возьмите один и доведите до конца.",
       resources: [
         { title: "CS50P — Introduction to Programming with Python (Harvard)", url: "https://cs50.harvard.edu/python/",
           cost: "free", lang: "en", level: "База", hours: 40, required: true,
+          scope: "Лекции 0–5 из 9 плюс задачи к ним",
           study: "Лекции 0–5 и задачи к ним. Это ОСНОВНОЙ курс — берите один и доводите до конца.",
           skip: "Не проходите параллельно другой курс по Python.", checked: "2026-08-23" },
         { title: "100 Days of Code: Python Bootcamp (Udemy)", url: "https://www.udemy.com/course/100-days-of-code/",
           cost: "paid", lang: "en", level: "База", hours: 40, required: false,
+          scope: "АЛЬТЕРНАТИВА CS50P целиком — не проходить оба курса",
           study: "АЛЬТЕРНАТИВА CS50P, а не дополнение. Выберите что-то одно: CS50P жёстче и бесплатен, Udemy мягче и с большим числом мелких проектов.",
           skip: "Дни про веб-разработку на Flask можно отложить.", checked: "2026-08-23" },
         { title: "Python Tutor — визуализация выполнения кода", url: "https://pythontutor.com/",
           cost: "free", lang: "en", level: "База", hours: 3, required: false,
+          scope: "Инструмент, а не курс — открывать по мере надобности",
           study: "Прогоняйте через него любой код, который «работает, но непонятно почему».",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -644,13 +790,16 @@ window.ROADMAP.stages.push(
     {
       id: "stage-1-errors", title: "Ошибки, файлы, JSON и CSV", en: "Exceptions, files, JSON, CSV",
       track: "python", kind: "practice", hours: { novice: 20, dev: 6 }, required: true,
+      courseNote: "Тот же CS50P: лекции File I/O и Exceptions. Официальный туториал Python (16 глав) целиком не читается — только главы 7 и 8, как справочник.",
       resources: [
         { title: "CS50P — File I/O и Exceptions", url: "https://cs50.harvard.edu/python/",
           cost: "free", lang: "en", level: "База", hours: 10, required: true,
+          scope: "Лекции File I/O и Exceptions из того же CS50P",
           study: "Лекции про exceptions и file I/O плюс задачи.",
           skip: "—", checked: "2026-08-23" },
         { title: "Python — официальный туториал", url: "https://docs.python.org/3/tutorial/",
           cost: "free", lang: "en", level: "База", hours: 6, required: false,
+          scope: "Главы 7 и 8 из 16",
           study: "Главы 7 (ввод-вывод) и 8 (исключения) — как справочник.",
           skip: "Читать подряд целиком не нужно.", checked: "2026-08-23" }
       ],
@@ -662,6 +811,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "uv — управление проектами и зависимостями", url: "https://docs.astral.sh/uv/",
           cost: "free", lang: "en", level: "База", hours: 5, required: true,
+          scope: "Разделы Projects и Guides — без Publishing и Workspaces",
           study: "Projects, dependencies, running scripts, lockfile. uv сегодня — стандарт де-факто вместо связки venv + pip.",
           skip: "Publishing и workspaces — позже.", checked: "2026-08-23" }
       ],
@@ -670,13 +820,16 @@ window.ROADMAP.stages.push(
     {
       id: "stage-1-oop", title: "Классы, ООП, type hints, dataclasses", en: "OOP, type hints, dataclasses",
       track: "python", kind: "practice", hours: { novice: 25, dev: 8 }, required: true,
+      courseNote: "Тот же CS50P: лекция Object-Oriented Programming. Из туториала Python — глава 9.",
       resources: [
         { title: "CS50P — Object-Oriented Programming", url: "https://cs50.harvard.edu/python/",
           cost: "free", lang: "en", level: "Средний", hours: 12, required: true,
+          scope: "Лекция Object-Oriented Programming из CS50P",
           study: "Лекция про ООП плюс задачи; отдельно — раздел про type hints.",
           skip: "Множественное наследование в глубину — не нужно.", checked: "2026-08-23" },
         { title: "Python — официальный туториал, глава 9 (Classes)", url: "https://docs.python.org/3/tutorial/",
           cost: "free", lang: "en", level: "Средний", hours: 4, required: false,
+          scope: "Глава 9 из 16",
           study: "Как справочник по областям видимости и наследованию.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -688,6 +841,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Python — официальный туториал (списковые включения, итераторы, генераторы)", url: "https://docs.python.org/3/tutorial/",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: true,
+          scope: "Главы 5 и 9.8–9.13",
           study: "Главы 5 и 9.8–9.13: comprehensions, iterators, generators.",
           skip: "Декораторы на этом этапе — только базовое понимание, без метапрограммирования.", checked: "2026-08-23" }
       ],
@@ -699,6 +853,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "MDN — HTTP", url: "https://developer.mozilla.org/en-US/docs/Web/HTTP",
           cost: "free", lang: "en", level: "База", hours: 4, required: true,
+          scope: "Раздел Overview плюс справочники методов и кодов",
           study: "Overview, методы, коды ответов, заголовки.",
           skip: "Кеширование и CSP — позже, на этапе 4.", checked: "2026-08-23" }
       ],
@@ -710,6 +865,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "pytest — официальная документация", url: "https://docs.pytest.org/en/stable/",
           cost: "free", lang: "en", level: "Средний", hours: 10, required: true,
+          scope: "Get Started и How-to guides — не Reference целиком",
           study: "Get Started, How-to guides: assert, фикстуры, параметризация, тестирование исключений.",
           skip: "Плагины и хуки — не сейчас.", checked: "2026-08-23" }
       ],
@@ -721,14 +877,17 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "GitHub Skills — интерактивные курсы", url: "https://skills.github.com/",
           cost: "free", lang: "en", level: "База", hours: 6, required: true,
+          scope: "3 курса из ~20: Introduction, Review PR, Merge conflicts",
           study: "Introduction to GitHub, Review pull requests, Resolve merge conflicts.",
           skip: "Курсы про GitHub Pages и Copilot — по желанию.", checked: "2026-08-23" },
         { title: "Pro Git (официальная книга)", url: "https://git-scm.com/book/en/v2",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: false,
+          scope: "Главы 2–3 из 10",
           study: "Главы 2–3: основы и ветвление. Как справочник, а не чтение подряд.",
           skip: "Внутреннее устройство Git (глава 10) — не сейчас.", checked: "2026-08-23" },
         { title: "GitHub Actions — документация", url: "https://docs.github.com/en/actions",
           cost: "free", lang: "en", level: "Средний", hours: 3, required: false,
+          scope: "Только Quickstart",
           study: "Quickstart: один workflow, который запускает ваши тесты на каждый push.",
           skip: "Матрицы, кеши, self-hosted runners — на этапе 7.", checked: "2026-08-23" }
       ],
@@ -737,9 +896,11 @@ window.ROADMAP.stages.push(
     {
       id: "stage-1-cs", title: "Алгоритмическое мышление и структуры данных", en: "Algorithms and data structures",
       track: "python", kind: "theory", hours: { novice: 10, dev: 8 }, required: false,
+      courseNote: "Курс CS50x — 10 лекций, и это НЕ повтор Python. Нужны выборочно 4: алгоритмы, структуры данных, память и SQL. Python-блок вы уже прошли, C-задачи можно только посмотреть, веб-трек — на этапе 4.",
       resources: [
         { title: "CS50x — Introduction to Computer Science (Harvard)", url: "https://cs50.harvard.edu/x/",
           cost: "free", lang: "en", level: "Средний", hours: 10, required: false,
+          scope: "4 лекции из 10 — алгоритмы, структуры данных, память, SQL",
           study: "Выборочно: лекции про алгоритмы, сложность, структуры данных и память. Плюс лекция про SQL как разогрев к этапу 2.",
           skip: "Весь Python-блок (вы его уже прошли), C-задачи можно только посмотреть, веб-трек — на этапе 4.", checked: "2026-08-23" }
       ],
@@ -785,17 +946,21 @@ window.ROADMAP.stages.push(
     {
       id: "stage-2-sql-basics", title: "SQL: выборка, фильтрация, агрегация, JOIN", en: "SQL fundamentals",
       track: "data", kind: "practice", hours: { novice: 30, dev: 18 }, required: true,
+      courseNote: "Три ресурса намеренно перекрываются: SQLBolt даёт синтаксис (уроки 1–13 из 18), Kaggle — практику на больших таблицах, PostgreSQL — диалект, на котором будете работать. Проходите в этом порядке, не параллельно.",
       resources: [
         { title: "SQLBolt — интерактивные уроки SQL", url: "https://sqlbolt.com/",
           cost: "free", lang: "en", level: "База", hours: 10, required: true,
+          scope: "Уроки 1–13 из 18",
           study: "Уроки 1–13: SELECT, WHERE, ORDER BY, LIMIT, все виды JOIN, NULL, агрегатные функции, GROUP BY, HAVING.",
           skip: "Уроки про изменение схемы пройдите позже, вместе с проектированием.", checked: "2026-08-23" },
         { title: "Kaggle Learn — Intro to SQL", url: "https://www.kaggle.com/learn/intro-to-sql",
           cost: "free", lang: "en", level: "База", hours: 8, required: true,
+          scope: "Весь курс — 6 уроков",
           study: "Практика на больших реальных таблицах — то, чего не даёт SQLBolt.",
           skip: "—", checked: "2026-08-23" },
         { title: "PostgreSQL — официальный туториал по SQL", url: "https://www.postgresql.org/docs/current/tutorial-sql.html",
           cost: "free", lang: "en", level: "База", hours: 6, required: false,
+          scope: "Глава Tutorial целиком, дальше — справочник",
           study: "Как справочник по синтаксису именно PostgreSQL — на нём вы будете работать дальше.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -807,14 +972,17 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Kaggle Learn — Advanced SQL", url: "https://www.kaggle.com/learn/advanced-sql",
           cost: "free", lang: "en", level: "Средний", hours: 10, required: true,
+          scope: "Весь курс — 4 урока",
           study: "JOIN и UNION, аналитические (оконные) функции, вложенные и повторяющиеся данные.",
           skip: "—", checked: "2026-08-23" },
         { title: "PostgreSQL Exercises", url: "https://www.pgexercises.com/",
           cost: "free", lang: "en", level: "Средний", hours: 8, required: false,
+          scope: "Разделы Aggregates, Recursive, Window",
           study: "Разделы Aggregates, Recursive и Window — лучший тренажёр по оконным функциям.",
           skip: "String functions — по желанию.", checked: "2026-08-23" },
         { title: "Select Star SQL", url: "https://selectstarsql.com/",
           cost: "free", lang: "en", level: "Средний", hours: 5, required: false,
+          scope: "Книга целиком — короткая",
           study: "Если после Kaggle оконные функции всё ещё «магия» — эта книга объясняет их лучше всех.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -826,6 +994,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "PostgreSQL — официальная документация", url: "https://www.postgresql.org/docs/",
           cost: "free", lang: "en", level: "Средний", hours: 12, required: true,
+          scope: "Главы Data Definition, Indexes, Transactions, Performance Tips",
           study: "Data Definition (таблицы, ключи, ограничения), Indexes, Transactions (главы про ACID), Performance Tips и EXPLAIN.",
           skip: "Репликация, партиционирование, расширения — на этапе 7 по необходимости.", checked: "2026-08-23" }
       ],
@@ -837,6 +1006,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "NumPy — Learn", url: "https://numpy.org/learn/",
           cost: "free", lang: "en", level: "База", hours: 8, required: true,
+          scope: "Absolute basics и NumPy fundamentals",
           study: "NumPy: the absolute basics for beginners и NumPy fundamentals: массивы, форма, индексация, broadcasting.",
           skip: "Продвинутая работа с dtype и C-API — не нужна.", checked: "2026-08-23" }
       ],
@@ -848,10 +1018,12 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "pandas — Getting started", url: "https://pandas.pydata.org/docs/getting_started/index.html",
           cost: "free", lang: "en", level: "База", hours: 12, required: true,
+          scope: "10 minutes to pandas плюс весь блок Intro tutorials",
           study: "10 minutes to pandas и весь блок Intro tutorials: чтение файлов, выборка, работа с типами, объединение таблиц, groupby, работа с датами.",
           skip: "MultiIndex в глубину — по необходимости.", checked: "2026-08-23" },
         { title: "Kaggle Learn — Pandas", url: "https://www.kaggle.com/learn/pandas",
           cost: "free", lang: "en", level: "База", hours: 8, required: false,
+          scope: "Весь курс — 6 уроков",
           study: "Практика с упражнениями — хорошо ложится сразу после официального туториала.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -863,10 +1035,12 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Kaggle Learn — Data Cleaning", url: "https://www.kaggle.com/learn/data-cleaning",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: true,
+          scope: "Весь курс — 5 уроков",
           study: "Пропуски, масштабирование, разбор дат, кодировки, несогласованный ввод.",
           skip: "—", checked: "2026-08-23" },
         { title: "Pydantic — валидация данных", url: "https://pydantic.dev/docs/validation/latest/get-started/",
           cost: "free", lang: "en", level: "Средний", hours: 4, required: false,
+          scope: "Только Get started и валидаторы",
           study: "Модели и валидаторы. Тот же инструмент вернётся на этапе 4 в FastAPI и на этапе 6 в structured outputs.",
           skip: "Кастомные типы и сериализация — позже.", checked: "2026-08-23" }
       ],
@@ -878,6 +1052,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Matplotlib — Tutorials", url: "https://matplotlib.org/stable/tutorials/",
           cost: "free", lang: "en", level: "База", hours: 6, required: true,
+          scope: "Quick start и Pyplot tutorial",
           study: "Quick start, Pyplot tutorial, основы оформления осей и подписей.",
           skip: "Анимации, 3D, кастомные бэкенды — не нужны.", checked: "2026-08-23" }
       ],
@@ -914,18 +1089,22 @@ window.ROADMAP.stages.push(
   title: "Data Science и классический Machine Learning",
   subtitle: "3–4 месяца. Уверенная база, а не путь в исследователи.",
   why: "AI Solutions Engineer обязан знать, когда LLM не нужна. Половина «AI-задач» клиента решается градиентным бустингом на табличных данных — дешевле, быстрее и предсказуемее. Уметь распознать этот случай — конкурентное преимущество.",
+  courseNote: "Основных курса тоже два и они взаимозаменяемы: scikit-learn MOOC от Inria (бесплатный, 7 модулей, нужны 5) и Machine Learning Specialization от DeepLearning.AI (материалы бесплатны в режиме audit). Второй используйте как справочник, а не проходите целиком. Stanford CS229 — продвинутый справочник на потом, не сейчас.",
   prereq: ["stage-2", "track-math"],
   topics: [
     {
       id: "stage-3-framing", title: "Постановка ML-задачи, baseline, разбиение данных", en: "Problem framing and baselines",
       track: "ml", kind: "theory", hours: { novice: 18, dev: 16 }, required: true,
+      courseNote: "scikit-learn MOOC (Inria) состоит из 7 модулей. По этапу 3 нужны 5 из них, они разнесены по темам ниже. ⚠ MOOC и Machine Learning Specialization (DeepLearning.AI) — ВЗАИМОЗАМЕНЯЕМЫЕ основные курсы: берите один, второй используйте как справочник по трудным темам.",
       resources: [
         { title: "scikit-learn MOOC (Inria) — Machine learning concepts", url: "https://inria.github.io/scikit-learn-mooc/",
           cost: "free", lang: "en", level: "Средний", hours: 12, required: true,
+          scope: "Модули Machine Learning Concepts и Predictive modeling pipeline",
           study: "Модуль Machine Learning Concepts и Predictive modeling pipeline. Это ОСНОВНОЙ курс этапа.",
           skip: "Не проходите параллельно второй большой курс.", checked: "2026-08-23" },
         { title: "Kaggle Learn — Intro to Machine Learning", url: "https://www.kaggle.com/learn/intro-to-machine-learning",
           cost: "free", lang: "en", level: "База", hours: 4, required: false,
+          scope: "Весь курс — 7 уроков",
           study: "Быстрый практический вход, если MOOC кажется тяжёлым стартом.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -934,17 +1113,21 @@ window.ROADMAP.stages.push(
     {
       id: "stage-3-supervised", title: "Регрессия, классификация, деревья, kNN", en: "Supervised learning",
       track: "ml", kind: "practice", hours: { novice: 35, dev: 31 }, required: true,
+      courseNote: "Из scikit-learn MOOC — модули Linear models и Decision tree models целиком (2 из 7).",
       resources: [
         { title: "scikit-learn MOOC — Linear models, Decision trees", url: "https://inria.github.io/scikit-learn-mooc/",
           cost: "free", lang: "en", level: "Средний", hours: 22, required: true,
+          scope: "Модули Linear models и Decision tree models целиком",
           study: "Модули Linear models и Decision tree models целиком, с упражнениями.",
           skip: "—", checked: "2026-08-23" },
         { title: "StatQuest — указатель видео", url: "https://statquest.org/video_index.html",
           cost: "free", lang: "en", level: "Средний", hours: 8, required: false,
+          scope: "Раздел Machine Learning — выборочно",
           study: "Linear Regression, Logistic Regression, Decision Trees — смотрите ПЕРЕД чтением документации, если тема не заходит.",
           skip: "Нейросети — вернётесь на этапе 5.", checked: "2026-08-23" },
         { title: "Machine Learning Specialization (DeepLearning.AI)", url: "https://www.deeplearning.ai/specializations/machine-learning",
           cost: "paid", lang: "en", level: "Средний", hours: 20, required: false,
+          scope: "АЛЬТЕРНАТИВА MOOC целиком — 3 курса, брать вместо, а не вдобавок",
           study: "АЛЬТЕРНАТИВНЫЙ основной курс. Материалы можно смотреть бесплатно в режиме audit; платить нужно только за сертификат. Берите его вместо MOOC, если вам нужна более разжёванная подача.",
           skip: "Не проходите оба целиком.", checked: "2026-08-23" }
       ],
@@ -953,13 +1136,16 @@ window.ROADMAP.stages.push(
     {
       id: "stage-3-ensembles", title: "Ансамбли: random forest и градиентный бустинг", en: "Ensembles and boosting",
       track: "ml", kind: "practice", hours: { novice: 25, dev: 22 }, required: true,
+      courseNote: "Из scikit-learn MOOC — модуль Ensemble of models (3-й из 5 нужных).",
       resources: [
         { title: "scikit-learn MOOC — Ensemble of models", url: "https://inria.github.io/scikit-learn-mooc/",
           cost: "free", lang: "en", level: "Средний", hours: 16, required: true,
+          scope: "Модуль Ensemble of models целиком",
           study: "Bagging, random forest, boosting, gradient boosting и их гиперпараметры.",
           skip: "—", checked: "2026-08-23" },
         { title: "Kaggle Learn — Intermediate Machine Learning", url: "https://www.kaggle.com/learn/intermediate-machine-learning",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: false,
+          scope: "Весь курс — 7 уроков",
           study: "Пропуски, категориальные признаки, пайплайны, XGBoost, утечка данных.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -971,10 +1157,12 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "scikit-learn — User Guide: Clustering и Decomposition", url: "https://scikit-learn.org/stable/",
           cost: "free", lang: "en", level: "Средний", hours: 8, required: true,
+          scope: "Разделы Clustering и Decomposing signals",
           study: "Разделы Clustering (k-means, выбор числа кластеров, метрики качества) и Decomposing signals (PCA).",
           skip: "Спектральная кластеризация, ICA — по необходимости.", checked: "2026-08-23" },
         { title: "StatQuest — PCA и k-means", url: "https://statquest.org/video_index.html",
           cost: "free", lang: "en", level: "Средний", hours: 3, required: false,
+          scope: "2 видео: PCA step-by-step и K-means",
           study: "Видео PCA step-by-step и K-means clustering — визуальная интуиция перед документацией.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -983,13 +1171,16 @@ window.ROADMAP.stages.push(
     {
       id: "stage-3-preprocess", title: "Препроцессинг, кодирование, feature engineering, pipeline", en: "Preprocessing and feature engineering",
       track: "ml", kind: "practice", hours: { novice: 25, dev: 22 }, required: true,
+      courseNote: "Из scikit-learn MOOC — модуль Predictive modeling pipeline (4-й из 5 нужных).",
       resources: [
         { title: "scikit-learn MOOC — Predictive modeling pipeline", url: "https://inria.github.io/scikit-learn-mooc/",
           cost: "free", lang: "en", level: "Средний", hours: 14, required: true,
+          scope: "Модуль Predictive modeling pipeline целиком",
           study: "Обработка числовых и категориальных признаков, ColumnTransformer, Pipeline. Пайплайн обязателен: он и защищает от утечки.",
           skip: "—", checked: "2026-08-23" },
         { title: "Kaggle Learn — Feature Engineering", url: "https://www.kaggle.com/learn/feature-engineering",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: false,
+          scope: "Весь курс — 6 уроков",
           study: "Взаимная информация, создание признаков, целевое кодирование.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -998,13 +1189,16 @@ window.ROADMAP.stages.push(
     {
       id: "stage-3-validation", title: "Валидация, подбор гиперпараметров, переобучение, дисбаланс", en: "Validation and tuning",
       track: "ml", kind: "practice", hours: { novice: 25, dev: 23 }, required: true,
+      courseNote: "Из scikit-learn MOOC — модули Selecting the best model и Evaluating model performance. На них MOOC для вас закрыт: 5 модулей из 7, разделы про конкретные соревнования не нужны.",
       resources: [
         { title: "scikit-learn MOOC — Selecting the best model, Evaluating model performance", url: "https://inria.github.io/scikit-learn-mooc/",
           cost: "free", lang: "en", level: "Средний", hours: 16, required: true,
+          scope: "Модули Selecting the best model и Evaluating model performance",
           study: "Кросс-валидация, переобучение и недообучение, компромисс смещения и разброса, подбор гиперпараметров.",
           skip: "—", checked: "2026-08-23" },
         { title: "scikit-learn — User Guide", url: "https://scikit-learn.org/stable/",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: false,
+          scope: "Разделы Cross-validation и Tuning hyper-parameters",
           study: "Разделы Cross-validation и Tuning hyper-parameters как справочник.",
           skip: "Читать подряд не нужно.", checked: "2026-08-23" }
       ],
@@ -1016,10 +1210,12 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "scikit-learn — Metrics and scoring", url: "https://scikit-learn.org/stable/",
           cost: "free", lang: "en", level: "Средний", hours: 10, required: true,
+          scope: "Раздел Model evaluation",
           study: "Раздел Model evaluation: precision, recall, F1, ROC-AUC, confusion matrix, MAE, RMSE, R².",
           skip: "Экзотические метрики — по необходимости.", checked: "2026-08-23" },
         { title: "StatQuest — ROC and AUC, Confusion Matrix", url: "https://statquest.org/video_index.html",
           cost: "free", lang: "en", level: "Средний", hours: 4, required: false,
+          scope: "Видео про ROC/AUC и confusion matrix",
           study: "Раздел про метрики — самые понятные объяснения ROC-AUC.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1031,6 +1227,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "An Introduction to Statistical Learning (бесплатная книга)", url: "https://www.statlearning.com/",
           cost: "free", lang: "en", level: "Продвинутый", hours: 8, required: false,
+          scope: "Главы 2, 3 и 8 из 13 — PDF бесплатен",
           study: "Главы 2–3 и 8 как справочник по интуиции моделей. PDF бесплатен на сайте авторов. Фундаментальная книга, обновляется — есть версия с примерами на Python.",
           skip: "Математические выкладки можно пропускать, читайте объяснения.", checked: "2026-08-23" }
       ],
@@ -1042,6 +1239,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Kaggle Learn — Time Series", url: "https://www.kaggle.com/learn/time-series",
           cost: "free", lang: "en", level: "Средний", hours: 8, required: false,
+          scope: "Весь курс — 6 уроков",
           study: "Тренд, сезонность, лаговые признаки, правильная валидация по времени.",
           skip: "Гибридные модели — по желанию.", checked: "2026-08-23" }
       ],
@@ -1092,6 +1290,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "MDN — HTTP", url: "https://developer.mozilla.org/en-US/docs/Web/HTTP",
           cost: "free", lang: "en", level: "Средний", hours: 18, required: true,
+          scope: "Разделы Guides и References целиком — это справочник на годы",
           study: "Методы, коды ответов, заголовки, cookies, CORS, аутентификация, кеширование. Это справочник, к которому вы будете возвращаться всю карьеру.",
           skip: "HTTP/3 и детали протокола — обзорно.", checked: "2026-08-23" }
       ],
@@ -1103,10 +1302,12 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "FastAPI — Tutorial, User Guide", url: "https://fastapi.tiangolo.com/tutorial/",
           cost: "free", lang: "en", level: "Средний", hours: 22, required: true,
+          scope: "Раздел Tutorial — User Guide целиком",
           study: "Весь Tutorial подряд: маршруты, параметры, модели запроса и ответа, зависимости, обработка ошибок, безопасность.",
           skip: "GraphQL, WebSockets — по необходимости.", checked: "2026-08-23" },
         { title: "Pydantic — валидация", url: "https://pydantic.dev/docs/validation/latest/get-started/",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: false,
+          scope: "Concepts: модели, валидаторы, настройки",
           study: "Модели, валидаторы, настройки. Тот же механизм отвечает за structured outputs у LLM на этапе 6.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1118,6 +1319,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "PostgreSQL — документация", url: "https://www.postgresql.org/docs/",
           cost: "free", lang: "en", level: "Средний", hours: 8, required: true,
+          scope: "Главы про подключения, пулы и транзакции",
           study: "Подключения, пулы, транзакции из приложения. ORM берите на уровне «умею простые запросы и понимаю, какой SQL он породил».",
           skip: "Глубокое администрирование — не ваша работа.", checked: "2026-08-23" }
       ],
@@ -1129,6 +1331,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "pytest — документация", url: "https://docs.pytest.org/en/stable/",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: true,
+          scope: "How-to guides плюс тесты FastAPI через TestClient",
           study: "Фикстуры, параметризация, конфигурация. Для FastAPI — тесты через TestClient из туториала.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1140,6 +1343,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "The Twelve-Factor App", url: "https://12factor.net/",
           cost: "free", lang: "en", level: "Средний", hours: 4, required: true,
+          scope: "4 фактора из 12: Config, Logs, Dev/prod parity, Disposability",
           study: "Разделы Config, Logs, Dev/prod parity, Disposability. Короткий и до сих пор актуальный текст.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1151,6 +1355,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Docker — Get started", url: "https://docs.docker.com/get-started/",
           cost: "free", lang: "en", level: "База", hours: 8, required: true,
+          scope: "Весь Get started плюс раздел Docker Compose",
           study: "Образы, контейнеры, Dockerfile, тома, Docker Compose.",
           skip: "Swarm — не нужен.", checked: "2026-08-23" }
       ],
@@ -1187,6 +1392,7 @@ window.ROADMAP.stages.push(
   title: "Основы Deep Learning и LLM",
   subtitle: "2–3 месяца. Ровно столько, чтобы понимать, чем вы пользуетесь.",
   why: "Вы не будете обучать foundation-модели. Но вы будете отвечать клиенту на вопросы «а почему она врёт», «а можно её дообучить» и «почему это стоит столько». Без понимания, как модель устроена внутри, эти ответы превращаются в маркетинг.",
+  courseNote: "Hugging Face LLM Course (12 глав) проходится примерно наполовину и продолжается на этапе 6. Karpathy Zero to Hero — сильное, но НЕ блокирующее дополнение: нужны видео 1–2 из 8, и если они тормозят вас больше чем на 3 недели, идите дальше.",
   prereq: ["stage-3", "track-math"],
   topics: [
     {
@@ -1195,14 +1401,17 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "3Blue1Brown — Neural networks", url: "https://www.3blue1brown.com/topics/neural-networks",
           cost: "free", lang: "en", level: "Средний", hours: 8, required: true,
+          scope: "Вся серия Neural networks — 4 видео",
           study: "Вся серия: нейрон, слои, градиентный спуск, backpropagation. Смотрите ПЕРВЫМ — это лучший визуальный ввод.",
           skip: "—", checked: "2026-08-23" },
         { title: "Andrej Karpathy — Neural Networks: Zero to Hero", url: "https://karpathy.ai/zero-to-hero.html",
           cost: "free", lang: "en", level: "Продвинутый", hours: 20, required: false,
+          scope: "Видео 1–2 из 8 — micrograd и makemore",
           study: "Видео 1–2 (micrograd и makemore): вы своими руками пишете автоград и обучаете модель. Это ДОПОЛНЕНИЕ, а не блокирующее условие для AI Solutions Engineer.",
           skip: "GPT с нуля и токенизатор — по желанию, если тема захватила.", checked: "2026-08-23" },
         { title: "Andrej Karpathy — YouTube-канал", url: "https://www.youtube.com/@AndrejKarpathy",
           cost: "free", lang: "en", level: "Продвинутый", hours: 4, required: false,
+          scope: "Обзорные видео про устройство LLM — выборочно",
           study: "Обзорные видео про то, как на самом деле устроены LLM — отличный материал для объяснения клиентам.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1214,6 +1423,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "PyTorch — Learn the Basics", url: "https://docs.pytorch.org/tutorials/beginner/basics/intro.html",
           cost: "free", lang: "en", level: "Средний", hours: 18, required: true,
+          scope: "Весь вводный курс Learn the Basics — 8 разделов",
           study: "Весь вводный курс: тензоры, датасеты, модель, автоград, цикл обучения, сохранение модели.",
           skip: "Распределённое обучение, квантизация — не сейчас.", checked: "2026-08-23" }
       ],
@@ -1222,9 +1432,11 @@ window.ROADMAP.stages.push(
     {
       id: "stage-5-transformers", title: "Embeddings, attention, transformers, токены", en: "Embeddings, attention, transformers",
       track: "ai", kind: "theory", hours: { novice: 25, dev: 22 }, required: true,
+      courseNote: "Hugging Face LLM Course — 12 глав. Здесь нужны главы 1–3; главы про дообучение — в следующей теме; разделы про эмбеддинги — на этапе 6. Итого по карте: примерно половина курса.",
       resources: [
         { title: "Hugging Face — LLM Course", url: "https://huggingface.co/learn/llm-course",
           cost: "free", lang: "en", level: "Средний", hours: 18, required: true,
+          scope: "Главы 1–3 из 12",
           study: "Главы 1–3: трансформеры, токенизация, использование готовых моделей. Это же курс продолжится на этапе 6.",
           skip: "Дообучение и обучение с нуля — только обзорно.", checked: "2026-08-23" }
       ],
@@ -1233,9 +1445,11 @@ window.ROADMAP.stages.push(
     {
       id: "stage-5-lifecycle", title: "Pretraining, fine-tuning, inference, галлюцинации", en: "LLM lifecycle and limits",
       track: "ai", kind: "theory", hours: { novice: 15, dev: 13 }, required: true,
+      courseNote: "Тот же HF LLM Course — главы про дообучение и инференс. Практическое дообучение делайте, только если оно реально понадобится на этапе 6.",
       resources: [
         { title: "Hugging Face — LLM Course (главы про дообучение)", url: "https://huggingface.co/learn/llm-course",
           cost: "free", lang: "en", level: "Средний", hours: 8, required: true,
+          scope: "Главы про дообучение и инференс",
           study: "Чем предобучение отличается от дообучения, что такое инференс, откуда берутся галлюцинации и где предел контекстного окна.",
           skip: "Практическое дообучение — только если реально понадобится на этапе 6.", checked: "2026-08-23" }
       ],
@@ -1273,22 +1487,27 @@ window.ROADMAP.stages.push(
   title: "Глубокая специализация: AI Engineering",
   subtitle: "3–4 месяца. Это вертикальная палочка вашей буквы T.",
   why: "Здесь вы перестаёте быть человеком, который «умеет немного всего», и становитесь специалистом, за которым приходят. RAG, агенты, evals и безопасность LLM — то, что отличает инженера от энтузиаста с промптами.",
+  courseNote: "Порядок здесь важнее объёма: сначала голый API провайдера, потом примитивы руками, и только потом фреймворки. Документация трёх провайдеров — не три курса, а сравнение. LangChain читается ПОСЛЕ того, как вы собрали RAG и агента сами.",
   prereq: ["stage-4", "stage-5"],
   topics: [
     {
       id: "stage-6-apis", title: "Model API напрямую: промпты, system instructions, structured outputs, streaming", en: "Model APIs and prompting",
       track: "ai", kind: "practice", hours: { novice: 28, dev: 26 }, required: true,
+      courseNote: "Три провайдера — НЕ три курса. Один изучаете как основной (любой), два других открываете, чтобы увидеть те же примитивы под другими именами и не привязать карту к одному вендору.",
       resources: [
         { title: "Claude Developer Platform — документация", url: "https://platform.claude.com/docs/en/home",
           cost: "free", lang: "en", level: "Средний", hours: 10, required: true,
+          scope: "Messages API, system prompts, structured outputs, streaming",
           study: "Messages API, system prompt, параметры, структурированные ответы, потоковая выдача. Работайте с API НАПРЯМУЮ, до всяких фреймворков.",
           skip: "Batch API — по необходимости.", checked: "2026-08-23" },
         { title: "OpenAI — документация для разработчиков", url: "https://developers.openai.com/api/docs",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: true,
+          scope: "Те же примитивы у второго провайдера — для сравнения",
           study: "Тот же набор примитивов у второго провайдера — чтобы не привязываться к одному вендору.",
           skip: "—", checked: "2026-08-23" },
         { title: "Gemini API — документация", url: "https://ai.google.dev/gemini-api/docs",
           cost: "free", lang: "en", level: "Средний", hours: 4, required: false,
+          scope: "Обзорно — третий провайдер для сравнения",
           study: "Третий провайдер для сравнения. Полезно, когда клиент уже сидит в Google Cloud.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1300,6 +1519,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Claude — Tool use (overview)", url: "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview",
           cost: "free", lang: "en", level: "Средний", hours: 8, required: true,
+          scope: "Раздел Tool use целиком",
           study: "Описание инструментов, цикл вызова, параллельные вызовы, обработка ошибок инструмента.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1308,13 +1528,16 @@ window.ROADMAP.stages.push(
     {
       id: "stage-6-embeddings", title: "Embeddings, семантический поиск, векторные базы, chunking", en: "Embeddings and vector search",
       track: "ai", kind: "practice", hours: { novice: 26, dev: 24 }, required: true,
+      courseNote: "Заключительный кусок HF LLM Course — разделы про эмбеддинги и семантический поиск. pgvector берите вместо отдельной векторной СУБД: у вас уже есть PostgreSQL.",
       resources: [
         { title: "Hugging Face — LLM Course", url: "https://huggingface.co/learn/llm-course",
           cost: "free", lang: "en", level: "Средний", hours: 10, required: true,
+          scope: "Разделы про эмбеддинги и семантический поиск",
           study: "Разделы про эмбеддинги и семантический поиск.",
           skip: "—", checked: "2026-08-23" },
         { title: "pgvector — векторный поиск в PostgreSQL", url: "https://github.com/pgvector/pgvector",
           cost: "free", lang: "en", level: "Средний", hours: 8, required: true,
+          scope: "README целиком плюс раздел про типы индексов",
           study: "Установка, типы индексов (HNSW, IVFFlat), операторы расстояния. Начинайте с pgvector, а не с отдельной векторной СУБД: у вас уже есть PostgreSQL, и клиенту это проще согласовать.",
           skip: "Экзотические типы квантизации — по необходимости.", checked: "2026-08-23" }
       ],
@@ -1326,10 +1549,12 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Full Stack Deep Learning — курс", url: "https://fullstackdeeplearning.com/course/",
           cost: "free", lang: "en", level: "Продвинутый", hours: 14, required: true,
+          scope: "Лекции про LLM-приложения и retrieval — не весь курс",
           study: "Лекции про LLM-приложения, retrieval и продакшен-архитектуру.",
           skip: "Разделы про обучение больших моделей — обзорно.", checked: "2026-08-23" },
         { title: "AI Engineering (Chip Huyen, O'Reilly)", url: "https://www.oreilly.com/library/view/ai-engineering/9781098166298/",
           cost: "paid", lang: "en", level: "Продвинутый", hours: 20, required: false,
+          scope: "Книга целиком — главная книга специализации",
           study: "Ключевая книга по теме: RAG, агенты, evals, стоимость, продакшен. Дополнение к бесплатным курсам — но если покупать одну книгу по специализации, то эту.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1341,6 +1566,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Hugging Face — AI Agents Course", url: "https://huggingface.co/learn/agents-course",
           cost: "free", lang: "en", level: "Продвинутый", hours: 16, required: true,
+          scope: "Весь курс целиком",
           study: "Весь курс: что такое агент, цикл рассуждения и действия, инструменты, память, многошаговые сценарии.",
           skip: "Конкретные фреймворки из курса — только как иллюстрация.", checked: "2026-08-23" }
       ],
@@ -1352,10 +1578,12 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Model Context Protocol — документация", url: "https://modelcontextprotocol.io/docs/getting-started/intro",
           cost: "free", lang: "en", level: "Продвинутый", hours: 8, required: true,
+          scope: "Раздел Getting started плюс концепции — не вся спецификация",
           study: "Архитектура, сервер и клиент, инструменты и ресурсы, транспорт.",
           skip: "Спецификацию целиком читать не нужно — начните с getting started.", checked: "2026-08-23" },
         { title: "Hugging Face — MCP Course", url: "https://huggingface.co/learn/mcp-course",
           cost: "free", lang: "en", level: "Продвинутый", hours: 6, required: false,
+          scope: "Весь курс целиком",
           study: "Практический курс с примерами сервера и клиента.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1367,6 +1595,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Ragas — оценка RAG-систем", url: "https://docs.ragas.io/en/stable/",
           cost: "free", lang: "en", level: "Продвинутый", hours: 10, required: true,
+          scope: "Разделы Metrics и Testing",
           study: "Метрики retrieval и качества ответа, сборка тестового набора, запуск оценки.",
           skip: "Интеграции с конкретными фреймворками — по необходимости.", checked: "2026-08-23" }
       ],
@@ -1378,10 +1607,12 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "OWASP Top 10 для LLM-приложений", url: "https://genai.owasp.org/llm-top-10/",
           cost: "free", lang: "en", level: "Продвинутый", hours: 8, required: true,
+          scope: "Все 10 рисков",
           study: "Все десять рисков с примерами. Особое внимание: prompt injection, утечка чувствительных данных, избыточные полномочия агента.",
           skip: "—", checked: "2026-08-23" },
         { title: "OWASP — страница проекта", url: "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
           cost: "free", lang: "en", level: "Продвинутый", hours: 3, required: false,
+          scope: "Обзорная страница проекта",
           study: "Официальная страница проекта со ссылками на материалы и переводы.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1393,6 +1624,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "OpenTelemetry — документация", url: "https://opentelemetry.io/docs/",
           cost: "free", lang: "en", level: "Продвинутый", hours: 8, required: true,
+          scope: "Разделы Concepts и Traces — не настройка коллектора",
           study: "Concepts и traces: что такое span, как собрать трассировку многошагового запроса. Стандарт, не привязанный к вендору.",
           skip: "Настройка коллектора в деталях — по необходимости.", checked: "2026-08-23" }
       ],
@@ -1404,6 +1636,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "LangChain — документация", url: "https://docs.langchain.com/",
           cost: "free", lang: "en", level: "Продвинутый", hours: 5, required: false,
+          scope: "Обзорное чтение ПОСЛЕ своего RAG — не проходить как курс",
           study: "Смотрите ПОСЛЕ того, как собрали RAG и агента руками. Цель — понять, что фреймворк делает за вас и какой ценой.",
           skip: "Не начинайте специализацию с фреймворка: тогда вы выучите библиотеку, а не предметную область.", checked: "2026-08-23" }
       ],
@@ -1415,6 +1648,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Claude Developer Platform — документация", url: "https://platform.claude.com/docs/en/home",
           cost: "free", lang: "en", level: "Продвинутый", hours: 4, required: false,
+          scope: "Разделы про изображения и документы",
           study: "Разделы про работу с изображениями и документами. Плюс критерии, когда дообучение действительно оправдано.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1480,6 +1714,7 @@ window.ROADMAP.stages.push(
   title: "Production AI, MLOps, Cloud и безопасность",
   subtitle: "2–3 месяца. Прототип, который нельзя запустить, клиенту не нужен.",
   why: "На защите архитектуры вам зададут три вопроса: сколько это стоит, что будет при отказе и кто имеет доступ к данным. Ответы на них живут здесь.",
+  courseNote: "Облако выбирается ОДНО из трёх (AWS, Azure, Google Cloud) — ссылки ниже взаимозаменяемы. Сертификаты — дополнение, а не замена проектам. Курс Full Stack Deep Learning 2022 не новый, но по инженерной части остаётся актуальным; устарели только части про конкретные версии библиотек.",
   prereq: ["stage-6"],
   topics: [
     {
@@ -1488,10 +1723,12 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Docker — Get started", url: "https://docs.docker.com/get-started/",
           cost: "free", lang: "en", level: "Средний", hours: 8, required: true,
+          scope: "Многоступенчатые сборки, тома, сети, Compose",
           study: "Многоступенчатые сборки, тома, сети, Compose для нескольких сервисов.",
           skip: "—", checked: "2026-08-23" },
         { title: "GitHub Actions — документация", url: "https://docs.github.com/en/actions",
           cost: "free", lang: "en", level: "Средний", hours: 10, required: true,
+          scope: "Разделы Workflows, Secrets, Environments, Deployment",
           study: "Workflow, джобы, матрицы, секреты, окружения (dev/staging/production), деплой.",
           skip: "Self-hosted runners — по необходимости.", checked: "2026-08-23" }
       ],
@@ -1500,21 +1737,26 @@ window.ROADMAP.stages.push(
     {
       id: "stage-7-cloud", title: "Основы облака: compute, storage, сеть", en: "Cloud fundamentals",
       track: "cloud", kind: "theory", hours: { novice: 30, dev: 22 }, required: true,
+      courseNote: "⚠ ВЫБЕРИТЕ ОДНО облако из трёх и не распыляйтесь. Три ссылки ниже — это три взаимозаменяемых варианта, а не три курса подряд. Три поверхностных знания хуже одного рабочего.",
       resources: [
         { title: "AWS Skill Builder", url: "https://skillbuilder.aws/",
           cost: "free", lang: "en", level: "База", hours: 20, required: false,
+          scope: "ВАРИАНТ 1 из 3 — начать с Cloud Practitioner Essentials",
           study: "ВАРИАНТ 1 (AWS). Начните с Cloud Practitioner Essentials: базовые сервисы, модель ответственности, ценообразование.",
           skip: "Сертификацию оставьте на потом — она не заменяет проекты.", checked: "2026-08-23" },
         { title: "Microsoft Learn — Azure Fundamentals", url: "https://learn.microsoft.com/en-us/training/paths/microsoft-azure-fundamentals-describe-cloud-concepts/",
           cost: "free", lang: "en", level: "База", hours: 20, required: false,
+          scope: "ВАРИАНТ 2 из 3 — путь Azure Fundamentals",
           study: "ВАРИАНТ 2 (Azure). Концепции облака, затем путь AI Engineer в Microsoft Learn.",
           skip: "—", checked: "2026-08-23" },
         { title: "Google Cloud Skills Boost — обучающие пути", url: "https://www.skills.google/paths",
           cost: "free", lang: "en", level: "База", hours: 20, required: false,
+          scope: "ВАРИАНТ 3 из 3 — один путь по Generative AI или Cloud Engineer",
           study: "ВАРИАНТ 3 (Google Cloud). Выберите путь по Generative AI или Cloud Engineer.",
           skip: "—", checked: "2026-08-23" },
         { title: "Microsoft Learn — путь AI Engineer", url: "https://learn.microsoft.com/en-us/training/career-paths/ai-engineer",
           cost: "free", lang: "en", level: "Средний", hours: 10, required: false,
+          scope: "Карта роли — читать, а не проходить",
           study: "Полезен даже вне Azure: хорошая карта того, что вообще входит в роль AI-инженера.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1526,10 +1768,12 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "AWS Well-Architected Framework", url: "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html",
           cost: "free", lang: "en", level: "Продвинутый", hours: 12, required: true,
+          scope: "Столпы Security, Reliability и Cost Optimization из 6",
           study: "Столпы Security, Reliability и Cost Optimization. Принципы применимы к любому облаку, не только к AWS.",
           skip: "Специфические сервисы AWS — обзорно.", checked: "2026-08-23" },
         { title: "OWASP — Threat Modeling", url: "https://owasp.org/www-community/Threat_Modeling",
           cost: "free", lang: "en", level: "Продвинутый", hours: 5, required: true,
+          scope: "Страница целиком — короткая",
           study: "Как систематически задавать вопрос «что может пойти не так». Понадобится в каждом капстоуне.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1541,10 +1785,12 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Made With ML — MLOps Course", url: "https://madewithml.com/courses/mlops/",
           cost: "free", lang: "en", level: "Продвинутый", hours: 16, required: true,
+          scope: "Разделы про эксперименты, тестирование и мониторинг",
           study: "Разделы про эксперименты, версионирование, тестирование, мониторинг и дрейф. Один из немногих курсов, где MLOps показан целиком и на коде.",
           skip: "Части, привязанные к конкретной платформе, — обзорно.", checked: "2026-08-23" },
         { title: "Full Stack Deep Learning (2022)", url: "https://fullstackdeeplearning.com/course/2022/",
           cost: "free", lang: "en", level: "Продвинутый", hours: 8, required: false,
+          scope: "Лекции про тестирование, деплой и мониторинг",
           study: "Лекции про тестирование, деплой и мониторинг ML. Курс не новый, но по инженерной части остаётся актуальным — это фундаментальный материал, а не свежие новости.",
           skip: "Части про конкретные версии библиотек устарели.", checked: "2026-08-23" }
       ],
@@ -1556,6 +1802,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Designing Machine Learning Systems (Chip Huyen, O'Reilly)", url: "https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/",
           cost: "paid", lang: "en", level: "Продвинутый", hours: 12, required: false,
+          scope: "Главы про деплой, мониторинг и надёжность",
           study: "Главы про деплой, мониторинг и надёжность ML-систем. Лучшее системное изложение темы.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1567,6 +1814,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "AWS Well-Architected — Cost Optimization", url: "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html",
           cost: "free", lang: "en", level: "Продвинутый", hours: 5, required: true,
+          scope: "Столп Cost Optimization",
           study: "Столп Cost Optimization: как вообще считать стоимость архитектуры.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1616,6 +1864,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Google — Technical Writing", url: "https://developers.google.com/tech-writing",
           cost: "free", lang: "en", level: "Средний", hours: 6, required: false,
+          scope: "Обзорно — как писать документ требований",
           study: "Как писать документ требований, который прочитают: короткие предложения, списки, однозначные формулировки.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1627,14 +1876,17 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "C4 model — визуализация архитектуры", url: "https://c4model.com/",
           cost: "free", lang: "en", level: "Средний", hours: 5, required: true,
+          scope: "Уровни Context, Container, Component — уровень Code не нужен",
           study: "Уровни: контекст, контейнеры, компоненты. Простой и общепринятый способ рисовать архитектуру так, чтобы её поняли и бизнес, и инженеры.",
           skip: "Уровень кода обычно не нужен.", checked: "2026-08-23" },
         { title: "Mermaid — диаграммы текстом", url: "https://mermaid.js.org/",
           cost: "free", lang: "en", level: "База", hours: 4, required: true,
+          scope: "Типы sequence, flowchart и C4",
           study: "Sequence, flowchart, C4. Диаграммы хранятся в Git рядом с кодом и не устаревают.",
           skip: "Экзотические типы диаграмм — по необходимости.", checked: "2026-08-23" },
         { title: "Azure Architecture Center", url: "https://learn.microsoft.com/en-us/azure/architecture/",
           cost: "free", lang: "en", level: "Продвинутый", hours: 6, required: false,
+          scope: "Выборочно — 2–3 эталонные архитектуры как образец",
           study: "Готовые эталонные архитектуры — как образец того, какого уровня детализации от вас ждут.",
           skip: "Привязку к конкретным сервисам Azure — обзорно.", checked: "2026-08-23" }
       ],
@@ -1715,6 +1967,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Google — Technical Writing One", url: "https://developers.google.com/tech-writing/one",
           cost: "free", lang: "en", level: "Средний", hours: 4, required: false,
+          scope: "Перечитать перед вычиткой README",
           study: "Перечитайте перед финальной вычиткой README — большинство портфолио проваливается именно на текстах.",
           skip: "—", checked: "2026-08-23" }
       ],
@@ -1732,6 +1985,7 @@ window.ROADMAP.stages.push(
       resources: [
         { title: "Google Cloud — Architecture Center", url: "https://cloud.google.com/architecture",
           cost: "free", lang: "en", level: "Продвинутый", hours: 6, required: false,
+          scope: "Выборочно — 3–4 архитектуры для тренировки вслух",
           study: "Эталонные архитектуры как образцы для тренировки. Проговаривайте их вслух, как на собеседовании.",
           skip: "—", checked: "2026-08-23" }
       ],

@@ -166,8 +166,8 @@
     if (filters.track !== "all" && topic.track !== filters.track) return false;
     if (filters.query) {
       var q = filters.query;
-      var hay = [topic.title, topic.en, topic.task || ""]
-        .concat(topic.resources.map(function (r) { return r.title + " " + (r.study || ""); }))
+      var hay = [topic.title, topic.en, topic.task || "", topic.courseNote || ""]
+        .concat(topic.resources.map(function (r) { return r.title + " " + (r.study || "") + " " + (r.scope || ""); }))
         .join(" ").toLowerCase();
       if (hay.indexOf(q) === -1) return false;
     }
@@ -408,6 +408,13 @@
       why.appendChild(el("p", null, stage.why));
       body.appendChild(why);
 
+      if (stage.courseNote) {
+        var scn = el("div", "course-note");
+        scn.appendChild(el("strong", null, "Объём курсов"));
+        scn.appendChild(el("p", null, stage.courseNote));
+        body.appendChild(scn);
+      }
+
       if (stage.prereq && stage.prereq.length) {
         var names = stage.prereq.map(function (id) {
           var s = DATA.stages.filter(function (x) { return x.id === id; })[0];
@@ -502,6 +509,13 @@
 
     var detail = el("div", "topic-detail");
 
+    if (topic.courseNote) {
+      var cn = el("div", "course-note");
+      cn.appendChild(el("strong", null, "Сколько брать из курса"));
+      cn.appendChild(el("p", null, topic.courseNote));
+      detail.appendChild(cn);
+    }
+
     topic.resources.forEach(function (r) {
       var res = el("div", "res");
       var line = el("div");
@@ -520,6 +534,13 @@
       badges.appendChild(el("span", "badge", "~" + r.hours + " ч"));
       line.appendChild(badges);
       res.appendChild(line);
+
+      if (r.scope) {
+        var sc = el("div", "res-meta res-scope");
+        sc.appendChild(el("b", null, "Объём: "));
+        sc.appendChild(document.createTextNode(r.scope));
+        res.appendChild(sc);
+      }
 
       var what = el("div", "res-meta");
       what.appendChild(el("b", null, "Изучать: "));

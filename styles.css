@@ -462,3 +462,16 @@ td ul { margin: 0; padding-left: 1.1em; }
   .stage-body { display: block !important; }
   body { background: #fff; color: #000; }
 }
+
+/* ---------- Объём курса: сколько именно юнитов брать ---------- */
+.course-note {
+  background: var(--warn-soft); border-left: 3px solid var(--warn);
+  padding: 11px 13px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: 0 0 14px; font-size: .89rem;
+}
+.course-note strong {
+  display: block; font-size: .72rem; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--warn); margin-bottom: 4px;
+}
+.course-note p { margin: 0; }
+.res-scope b { color: var(--warn); }
