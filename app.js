@@ -724,12 +724,28 @@
     if (!state.startDate) state.startDate = new Date().toISOString();
   }
 
+  // Прокрутка к элементу. Сначала обычный плавный путь; если браузер его
+  // проигнорировал (в некоторых окнах Chrome программная прокрутка не срабатывает),
+  // через 400 мс прыгаем мгновенно, вручную вычитая высоту липкой шапки.
+  function scrollToNode(node) {
+    if (!node) return;
+    var startY = window.scrollY;
+    try { node.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { /* старый браузер */ }
+    setTimeout(function () {
+      if (Math.abs(window.scrollY - startY) > 4) return;
+      var header = document.querySelector(".site-header");
+      var offset = (header ? header.offsetHeight : 112) + 12;
+      var top = Math.max(0, node.getBoundingClientRect().top + window.scrollY - offset);
+      try { window.scrollTo({ top: top, behavior: "instant" }); }
+      catch (e) { window.scrollTo(0, top); }
+    }, 400);
+  }
+
   function openStage(stageId) {
     state.open[stageId] = true;
     saveState();
     renderStages();
-    var node = document.getElementById(stageId);
-    if (node) node.scrollIntoView({ behavior: "smooth", block: "start" });
+    scrollToNode(document.getElementById(stageId));
   }
 
   function prefersDark() {
@@ -787,7 +803,7 @@
       openStage(next.stage.id);
       setTimeout(function () {
         var cb = document.getElementById("cb-" + next.topic.id);
-        if (cb) { cb.scrollIntoView({ behavior: "smooth", block: "center" }); cb.focus(); }
+        if (cb) { scrollToNode(cb); cb.focus(); }
       }, 260);
     });
   }
@@ -886,7 +902,7 @@
         e.preventDefault();
         var node = document.getElementById(id);
         if (node) {
-          node.scrollIntoView({ behavior: "smooth", block: "start" });
+          scrollToNode(node);
           if (history.replaceState) history.replaceState(null, "", "#" + id);
           else location.hash = id;
         }
