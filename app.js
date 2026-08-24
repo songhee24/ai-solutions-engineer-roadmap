@@ -863,6 +863,63 @@
     });
   }
 
+  /* ------------------------- панель разделов (табы) ----------------------- */
+
+  function setupSectionNav() {
+    var links = Array.prototype.slice.call(document.querySelectorAll("[data-nav]"));
+    if (!links.length) return;
+
+    links.forEach(function (a) {
+      a.addEventListener("click", function () {
+        // трек нужно раскрыть, иначе переход приведёт в свёрнутую карточку
+        if (a.dataset.open) {
+          state.open[a.dataset.open] = true;
+          saveState();
+          renderStages();
+        }
+        setActive(a.getAttribute("href").slice(1));
+      });
+    });
+
+    function setActive(id) {
+      links.forEach(function (a) {
+        var on = a.getAttribute("href") === "#" + id;
+        if (on) a.setAttribute("aria-current", "true");
+        else a.removeAttribute("aria-current");
+      });
+    }
+
+    // Подсветка активного раздела при прокрутке
+    var targets = links
+      .map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); })
+      .filter(Boolean);
+
+    var ticking = false;
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        ticking = false;
+        var headerH = document.querySelector(".site-header");
+        var offset = (headerH ? headerH.offsetHeight : 112) + 24;
+        var current = null;
+        targets.forEach(function (t) {
+          if (t.getBoundingClientRect().top <= offset) current = t;
+        });
+        // у самого низа страницы подсвечиваем последний раздел
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 4) {
+          current = targets[targets.length - 1];
+        }
+        if (current) setActive(current.id);
+        else links.forEach(function (a) { a.removeAttribute("aria-current"); });
+      });
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    onScroll();
+  }
+
   /* --------------------------------- запуск ------------------------------- */
 
   function renderAll() {
@@ -881,6 +938,7 @@
     setupHeader();
     setupFilters();
     setupDataButtons();
+    setupSectionNav();
     renderStatic();
     renderAll();
 

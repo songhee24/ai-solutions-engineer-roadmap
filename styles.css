@@ -506,3 +506,35 @@ td ul { margin: 0; padding-left: 1.1em; }
 
 .check-note > strong { color: var(--warn); }
 .check-note p { margin: 0; font-size: .9rem; }
+
+/* ---------- Панель разделов под шапкой ---------- */
+:root { --header-h: 112px; }
+
+.section-nav {
+  display: flex; gap: 4px; overflow-x: auto; overscroll-behavior-x: contain;
+  border-top: 1px solid var(--border);
+  padding: 6px 20px; margin: 0 -20px -8px;
+  scrollbar-width: none;
+}
+.section-nav::-webkit-scrollbar { display: none; }
+.section-nav a {
+  flex: none; text-decoration: none; white-space: nowrap;
+  font-size: .84rem; font-weight: 550; color: var(--text-muted);
+  padding: 6px 12px; border-radius: 999px; border: 1px solid transparent;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.section-nav a:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+.section-nav a[aria-current="true"] {
+  background: var(--primary-soft); color: var(--primary); border-color: var(--primary);
+}
+
+/* Якоря не должны уезжать под липкую шапку */
+.section, .stage { scroll-margin-top: calc(var(--header-h) + 12px); }
+
+@media (max-width: 720px) {
+  :root { --header-h: 150px; }
+  .section-nav { padding: 6px 16px; margin: 0 -16px -8px; }
+  .section-nav a { font-size: .8rem; padding: 5px 10px; }
+}
+
+@media print { .section-nav { display: none !important; } }
