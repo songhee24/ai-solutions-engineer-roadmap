@@ -869,15 +869,30 @@
     var links = Array.prototype.slice.call(document.querySelectorAll("[data-nav]"));
     if (!links.length) return;
 
+    var lockUntil = 0;   // после клика не даём обработчику прокрутки перебить подсветку
+
     links.forEach(function (a) {
-      a.addEventListener("click", function () {
-        // трек нужно раскрыть, иначе переход приведёт в свёрнутую карточку
+      a.addEventListener("click", function (e) {
+        var id = a.getAttribute("href").slice(1);
+
+        // Трек нужно раскрыть, иначе переход приведёт в свёрнутую карточку.
+        // Перерисовка заменяет узел, поэтому прокручиваем сами, уже после неё.
         if (a.dataset.open) {
           state.open[a.dataset.open] = true;
           saveState();
           renderStages();
         }
-        setActive(a.getAttribute("href").slice(1));
+
+        e.preventDefault();
+        var node = document.getElementById(id);
+        if (node) {
+          node.scrollIntoView({ behavior: "smooth", block: "start" });
+          if (history.replaceState) history.replaceState(null, "", "#" + id);
+          else location.hash = id;
+        }
+
+        setActive(id);
+        lockUntil = Date.now() + 900;
       });
     });
 
@@ -910,8 +925,8 @@
         if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 4) {
           current = targets[targets.length - 1];
         }
-        if (current) setActive(current.id);
-        else links.forEach(function (a) { a.removeAttribute("aria-current"); });
+        if (Date.now() < lockUntil) return;          // идёт плавная прокрутка после клика
+        setActive(current ? current.id : targets[0].id);
       });
     }
 
