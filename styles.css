@@ -475,3 +475,34 @@ td ul { margin: 0; padding-left: 1.1em; }
 }
 .course-note p { margin: 0; }
 .res-scope b { color: var(--warn); }
+
+/* ---------- Пошаговый приём, пример «до/после», критерий проверки ---------- */
+.howto, .example, .check-note {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 14px; margin: 0 0 12px; background: var(--surface);
+}
+.howto > strong, .example > strong, .check-note > strong {
+  display: block; font-size: .72rem; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--primary); margin-bottom: 6px;
+}
+.howto ol { margin: 0; padding-left: 1.3em; font-size: .9rem; }
+.howto li { margin-bottom: .35em; }
+
+.example > strong { color: var(--accent); }
+.example-intro { font-size: .88rem; color: var(--text-muted); margin: 0 0 8px; }
+.example-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 700px) { .example-pair { grid-template-columns: 1fr; } }
+.example-side {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 12px;
+}
+.example-label {
+  display: block; font-size: .68rem; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--text-faint); margin-bottom: 4px;
+}
+.example-side p { margin: 0; font-size: .9rem; }
+.example-side:last-child p { font-style: italic; }
+.example-gain { margin: 10px 0 0; font-size: .89rem; color: var(--text-muted); }
+
+.check-note > strong { color: var(--warn); }
+.check-note p { margin: 0; font-size: .9rem; }

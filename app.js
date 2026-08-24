@@ -166,7 +166,9 @@
     if (filters.track !== "all" && topic.track !== filters.track) return false;
     if (filters.query) {
       var q = filters.query;
-      var hay = [topic.title, topic.en, topic.task || "", topic.courseNote || ""]
+      var hay = [topic.title, topic.en, topic.task || "", topic.courseNote || "", topic.check || ""]
+        .concat(topic.steps || [])
+        .concat(topic.example ? [topic.example.ru, topic.example.en, topic.example.gain || ""] : [])
         .concat(topic.resources.map(function (r) { return r.title + " " + (r.study || "") + " " + (r.scope || ""); }))
         .join(" ").toLowerCase();
       if (hay.indexOf(q) === -1) return false;
@@ -514,6 +516,40 @@
       cn.appendChild(el("strong", null, "Сколько брать из курса"));
       cn.appendChild(el("p", null, topic.courseNote));
       detail.appendChild(cn);
+    }
+
+    if (topic.steps && topic.steps.length) {
+      var how = el("div", "howto");
+      how.appendChild(el("strong", null, "Как это делать"));
+      var ol = document.createElement("ol");
+      topic.steps.forEach(function (st) { ol.appendChild(el("li", null, st)); });
+      how.appendChild(ol);
+      detail.appendChild(how);
+    }
+
+    if (topic.example) {
+      var ex = el("div", "example");
+      ex.appendChild(el("strong", null, "Как это выглядит"));
+      if (topic.example.intro) ex.appendChild(el("p", "example-intro", topic.example.intro));
+      var pair = el("div", "example-pair");
+      var ru = el("div", "example-side");
+      ru.appendChild(el("span", "example-label", "Проход 1 — по-русски"));
+      ru.appendChild(el("p", null, topic.example.ru));
+      var en = el("div", "example-side");
+      en.appendChild(el("span", "example-label", "Проход 2 — в оригинале"));
+      en.appendChild(el("p", null, topic.example.en));
+      pair.appendChild(ru);
+      pair.appendChild(en);
+      ex.appendChild(pair);
+      if (topic.example.gain) ex.appendChild(el("p", "example-gain", topic.example.gain));
+      detail.appendChild(ex);
+    }
+
+    if (topic.check) {
+      var ch = el("div", "check-note");
+      ch.appendChild(el("strong", null, "Проверь себя"));
+      ch.appendChild(el("p", null, topic.check));
+      detail.appendChild(ch);
     }
 
     topic.resources.forEach(function (r) {
