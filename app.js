@@ -19,7 +19,8 @@
       theme: null,
       startDate: null,
       topics: {},
-      open: {}
+      open: {},
+      openTopics: {}
     };
   }
 
@@ -36,6 +37,7 @@
           s.startDate = typeof parsed.startDate === "string" ? parsed.startDate : null;
           if (parsed.topics && typeof parsed.topics === "object") s.topics = parsed.topics;
           if (parsed.open && typeof parsed.open === "object") s.open = parsed.open;
+          if (parsed.openTopics && typeof parsed.openTopics === "object") s.openTopics = parsed.openTopics;
         }
       }
     } catch (e) {
@@ -252,7 +254,10 @@
           if (item.href) {
             var a = el("a", null, item.title);
             a.href = item.href;
-            a.addEventListener("click", function () { openStage(item.stageId); });
+            a.addEventListener("click", function () {
+              if (item.topicId) state.openTopics[item.topicId] = true;
+              openStage(item.stageId);
+            });
             li.appendChild(a);
           } else {
             li.appendChild(document.createTextNode(item.title));
@@ -273,19 +278,20 @@
       incompleteTopics(current, 5).forEach(function (t) {
         nowItems.push({
           stage: (current.kind === "track" ? "Трек " : "Этап ") + current.num,
-          title: t.title, hours: hoursOf(t), href: "#" + current.id, stageId: current.id
+          title: t.title, hours: hoursOf(t), href: "#" + current.id,
+          stageId: current.id, topicId: t.id
         });
       });
     }
     tracks.slice(0, 2).forEach(function (tr) {
       var t = incompleteTopics(tr, 1)[0];
-      if (t) nowItems.push({ stage: "Параллельно · Трек " + tr.num, title: t.title, hours: hoursOf(t), href: "#" + tr.id, stageId: tr.id });
+      if (t) nowItems.push({ stage: "Параллельно · Трек " + tr.num, title: t.title, hours: hoursOf(t), href: "#" + tr.id, stageId: tr.id, topicId: t.id });
     });
 
     var nextItems = [];
     if (nextStage) {
       incompleteTopics(nextStage, 4).forEach(function (t) {
-        nextItems.push({ stage: "Этап " + nextStage.num, title: t.title, hours: hoursOf(t), href: "#" + nextStage.id, stageId: nextStage.id });
+        nextItems.push({ stage: "Этап " + nextStage.num, title: t.title, hours: hoursOf(t), href: "#" + nextStage.id, stageId: nextStage.id, topicId: t.id });
       });
     }
 
@@ -333,7 +339,7 @@
       link.addEventListener("click", function () {
         d.skips.forEach(function (id) {
           var row = allTopics.filter(function (r) { return r.topic.id === id; })[0];
-          if (row) openStage(row.stage.id);
+          if (row) { state.openTopics[id] = true; openStage(row.stage.id); }
         });
       });
       actions.appendChild(link);
@@ -467,6 +473,9 @@
     cb.className = "topic-check";
     cb.checked = !!st.done;
     cb.id = "cb-" + topic.id;
+    // Ярлыком раньше служил <label> с названием; теперь название — кнопка раскрытия,
+    // поэтому чекбоксу нужен собственный доступный ярлык.
+    cb.setAttribute("aria-label", "Отметить пройденным: " + topic.title);
     cb.addEventListener("change", function () {
       st.done = cb.checked;
       st.at = cb.checked ? new Date().toISOString() : null;
@@ -477,13 +486,20 @@
     });
     head.appendChild(cb);
 
+    var detailId = "det-" + topic.id;
+    var isOpen = filtersActive() ? true : !!state.openTopics[topic.id];
+
     var main = el("div", "topic-main");
-    var label = document.createElement("label");
-    label.className = "topic-title";
-    label.htmlFor = cb.id;
-    label.appendChild(document.createTextNode(topic.title + " "));
-    label.appendChild(el("span", "topic-en", "(" + topic.en + ")"));
-    main.appendChild(label);
+    var toggle = el("button", "topic-toggle");
+    toggle.type = "button";
+    toggle.setAttribute("aria-expanded", String(isOpen));
+    toggle.setAttribute("aria-controls", detailId);
+    var title = el("span", "topic-title");
+    title.appendChild(document.createTextNode(topic.title + " "));
+    title.appendChild(el("span", "topic-en", "(" + topic.en + ")"));
+    toggle.appendChild(title);
+    toggle.appendChild(el("span", "topic-chevron", "›"));
+    main.appendChild(toggle);
 
     var tags = el("div", "topic-tags");
     tags.appendChild(el("span", "tag " + (topic.required ? "req" : "opt"), topic.required ? "обязательно" : "дополнительно"));
@@ -493,6 +509,17 @@
     if (st.skipped) tags.appendChild(el("span", "tag", "пропущено"));
     if (st.at) tags.appendChild(el("span", "tag hrs", ruDate(st.at)));
     main.appendChild(tags);
+
+    var parts = [];
+    if (topic.resources.length) {
+      parts.push(topic.resources.length + " " + plural(topic.resources.length, "ресурс", "ресурса", "ресурсов"));
+    }
+    if (topic.steps && topic.steps.length) parts.push("порядок действий");
+    if (topic.example) parts.push("пример");
+    if (topic.task) parts.push("задание");
+    if (st.note && st.note.trim()) parts.push("ваша заметка");
+    if (parts.length) main.appendChild(el("div", "topic-summary", parts.join(" · ")));
+
     head.appendChild(main);
 
     var actions = el("div", "topic-actions");
@@ -510,6 +537,17 @@
     box.appendChild(head);
 
     var detail = el("div", "topic-detail");
+    detail.id = detailId;
+    detail.hidden = !isOpen;
+
+    toggle.addEventListener("click", function () {
+      var open = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", String(!open));
+      detail.hidden = open;
+      if (open) delete state.openTopics[topic.id];
+      else state.openTopics[topic.id] = true;
+      saveState();
+    });
 
     if (topic.courseNote) {
       var cn = el("div", "course-note");
@@ -707,12 +745,18 @@
     });
 
     document.getElementById("expand-all").addEventListener("click", function () {
-      DATA.stages.forEach(function (s) { state.open[s.id] = true; });
+      DATA.stages.forEach(function (s) {
+        state.open[s.id] = true;
+        s.topics.forEach(function (t) { state.openTopics[t.id] = true; });
+      });
       saveState();
       renderStages();
     });
     document.getElementById("collapse-all").addEventListener("click", function () {
-      DATA.stages.forEach(function (s) { state.open[s.id] = false; });
+      DATA.stages.forEach(function (s) {
+        state.open[s.id] = false;
+        s.topics.forEach(function (t) { delete state.openTopics[t.id]; });
+      });
       saveState();
       renderStages();
     });
@@ -800,6 +844,7 @@
     document.getElementById("continue-btn").addEventListener("click", function () {
       var next = allTopics.filter(function (r) { return !isComplete(r.topic.id); })[0];
       if (!next) { toast("Все темы пройдены."); return; }
+      state.openTopics[next.topic.id] = true;   // иначе прокрутка приведёт к свёрнутой карточке
       openStage(next.stage.id);
       setTimeout(function () {
         var cb = document.getElementById("cb-" + next.topic.id);
@@ -845,6 +890,7 @@
           state.startDate = typeof incoming.startDate === "string" ? incoming.startDate : state.startDate;
           state.topics = incoming.topics;
           state.open = incoming.open && typeof incoming.open === "object" ? incoming.open : {};
+          state.openTopics = incoming.openTopics && typeof incoming.openTopics === "object" ? incoming.openTopics : {};
           saveState();
           location.reload();
         } catch (e) {
