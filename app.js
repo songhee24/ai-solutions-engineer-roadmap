@@ -717,6 +717,7 @@
 
     renderStudyMethod();
     renderThroughline();
+    renderDestinations();
     renderReviews();
 
     var honest = document.getElementById("honest-list");
@@ -1023,6 +1024,34 @@
     box.setAttribute("aria-label", "оценка " + n + " из 5");
     box.textContent = new Array(n + 1).join("★") + new Array(6 - n).join("☆");
     return box;
+  }
+
+  function renderDestinations() {
+    var d = DATA.destinations;
+    if (!d) return;
+    document.getElementById("ds-title").textContent = d.title;
+    document.getElementById("ds-intro").textContent = d.intro;
+    document.getElementById("ds-shared").textContent = d.sharedNote;
+    document.getElementById("ds-prompt").textContent = d.promptNote;
+    document.getElementById("ds-honest").textContent = d.honestNote;
+
+    var host = document.getElementById("ds-roles");
+    host.textContent = "";
+    d.roles.forEach(function (r) {
+      var card = el("div", "dest");
+      card.appendChild(el("h3", null, r.name));
+      card.appendChild(el("p", "dest-what", r.what));
+      function row(label, value) {
+        var p = el("p", "dest-row");
+        p.appendChild(el("b", null, label + ": "));
+        p.appendChild(document.createTextNode(value));
+        card.appendChild(p);
+      }
+      row("Ядро в карте", r.core);
+      row("Добрать", r.extra);
+      card.appendChild(el("p", "dest-note", r.note));
+      host.appendChild(card);
+    });
   }
 
   function renderReviews() {

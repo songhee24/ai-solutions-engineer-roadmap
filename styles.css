@@ -653,3 +653,15 @@ td ul { margin: 0; padding-left: 1.1em; }
 
 /* Одиннадцать пунктов меню — чуть плотнее, чтобы влезали без прокрутки */
 .section-nav a { padding: 6px 10px; }
+
+/* ---------- Развилка направлений ---------- */
+.dest-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin: 14px 0; }
+.dest {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px 18px;
+}
+.dest h3 { color: var(--primary); margin-bottom: 6px; }
+.dest-what { font-size: .93rem; }
+.dest-row { font-size: .88rem; margin: 0 0 4px; color: var(--text-muted); }
+.dest-row b { color: var(--text); font-weight: 600; }
+.dest-note { font-size: .86rem; color: var(--text-faint); margin: 8px 0 0; font-style: italic; }
