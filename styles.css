@@ -559,3 +559,34 @@ td ul { margin: 0; padding-left: 1.1em; }
 .topic-toggle[aria-expanded="true"] ~ .topic-summary { display: none; }
 
 .topic-detail[hidden] { display: none; }
+
+/* ---------- Дополнительный (необязательный) трек ---------- */
+.stage.is-optional { border-left: 4px solid var(--warn); }
+.stage.is-optional .stage-num { background: var(--warn-soft); color: var(--warn); }
+.stage-flag {
+  display: inline-block; margin-left: 8px; vertical-align: 2px;
+  font-size: .64rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  padding: 2px 8px; border-radius: 999px;
+  background: var(--warn-soft); color: var(--warn);
+}
+
+/* ---------- Блок «Как заниматься» ---------- */
+.method-rule {
+  background: var(--accent-soft); border-left: 3px solid var(--accent);
+  padding: 14px 16px; border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 1.02rem; font-weight: 550; margin-bottom: 18px;
+}
+.method-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.method-area {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px 18px;
+}
+.method-area h3 { margin-bottom: 6px; }
+.method-note { color: var(--text-muted); font-size: .92rem; }
+.method-label {
+  font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
+  margin: 14px 0 6px;
+}
+.method-label.is-need { color: var(--ok); }
+.method-label.is-skip { color: var(--text-faint); }
+.method-area ul { font-size: .92rem; margin-bottom: 0; }

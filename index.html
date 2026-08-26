@@ -49,6 +49,9 @@
       <a href="#roadmap"       data-nav>Карта</a>
       <a href="#track-math"    data-nav data-open="track-math">Математика</a>
       <a href="#track-english" data-nav data-open="track-english">Английский</a>
+      <a href="#track-automation" data-nav data-open="track-automation">Автоматизация</a>
+      <a href="#throughline"   data-nav>Сквозной проект</a>
+      <a href="#study-method"  data-nav>Как заниматься</a>
       <a href="#tutorial-hell" data-nav>Tutorial hell</a>
       <a href="#job-readiness" data-nav>Вакансии</a>
     </nav>
@@ -170,6 +173,62 @@
       <p id="filter-status" role="status" aria-live="polite" class="stage-sub" style="margin-top:14px"></p>
 
       <div id="stages" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- ================= СКВОЗНОЙ ПРОЕКТ ================= -->
+  <section class="section" id="throughline">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Сквозной проект: <span id="tl-name"></span></h2>
+        <p id="tl-intro"></p>
+      </div>
+      <p class="prereq" id="tl-domain"></p>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th scope="col">Где по карте</th><th scope="col">Что добавляется к системе</th></tr>
+          </thead>
+          <tbody id="tl-body"></tbody>
+        </table>
+      </div>
+      <div class="callout" id="tl-warning"></div>
+    </div>
+  </section>
+
+  <!-- ================= КАК ЗАНИМАТЬСЯ ================= -->
+  <section class="section" id="study-method">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="sm-title"></h2>
+        <p id="sm-intro"></p>
+      </div>
+
+      <div class="method-rule" id="sm-rule"></div>
+
+      <div class="method-grid" id="sm-areas"></div>
+
+      <div class="rules" style="margin-top:16px">
+        <h3 id="sm-nb-title"></h3>
+        <p id="sm-nb-intro"></p>
+        <div class="method-grid">
+          <div class="method-area">
+            <h4 class="method-label is-need">Писать</h4>
+            <ul id="sm-nb-write"></ul>
+          </div>
+          <div class="method-area">
+            <h4 class="method-label is-skip">Не писать</h4>
+            <ul id="sm-nb-dont"></ul>
+          </div>
+        </div>
+        <div class="callout" id="sm-nb-why"></div>
+      </div>
+
+      <div class="rules" style="margin-top:16px">
+        <h3 id="sm-week-title"></h3>
+        <ul id="sm-week-items"></ul>
+        <p id="sm-week-note"></p>
+      </div>
     </div>
   </section>
 

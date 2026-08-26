@@ -89,15 +89,27 @@
     return { total: total, done: done, pct: total ? Math.round((done / total) * 100) : 0 };
   }
 
+  // Часы дополнительных треков (stage.optional) НЕ входят в общий срок:
+  // они не ведут к цели карты, и смешивать их с основным путём было бы враньём.
   function overall() {
-    var total = 0, done = 0;
+    var total = 0, done = 0, extraTotal = 0, extraDone = 0;
     allTopics.forEach(function (row) {
       var h = hoursOf(row.topic);
-      total += h;
-      if (isComplete(row.topic.id)) done += h;
+      var complete = isComplete(row.topic.id);
+      if (row.stage.optional) {
+        extraTotal += h;
+        if (complete) extraDone += h;
+      } else {
+        total += h;
+        if (complete) done += h;
+      }
     });
     var exact = total ? (done / total) * 100 : 0;
-    return { total: total, done: done, left: total - done, pct: Math.round(exact), exact: exact };
+    return {
+      total: total, done: done, left: total - done,
+      pct: Math.round(exact), exact: exact,
+      extraTotal: extraTotal, extraDone: extraDone
+    };
   }
 
   function plural(n, one, few, many) {
@@ -219,6 +231,7 @@
 
   function currentStage() {
     for (var i = 0; i < DATA.stages.length; i++) {
+      if (DATA.stages[i].optional) continue;
       if (stageHours(DATA.stages[i]).pct < 100) return DATA.stages[i];
     }
     return null;
@@ -231,9 +244,9 @@
     grid.textContent = "";
 
     var pending = DATA.stages.filter(function (s) { return stageHours(s).pct < 100; });
-    var current = pending[0] || null;
-    var tracks = pending.filter(function (s) { return s.kind === "track" && s !== current; });
-    var nextStage = pending.filter(function (s) { return s !== current && s.kind !== "track"; })[0] || null;
+    var current = pending.filter(function (s) { return !s.optional; })[0] || null;
+    var tracks = pending.filter(function (s) { return s.kind === "track" && !s.optional && s !== current; });
+    var nextStage = pending.filter(function (s) { return s !== current && s.kind !== "track" && !s.optional; })[0] || null;
     var later = pending.filter(function (s) { return s !== current && s !== nextStage && tracks.indexOf(s) === -1; });
 
     function incompleteTopics(stage, limit) {
@@ -297,7 +310,8 @@
 
     var laterItems = later.map(function (s) {
       var h = stageHours(s);
-      return { stage: (s.kind === "track" ? "Трек " : "Этап ") + s.num, title: s.title, hours: h.total - h.done, href: "#" + s.id, stageId: s.id };
+      var label = (s.kind === "track" ? "Трек " : "Этап ") + s.num + (s.optional ? " · по желанию" : "");
+      return { stage: label, title: s.title, hours: h.total - h.done, href: "#" + s.id, stageId: s.id };
     });
 
     grid.appendChild(card("now", "Сейчас", "Берите отсюда — и ничего больше", nowItems, "Всё пройдено. Поздравляю."));
@@ -369,7 +383,7 @@
       shownTopics += visible.length;
 
       var h = stageHours(stage);
-      var card = el("section", "stage" + (stage.kind === "track" ? " is-track" : "") + (h.pct === 100 ? " is-done" : ""));
+      var card = el("section", "stage" + (stage.kind === "track" ? " is-track" : "") + (stage.optional ? " is-optional" : "") + (h.pct === 100 ? " is-done" : ""));
       card.id = stage.id;
 
       var bodyId = stage.id + "-body";
@@ -383,9 +397,12 @@
       head.appendChild(el("span", "stage-num", stage.num));
 
       var titleBox = el("span");
-      titleBox.appendChild(el("span", "stage-title", stage.title));
+      var titleLine = el("span", "stage-title", stage.title);
+      if (stage.optional) titleLine.appendChild(el("span", "stage-flag", "дополнительно"));
+      titleBox.appendChild(titleLine);
       titleBox.appendChild(document.createElement("br"));
-      titleBox.appendChild(el("span", "stage-sub", stage.subtitle + " · " + h.total + " ч"));
+      titleBox.appendChild(el("span", "stage-sub", stage.subtitle + " · " + h.total + " ч" +
+        (stage.optional ? " сверх основного пути" : "")));
       head.appendChild(titleBox);
 
       var meta = el("span", "stage-meta");
@@ -696,8 +713,80 @@
       body.appendChild(tr);
     });
 
+    renderStudyMethod();
+    renderThroughline();
+
     var honest = document.getElementById("honest-list");
     DATA.about.honest.forEach(function (h) { honest.appendChild(el("li", null, h)); });
+  }
+
+  function renderStudyMethod() {
+    var m = DATA.studyMethod;
+    if (!m) return;
+    document.getElementById("sm-title").textContent = m.title;
+    document.getElementById("sm-intro").textContent = m.intro;
+    document.getElementById("sm-rule").textContent = m.rule;
+
+    var host = document.getElementById("sm-areas");
+    m.areas.forEach(function (a) {
+      var box = el("div", "method-area");
+      box.appendChild(el("h3", null, a.area));
+      box.appendChild(el("p", "method-note", a.note));
+
+      function list(label, items, cls) {
+        if (!items || !items.length) return;
+        box.appendChild(el("h4", "method-label " + cls, label));
+        var ul = el("ul");
+        items.forEach(function (x) { ul.appendChild(el("li", null, x)); });
+        box.appendChild(ul);
+      }
+      list("Где нужна бумага", a.need, "is-need");
+      list("Где бумага лишняя", a.skip, "is-skip");
+
+      if (a.trap) {
+        var t = el("div", "callout");
+        t.textContent = a.trap;
+        box.appendChild(t);
+      }
+      host.appendChild(box);
+    });
+
+    var nb = DATA.studyMethod.notebook;
+    document.getElementById("sm-nb-title").textContent = nb.title;
+    document.getElementById("sm-nb-intro").textContent = nb.intro;
+    var w = document.getElementById("sm-nb-write");
+    nb.write.forEach(function (x) { w.appendChild(el("li", null, x)); });
+    var dw = document.getElementById("sm-nb-dont");
+    nb.dontWrite.forEach(function (x) { dw.appendChild(el("li", null, x)); });
+    document.getElementById("sm-nb-why").textContent = nb.why;
+
+    var wk = DATA.studyMethod.week;
+    document.getElementById("sm-week-title").textContent = wk.title;
+    var wl = document.getElementById("sm-week-items");
+    wk.items.forEach(function (x) { wl.appendChild(el("li", null, x)); });
+    document.getElementById("sm-week-note").textContent = wk.note;
+  }
+
+  function renderThroughline() {
+    var t = DATA.throughline;
+    if (!t) return;
+    document.getElementById("tl-name").textContent = t.name;
+    document.getElementById("tl-intro").textContent = t.intro;
+    document.getElementById("tl-domain").textContent = t.domain;
+
+    var body = document.getElementById("tl-body");
+    t.steps.forEach(function (row) {
+      var tr = document.createElement("tr");
+      var th = document.createElement("th");
+      th.scope = "row";
+      th.textContent = row.stage;
+      tr.appendChild(th);
+      var td = document.createElement("td");
+      td.textContent = row.add;
+      tr.appendChild(td);
+      body.appendChild(tr);
+    });
+    document.getElementById("tl-warning").textContent = t.warning;
   }
 
   /* ------------------------------- фильтры UI ----------------------------- */
