@@ -54,6 +54,7 @@
       <a href="#/method"                  data-nav>Как заниматься</a>
       <a href="#/tutorial-hell"           data-nav>Tutorial hell</a>
       <a href="#/jobs"                    data-nav>Вакансии</a>
+      <a href="#/reviews"                 data-nav>Отзывы</a>
     </nav>
   </div>
 </header>
@@ -276,6 +277,20 @@
     </div>
   </section>
 
+  <!-- ================= ОТЗЫВЫ ================= -->
+  <section class="section" id="reviews">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="rv-title"></h2>
+        <p id="rv-intro"></p>
+      </div>
+
+      <div id="rv-summary"></div>
+      <p id="rv-actions"></p>
+      <div id="rv-list" class="review-list"></div>
+    </div>
+  </section>
+
   <!-- ================= ЧЕСТНЫЕ ОГОВОРКИ ================= -->
   <section class="section" id="honesty">
     <div class="wrap">
@@ -298,6 +313,7 @@
       <button type="button" class="btn" id="import-btn">Импорт из JSON</button>
       <input type="file" id="import-file" accept="application/json,.json" hidden>
       <button type="button" class="btn btn-danger" id="reset-btn">Сбросить прогресс</button>
+      <a class="btn" href="#/reviews">Оставить отзыв</a>
     </div>
     <p id="footer-meta"></p>
     <p>Прогресс хранится только в вашем браузере (localStorage) и никуда не отправляется. Чтобы перенести его на другое устройство — используйте экспорт и импорт.</p>

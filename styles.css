@@ -629,3 +629,27 @@ td ul { margin: 0; padding-left: 1.1em; }
 #stage-page .stage-head .chevron { display: none; }
 
 [hidden] { display: none !important; }
+
+/* ---------- Отзывы ---------- */
+.review-summary {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 14px 18px; margin-bottom: 14px;
+}
+.review-avg { font-size: 2rem; font-weight: 750; line-height: 1; color: var(--primary); }
+.review-count { color: var(--text-muted); font-size: .9rem; }
+.stars { color: var(--warn); letter-spacing: 2px; font-size: 1.05rem; }
+
+.review-list { display: grid; gap: 12px; margin-top: 14px; }
+.review {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 14px 18px;
+}
+.review-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.review-date { color: var(--text-faint); font-size: .8rem; }
+.review-text { margin: 0 0 8px; }
+.review-who { font-size: .86rem; color: var(--text-muted); font-weight: 550; }
+.review-empty { color: var(--text-muted); }
+
+/* Одиннадцать пунктов меню — чуть плотнее, чтобы влезали без прокрутки */
+.section-nav a { padding: 6px 10px; }

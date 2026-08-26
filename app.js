@@ -717,6 +717,7 @@
 
     renderStudyMethod();
     renderThroughline();
+    renderReviews();
 
     var honest = document.getElementById("honest-list");
     DATA.about.honest.forEach(function (h) { honest.appendChild(el("li", null, h)); });
@@ -1015,6 +1016,66 @@
     });
   }
 
+  function stars(rating) {
+    var n = Math.max(1, Math.min(5, Math.round(Number(rating) || 0)));
+    var box = el("span", "stars");
+    box.setAttribute("role", "img");
+    box.setAttribute("aria-label", "оценка " + n + " из 5");
+    box.textContent = new Array(n + 1).join("★") + new Array(6 - n).join("☆");
+    return box;
+  }
+
+  function renderReviews() {
+    var r = DATA.reviews;
+    if (!r) return;
+
+    document.getElementById("rv-title").textContent = r.title;
+    document.getElementById("rv-intro").textContent = r.intro;
+
+    var items = (r.items || []).filter(function (x) { return x && x.text; });
+
+    // Сводка появляется только когда есть что усреднять
+    var summary = document.getElementById("rv-summary");
+    summary.textContent = "";
+    if (items.length) {
+      var avg = items.reduce(function (a, x) { return a + Math.max(1, Math.min(5, Number(x.rating) || 0)); }, 0) / items.length;
+      var box = el("div", "review-summary");
+      box.appendChild(el("span", "review-avg", (Math.round(avg * 10) / 10).toString().replace(".", ",")));
+      box.appendChild(stars(avg));
+      box.appendChild(el("span", "review-count", items.length + " " + plural(items.length, "отзыв", "отзыва", "отзывов")));
+      summary.appendChild(box);
+    }
+
+    // Пока ссылка на форму не вставлена, кнопки нет: мёртвый элемент хуже его отсутствия
+    var actions = document.getElementById("rv-actions");
+    actions.textContent = "";
+    if (r.formUrl) {
+      var a = el("a", "btn btn-primary", "Оставить отзыв");
+      a.href = r.formUrl;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      actions.appendChild(a);
+    }
+
+    var list = document.getElementById("rv-list");
+    list.textContent = "";
+    if (!items.length) {
+      list.appendChild(el("p", "review-empty", r.emptyState || "Отзывов пока нет."));
+      return;
+    }
+    items.forEach(function (x) {
+      var card = el("article", "review");
+      var head = el("div", "review-head");
+      head.appendChild(stars(x.rating));
+      if (x.date) head.appendChild(el("span", "review-date", ruDate(x.date)));
+      card.appendChild(head);
+      card.appendChild(el("p", "review-text", x.text));
+      var who = [x.name, x.role].filter(Boolean).join(" · ");
+      if (who) card.appendChild(el("div", "review-who", who));
+      list.appendChild(card);
+    });
+  }
+
   /* ------------------------------- роутер --------------------------------- */
 
   // Сайт разбит на страницы: за раз отрисован ровно один экран, а не весь лист.
@@ -1028,7 +1089,8 @@
     "throughline":   ["throughline"],
     "method":        ["study-method"],
     "tutorial-hell": ["tutorial-hell"],
-    "jobs":          ["job-readiness"]
+    "jobs":          ["job-readiness"],
+    "reviews":       ["reviews"]
   };
 
   function allPageSections() {
@@ -1146,6 +1208,7 @@
 
     if (r.name === "stage") renderStagePage(r.param);
     if (r.name === "roadmap") renderRoadmapPage();
+    if (r.name === "reviews") renderReviews();
 
     markActiveNav(r);
     window.scrollTo(0, 0);
