@@ -43,17 +43,17 @@
       </button>
     </div>
 
-    <nav class="section-nav" aria-label="Разделы страницы">
-      <a href="#horizons"      data-nav>Сейчас</a>
-      <a href="#diagnostics"   data-nav>Диагностика</a>
-      <a href="#roadmap"       data-nav>Карта</a>
-      <a href="#track-math"    data-nav data-open="track-math">Математика</a>
-      <a href="#track-english" data-nav data-open="track-english">Английский</a>
-      <a href="#track-automation" data-nav data-open="track-automation">Автоматизация</a>
-      <a href="#throughline"   data-nav>Сквозной проект</a>
-      <a href="#study-method"  data-nav>Как заниматься</a>
-      <a href="#tutorial-hell" data-nav>Tutorial hell</a>
-      <a href="#job-readiness" data-nav>Вакансии</a>
+    <nav class="section-nav" aria-label="Разделы сайта">
+      <a href="#/"                        data-nav>Главная</a>
+      <a href="#/diagnostics"             data-nav>Диагностика</a>
+      <a href="#/roadmap"                 data-nav>Карта</a>
+      <a href="#/stage/track-math"        data-nav>Математика</a>
+      <a href="#/stage/track-english"     data-nav>Английский</a>
+      <a href="#/stage/track-automation"  data-nav>Автоматизация</a>
+      <a href="#/throughline"             data-nav>Сквозной проект</a>
+      <a href="#/method"                  data-nav>Как заниматься</a>
+      <a href="#/tutorial-hell"           data-nav>Tutorial hell</a>
+      <a href="#/jobs"                    data-nav>Вакансии</a>
     </nav>
   </div>
 </header>
@@ -61,7 +61,7 @@
 <main id="main">
 
   <!-- ================= ГЛАВНЫЙ ЭКРАН ================= -->
-  <section class="hero">
+  <section class="hero" id="hero">
     <div class="wrap hero-grid">
       <div>
         <h1 id="hero-title">Путь с нуля до AI Solutions Engineer</h1>
@@ -172,7 +172,19 @@
 
       <p id="filter-status" role="status" aria-live="polite" class="stage-sub" style="margin-top:14px"></p>
 
+      <div id="roadmap-index" class="stage-index"></div>
       <div id="stages" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- ================= СТРАНИЦА ОДНОГО ЭТАПА ================= -->
+  <section class="section" id="stage-page">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Где вы находитесь">
+        <a href="#/roadmap">← Вся карта</a>
+      </nav>
+      <div id="stage-page-body"></div>
+      <nav class="stage-pager" id="stage-pager" aria-label="Переход между этапами"></nav>
     </div>
   </section>
 

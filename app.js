@@ -368,12 +368,13 @@
   var TRACK_LABELS = DATA.meta.tracks;
   var KIND_LABELS = { theory: "теория", practice: "практика", project: "проект" };
 
-  function renderStages() {
-    var host = document.getElementById("stages");
+  function renderStages(list, opts) {
+    opts = opts || {};
+    var host = document.getElementById(opts.host || "stages");
     host.textContent = "";
     var shownTopics = 0, shownStages = 0;
 
-    DATA.stages.forEach(function (stage) {
+    (list || DATA.stages).forEach(function (stage) {
       var visible = stage.topics.filter(matchesFilters);
       var stageMatchesText = filters.query && stage.title.toLowerCase().indexOf(filters.query) !== -1;
       if (!visible.length && !stageMatchesText) return;
@@ -387,7 +388,7 @@
       card.id = stage.id;
 
       var bodyId = stage.id + "-body";
-      var isOpen = filtersActive() ? true : !!state.open[stage.id];
+      var isOpen = opts.forceOpen || filtersActive() ? true : !!state.open[stage.id];
 
       var head = el("button", "stage-head");
       head.type = "button";
@@ -415,7 +416,7 @@
       meta.appendChild(el("span", "chevron", "›"));
       head.appendChild(meta);
 
-      head.addEventListener("click", function () {
+      if (!opts.forceOpen) head.addEventListener("click", function () {
         var open = head.getAttribute("aria-expanded") === "true";
         head.setAttribute("aria-expanded", String(!open));
         body.hidden = open;
@@ -473,6 +474,7 @@
       host.appendChild(card);
     });
 
+    if (opts.quiet) return;
     var status = document.getElementById("filter-status");
     status.textContent = filtersActive()
       ? "Показано " + shownTopics + " " + plural(shownTopics, "тема", "темы", "тем") + " в " + shownStages + " " + plural(shownStages, "этапе", "этапах", "этапах")
@@ -803,7 +805,7 @@
         Array.prototype.forEach.call(host.children, function (c, i) {
           c.setAttribute("aria-pressed", String(filters[key] === options[i].value));
         });
-        renderStages();
+        renderRoadmapPage();
       });
       host.appendChild(b);
     });
@@ -829,7 +831,7 @@
       clearTimeout(timer);
       timer = setTimeout(function () {
         filters.query = search.value.trim().toLowerCase();
-        renderStages();
+        renderRoadmapPage();
       }, 160);
     });
 
@@ -839,7 +841,7 @@
         s.topics.forEach(function (t) { state.openTopics[t.id] = true; });
       });
       saveState();
-      renderStages();
+      renderRoute();
     });
     document.getElementById("collapse-all").addEventListener("click", function () {
       DATA.stages.forEach(function (s) {
@@ -847,7 +849,7 @@
         s.topics.forEach(function (t) { delete state.openTopics[t.id]; });
       });
       saveState();
-      renderStages();
+      renderRoute();
     });
   }
 
@@ -877,8 +879,7 @@
   function openStage(stageId) {
     state.open[stageId] = true;
     saveState();
-    renderStages();
-    scrollToNode(document.getElementById(stageId));
+    goTo("#/stage/" + stageId);
   }
 
   function prefersDark() {
@@ -1014,76 +1015,145 @@
     });
   }
 
-  /* ------------------------- панель разделов (табы) ----------------------- */
+  /* ------------------------------- роутер --------------------------------- */
 
-  function setupSectionNav() {
-    var links = Array.prototype.slice.call(document.querySelectorAll("[data-nav]"));
-    if (!links.length) return;
+  // Сайт разбит на страницы: за раз отрисован ровно один экран, а не весь лист.
+  // Раньше в DOM жили все 13 этапов сразу — 6046 узлов, из них 92% приходилось
+  // на карту, и ориентироваться в этом было тяжело.
+  var PAGES = {
+    "":              ["hero", "horizons", "honesty"],
+    "diagnostics":   ["diagnostics"],
+    "roadmap":       ["roadmap"],
+    "stage":         ["stage-page"],
+    "throughline":   ["throughline"],
+    "method":        ["study-method"],
+    "tutorial-hell": ["tutorial-hell"],
+    "jobs":          ["job-readiness"]
+  };
 
-    var lockUntil = 0;   // после клика не даём обработчику прокрутки перебить подсветку
+  function allPageSections() {
+    var ids = [];
+    Object.keys(PAGES).forEach(function (k) {
+      PAGES[k].forEach(function (id) { if (ids.indexOf(id) === -1) ids.push(id); });
+    });
+    return ids;
+  }
 
-    links.forEach(function (a) {
-      a.addEventListener("click", function (e) {
-        var id = a.getAttribute("href").slice(1);
+  function currentRoute() {
+    var h = (location.hash || "").replace(/^#\/?/, "");
+    if (!h) return { name: "", param: null };
 
-        // Трек нужно раскрыть, иначе переход приведёт в свёрнутую карточку.
-        // Перерисовка заменяет узел, поэтому прокручиваем сами, уже после неё.
-        if (a.dataset.open) {
-          state.open[a.dataset.open] = true;
-          saveState();
-          renderStages();
-        }
+    // Старые ссылки вида #track-math продолжают работать
+    var legacy = DATA.stages.filter(function (s) { return s.id === h; })[0];
+    if (legacy) return { name: "stage", param: legacy.id };
 
-        e.preventDefault();
-        var node = document.getElementById(id);
-        if (node) {
-          scrollToNode(node);
-          if (history.replaceState) history.replaceState(null, "", "#" + id);
-          else location.hash = id;
-        }
+    var parts = h.split("/");
+    if (parts[0] === "stage" && parts[1]) return { name: "stage", param: parts[1] };
+    if (Object.prototype.hasOwnProperty.call(PAGES, parts[0])) return { name: parts[0], param: null };
+    return { name: "", param: null };
+  }
 
-        setActive(id);
-        lockUntil = Date.now() + 900;
-      });
+  function goTo(hash) {
+    if (location.hash === hash) renderRoute();
+    else location.hash = hash;
+  }
+
+  // Оглавление карты: 13 лёгких карточек вместо 13 раскрытых этапов
+  function renderRoadmapIndex() {
+    var host = document.getElementById("roadmap-index");
+    host.textContent = "";
+
+    DATA.stages.forEach(function (stage) {
+      var h = stageHours(stage);
+      var a = el("a", "stage-card" + (stage.kind === "track" ? " is-track" : "") +
+                      (stage.optional ? " is-optional" : "") + (h.pct === 100 ? " is-done" : ""));
+      a.href = "#/stage/" + stage.id;
+
+      a.appendChild(el("span", "stage-num", stage.num));
+
+      var body = el("span", "stage-card-body");
+      var titleLine = el("span", "stage-title", stage.title);
+      if (stage.optional) titleLine.appendChild(el("span", "stage-flag", "дополнительно"));
+      body.appendChild(titleLine);
+      body.appendChild(el("span", "stage-sub", stage.subtitle));
+
+      var facts = el("span", "stage-card-facts");
+      facts.appendChild(el("span", "tag hrs", h.total + " ч"));
+      facts.appendChild(el("span", "tag hrs", stage.topics.length + " " + plural(stage.topics.length, "тема", "темы", "тем")));
+      body.appendChild(facts);
+      a.appendChild(body);
+
+      var meta = el("span", "stage-meta");
+      var track = el("span", "mini-track");
+      var fill = el("span", "mini-fill");
+      fill.style.width = h.pct + "%";
+      track.appendChild(fill);
+      meta.appendChild(track);
+      meta.appendChild(el("span", "stage-pct", h.pct + "%"));
+      a.appendChild(meta);
+
+      host.appendChild(a);
+    });
+  }
+
+  function renderStagePage(stageId) {
+    var idx = -1;
+    DATA.stages.forEach(function (s, i) { if (s.id === stageId) idx = i; });
+    if (idx === -1) { goTo("#/roadmap"); return; }
+
+    renderStages([DATA.stages[idx]], { host: "stage-page-body", forceOpen: true, quiet: true });
+
+    var pager = document.getElementById("stage-pager");
+    pager.textContent = "";
+    function link(stage, label) {
+      if (!stage) return;
+      var a = el("a", "btn", label + " " + (stage.kind === "track" ? "Трек " : "Этап ") + stage.num);
+      a.href = "#/stage/" + stage.id;
+      pager.appendChild(a);
+    }
+    link(DATA.stages[idx - 1], "←");
+    var back = el("a", "btn", "Вся карта");
+    back.href = "#/roadmap";
+    pager.appendChild(back);
+    link(DATA.stages[idx + 1], "→");
+  }
+
+  // На странице карты показываем либо оглавление, либо результаты фильтрации
+  function renderRoadmapPage() {
+    var filtering = filtersActive();
+    document.getElementById("roadmap-index").hidden = filtering;
+    document.getElementById("stages").hidden = !filtering;
+    if (filtering) renderStages();
+    else { renderRoadmapIndex(); document.getElementById("filter-status").textContent = ""; }
+  }
+
+  function markActiveNav(r) {
+    var wanted = r.name === "stage" ? "#/stage/" + r.param : "#/" + r.name;
+    Array.prototype.forEach.call(document.querySelectorAll("[data-nav]"), function (a) {
+      if (a.getAttribute("href") === wanted) a.setAttribute("aria-current", "true");
+      else a.removeAttribute("aria-current");
+    });
+  }
+
+  function renderRoute() {
+    var r = currentRoute();
+    var visible = PAGES[r.name] || PAGES[""];
+
+    allPageSections().forEach(function (id) {
+      var node = document.getElementById(id);
+      if (node) node.hidden = visible.indexOf(id) === -1;
     });
 
-    function setActive(id) {
-      links.forEach(function (a) {
-        var on = a.getAttribute("href") === "#" + id;
-        if (on) a.setAttribute("aria-current", "true");
-        else a.removeAttribute("aria-current");
-      });
-    }
+    if (r.name === "stage") renderStagePage(r.param);
+    if (r.name === "roadmap") renderRoadmapPage();
 
-    // Подсветка активного раздела при прокрутке
-    var targets = links
-      .map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); })
-      .filter(Boolean);
+    markActiveNav(r);
+    window.scrollTo(0, 0);
+  }
 
-    var ticking = false;
-    function onScroll() {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(function () {
-        ticking = false;
-        var headerH = document.querySelector(".site-header");
-        var offset = (headerH ? headerH.offsetHeight : 112) + 24;
-        var current = null;
-        targets.forEach(function (t) {
-          if (t.getBoundingClientRect().top <= offset) current = t;
-        });
-        // у самого низа страницы подсвечиваем последний раздел
-        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 4) {
-          current = targets[targets.length - 1];
-        }
-        if (Date.now() < lockUntil) return;          // идёт плавная прокрутка после клика
-        setActive(current ? current.id : targets[0].id);
-      });
-    }
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    onScroll();
+  function setupSectionNav() {
+    // Ссылки меню — обычные якоря вида #/roadmap. Всю работу делает роутер.
+    window.addEventListener("hashchange", renderRoute);
   }
 
   /* --------------------------------- запуск ------------------------------- */
@@ -1092,7 +1162,7 @@
     renderHero();
     renderHorizons();
     renderDiagnostics();
-    renderStages();
+    renderRoute();
   }
 
   function init() {

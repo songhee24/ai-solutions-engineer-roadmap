@@ -590,3 +590,42 @@ td ul { margin: 0; padding-left: 1.1em; }
 .method-label.is-need { color: var(--ok); }
 .method-label.is-skip { color: var(--text-faint); }
 .method-area ul { font-size: .92rem; margin-bottom: 0; }
+
+/* ---------- Многостраничность: оглавление карты и страница этапа ---------- */
+.stage-index { display: grid; gap: 10px; margin-top: 8px; }
+
+.stage-card {
+  display: grid; grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 14px; align-items: center;
+  padding: 14px 18px; text-decoration: none; color: inherit;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+  transition: border-color .15s, transform .12s;
+}
+.stage-card:hover { border-color: var(--primary); text-decoration: none; transform: translateY(-1px); }
+.stage-card.is-track { border-left: 4px solid var(--accent); }
+.stage-card.is-optional { border-left: 4px solid var(--warn); }
+.stage-card.is-optional .stage-num { background: var(--warn-soft); color: var(--warn); }
+.stage-card.is-track .stage-num { background: var(--accent-soft); color: var(--accent); }
+.stage-card.is-done { opacity: .8; }
+.stage-card-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.stage-card-facts { display: flex; gap: 6px; margin-top: 6px; }
+
+@media (max-width: 640px) {
+  .stage-card { grid-template-columns: 40px minmax(0, 1fr); }
+  .stage-card .stage-meta { grid-column: 1 / -1; justify-content: flex-start; }
+}
+
+.crumbs { margin-bottom: 14px; font-size: .9rem; }
+.crumbs a { text-decoration: none; color: var(--text-muted); }
+.crumbs a:hover { color: var(--primary); text-decoration: none; }
+
+.stage-pager { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+.stage-pager .btn { text-decoration: none; }
+
+/* На странице одного этапа заголовок не сворачивается — прячем стрелку */
+#stage-page .stage-head { cursor: default; }
+#stage-page .stage-head:hover { background: transparent; }
+#stage-page .stage-head .chevron { display: none; }
+
+[hidden] { display: none !important; }
