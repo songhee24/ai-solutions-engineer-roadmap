@@ -2394,7 +2394,7 @@ window.ROADMAP.throughline = {
 window.ROADMAP.reviews = {
   title: "Отзывы",
   intro: "Карта сделана для одного конкретного пути, но если она пригодилась и вам — расскажите, что оказалось полезным, а что стоит исправить. Отзывы читаются и учитываются: часть разделов сайта появилась именно после чужих замечаний.",
-  formUrl: "",
+  formUrl: "https://docs.google.com/forms/d/e/1FAIpQLSeXSJt7q89E00zd32KOM_9vWNAfxrw6AZyBAkDg4v31xS2Ayw/viewform",
   emptyState: "Отзывов пока нет — вы можете стать первым.",
   items: []
 };
