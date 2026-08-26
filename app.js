@@ -198,6 +198,11 @@
   /* ------------------------------ отрисовка: герой ------------------------ */
 
   function renderHero() {
+    // Заголовок живёт в данных, а не в разметке: иначе правка meta.title
+    // никуда не выводится, а на экране остаётся старый текст.
+    document.getElementById("hero-title").textContent = DATA.meta.title;
+    document.getElementById("hero-lede").textContent = DATA.meta.lede || DATA.meta.subtitle;
+
     var o = overall();
     var weeksLeft = state.pace > 0 ? o.left / state.pace : 0;
     var current = currentStage();
@@ -430,7 +435,7 @@
       body.hidden = !isOpen;
 
       var why = el("div", "why");
-      why.appendChild(el("strong", null, "Зачем это Solutions Engineer"));
+      why.appendChild(el("strong", null, "Зачем это нужно"));
       why.appendChild(el("p", null, stage.why));
       body.appendChild(why);
 
