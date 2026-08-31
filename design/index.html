@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Макеты планнера — выбор направления</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%234338ca%27/%3E%3Ctext x=%2750%27 y=%2768%27 font-size=%2754%27 font-family=%27sans-serif%27 font-weight=%27bold%27 fill=%27white%27 text-anchor=%27middle%27%3EП%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="./mockup-base.css">
+<style>
+.pick { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.pick .card { padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+.pick h2 { margin: 0; font-size: 18px; }
+.pick p { margin: 0; color: var(--text-muted); font-size: 14px; }
+.pick .who { font-size: 13px; color: var(--text-faint); }
+.pick a.go { margin-top: auto; align-self: flex-start; font: inherit; font-size: 14px;
+  padding: 8px 16px; border-radius: var(--radius-sm); text-decoration: none;
+  border: 1px solid var(--primary); background: var(--primary); color: var(--primary-text); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin: 18px 0 26px; }
+.facts .card { padding: 12px 14px; }
+.facts b { display: block; font-size: 20px; font-family: var(--mono); }
+.facts span { color: var(--text-muted); font-size: 12px; }
+table.plain { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.plain th, table.plain td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+table.plain th { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+table.plain td.num { text-align: right; font-family: var(--mono); }
+</style>
+</head>
+<body>
+
+<div class="mock-bar"><div class="mock-bar-in">
+  <span class="mock-name">Макеты планнера</span>
+  <span class="mock-note">черновики для выбора направления — не рабочий код</span>
+</div></div>
+
+<div class="wrap">
+  <h1>Три направления на выбор</h1>
+  <p class="lede">Один и тот же планнер, три разных характера. Данные внутри настоящие — взяты из
+    карты, а не выдуманы. Откройте все три и скажите, какой берём.</p>
+
+  <div class="facts">
+    <div class="card"><b>5 ч</b><span>в день</span></div>
+    <div class="card"><b>322</b><span>дня ≈ 10,6 месяцев</span></div>
+    <div class="card"><b>1609 ч</b><span>основной путь</span></div>
+    <div class="card"><b>182</b><span>единицы плана</span></div>
+  </div>
+
+  <div class="pick">
+    <div class="card">
+      <h2>1. Таблица</h2>
+      <p>Плотная сетка, как в тех самых экселях из рекламы: строка — день, колонки — потоки,
+        в ячейках часы и галочки, внизу строка «Итого». Всё видно сразу, воздуха минимум.</p>
+      <p class="who">Подойдёт, если вы любите видеть числа и не любите скроллить.</p>
+      <a class="go" href="./planner-sheet.html">Открыть макет 1</a>
+    </div>
+
+    <div class="card">
+      <h2>2. Дашборд</h2>
+      <p>Крупные блоки на «сегодня», кольцо стрика, теплокарта года по дням и радар знаний по
+        девяти направлениям. Читается быстро, мотивирует формой, а не цифрами.</p>
+      <p class="who">Подойдёт, если важно каждый день видеть «я держусь».</p>
+      <a class="go" href="./planner-dashboard.html">Открыть макет 2</a>
+    </div>
+
+    <div class="card">
+      <h2>3. Дерево знаний</h2>
+      <p>Карта всех тем со связями в центре экрана: хребет этапов, параллельные рельсы математики
+        и английского, пунктирные ветки дополнительных треков. Закрашивается по мере прохождения.
+        Планнер живёт боковой колонкой.</p>
+      <p class="who">Подойдёт, если хочется видеть всю картину знаний целиком.</p>
+      <a class="go" href="./planner-tree.html">Открыть макет 3</a>
+    </div>
+  </div>
+
+  <h2>Раскладка пяти часов — одинаковая во всех трёх</h2>
+  <p class="lede">Она не выдумана: в карте написано, что математика идёт «параллельно с
+    программированием», а английский — «20–30 минут в день, параллельно всему». Часы разложены так,
+    чтобы все три потока закончились одновременно.</p>
+
+  <div class="card" style="padding: 4px 16px 10px">
+    <table class="plain">
+      <thead><tr><th>Поток</th><th class="num">Всего</th><th class="num">В день</th><th class="num">В неделю</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip math">Математика</span></td><td class="num">277 ч</td><td class="num">52 мин</td><td class="num">6,0 ч</td></tr>
+        <tr><td><span class="chip english">Английский</span></td><td class="num">105 ч</td><td class="num">20 мин</td><td class="num">2,3 ч</td></tr>
+        <tr><td><span class="chip seq">Основной этап</span></td><td class="num">1227 ч</td><td class="num">3 ч 49 мин</td><td class="num">26,7 ч</td></tr>
+        <tr><td><b>Итого</b></td><td class="num"><b>1609 ч</b></td><td class="num"><b>5 ч</b></td><td class="num"><b>35 ч</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top:18px"><small>Разбор первых четырёх недель по дням лежит в
+    <a href="../docs/first-weeks.md">docs/first-weeks.md</a> — по нему можно заниматься уже сейчас,
+    пока планнер строится.</small></p>
+</div>
+
+</body>
+</html>

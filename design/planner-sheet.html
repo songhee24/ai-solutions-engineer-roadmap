@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Макет 1 — «Таблица»</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%234338ca%27/%3E%3Ctext x=%2750%27 y=%2768%27 font-size=%2754%27 font-family=%27sans-serif%27 font-weight=%27bold%27 fill=%27white%27 text-anchor=%27middle%27%3EП%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="./mockup-base.css">
+<style>
+/* ---------- Плотная сетка: строка = день, колонка = поток ---------- */
+.sheet { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 860px; }
+.sheet th, .sheet td { border: 1px solid var(--border); padding: 7px 9px; text-align: left; vertical-align: top; }
+.sheet thead th {
+  position: sticky; top: 0; z-index: 2;
+  background: var(--surface-2); font-size: 12px; text-transform: uppercase;
+  letter-spacing: .04em; color: var(--text-muted); white-space: nowrap;
+}
+.sheet tbody tr:nth-child(even) td { background: var(--surface-2); }
+.sheet tbody tr.today td { background: var(--primary-soft); }
+.sheet tbody tr.miss td { background: var(--miss-soft); }
+.sheet tbody tr.rest td { color: var(--text-faint); }
+.sheet td.day { white-space: nowrap; font-weight: 600; }
+.sheet td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sheet tfoot td { background: var(--bg-soft); font-weight: 700; border-top: 2px solid var(--border-strong); }
+.cell { display: flex; gap: 8px; align-items: flex-start; }
+.cell .txt { min-width: 0; }
+.cell .t { display: block; }
+.cell .h { color: var(--text-faint); font-size: 12px; }
+.done .t { text-decoration: line-through; color: var(--text-faint); }
+.week-sep td { border-top: 2px solid var(--border-strong); }
+
+.bar { height: 8px; border-radius: 99px; background: var(--bg-soft); overflow: hidden; min-width: 90px; }
+.bar > i { display: block; height: 100%; background: var(--ok); }
+
+.kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.kpi .card { padding: 12px 14px; }
+.kpi b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; }
+.kpi span { color: var(--text-muted); font-size: 12px; }
+
+/* ---------- График знаний: горизонтальные полосы, всё в цифрах ---------- */
+.tracks { display: grid; gap: 8px; }
+.trow { display: grid; grid-template-columns: 120px 1fr 92px; gap: 12px; align-items: center; font-size: 13px; }
+.trow .bar { height: 18px; border-radius: 4px; }
+.trow .bar > i { background: var(--primary); }
+
+.tmpl { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.tmpl .card { padding: 13px 15px; }
+.tmpl h3 { display: flex; justify-content: space-between; gap: 8px; }
+.tmpl ul { margin: 8px 0 0; padding-left: 18px; font-size: 13px; color: var(--text-muted); }
+.tmpl .card.on { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); }
+
+.form { display: grid; gap: 10px; max-width: 560px; }
+.form label { font-size: 13px; font-weight: 600; }
+.form input, .form select, .form textarea {
+  font: inherit; width: 100%; padding: 8px 10px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+}
+.btn {
+  font: inherit; font-size: 14px; padding: 8px 16px; border-radius: var(--radius-sm);
+  border: 1px solid var(--primary); background: var(--primary); color: var(--primary-text); cursor: pointer;
+}
+.btn.ghost { background: var(--surface); color: var(--text); border-color: var(--border); }
+</style>
+</head>
+<body>
+
+<div class="mock-bar"><div class="mock-bar-in">
+  <span class="mock-name">Макет 1 — «Таблица»</span>
+  <span class="mock-note">плотная сетка как в тех самых экселях: всё видно сразу, минимум воздуха</span>
+  <span class="spacer"></span>
+  <a class="mock-back" href="./index.html">← к выбору</a>
+</div></div>
+
+<div class="mock-bar"><div class="mock-bar-in">
+  <div class="screens" role="tablist">
+    <button role="tab" aria-selected="true" data-s="today">Сегодня</button>
+    <button role="tab" aria-selected="false" data-s="calendar">Календарь</button>
+    <button role="tab" aria-selected="false" data-s="knowledge">График знаний</button>
+    <button role="tab" aria-selected="false" data-s="templates">Шаблоны дня</button>
+    <button role="tab" aria-selected="false" data-s="custom">Свои темы</button>
+  </div>
+</div></div>
+
+<div class="wrap">
+
+<!-- ============================ СЕГОДНЯ ============================ -->
+<section class="screen" id="s-today">
+  <h1>1 сентября, вторник — день 1 из 322</h1>
+  <p class="lede">5 часов: математика 52 мин, английский 20 мин, основной этап 3 ч 49 мин.</p>
+
+  <div class="kpi">
+    <div class="card"><b>0 / 5 ч</b><span>закрыто сегодня</span></div>
+    <div class="card"><b>1</b><span>день подряд</span></div>
+    <div class="card"><b>0</b><span>пропущено</span></div>
+    <div class="card"><b>10,6 мес</b><span>до конца при этом темпе</span></div>
+  </div>
+
+  <div class="table-scroll card">
+  <table class="sheet">
+    <thead><tr>
+      <th style="width:44px">✓</th><th>Что открыть</th><th>Этап и тема</th><th class="num">Часы</th><th style="width:110px">Поток</th>
+    </tr></thead>
+    <tbody>
+      <tr><td><input class="tick" type="checkbox"></td>
+        <td><a href="https://www.khanacademy.org/math/arithmetic/fraction-arithmetic">Khan Academy — Arithmetic, Unit 4: Understand fractions</a><br><small>Объём: Unit 4 из 19 — только этот юнит</small></td>
+        <td>A · A1.1 Дроби</td><td class="num">52 мин</td><td><span class="chip math">Математика</span></td></tr>
+      <tr><td><input class="tick" type="checkbox"></td>
+        <td><a href="https://learnenglish.britishcouncil.org/level">British Council — Level test</a><br><small>Объём: один тест, 25 минут</small></td>
+        <td>B · B0. Замер уровня</td><td class="num">1 ч</td><td><span class="chip english">Английский</span></td></tr>
+      <tr><td><input class="tick" type="checkbox"></td>
+        <td><a href="https://developers.google.com/machine-learning/intro-to-ml">Google ML Crash Course — Introduction to ML</a><br><small>Объём: модуль Introduction to ML, не весь курс</small></td>
+        <td>0 · AI, ML, DS — в чём разница</td><td class="num">2 ч</td><td><span class="chip seq">Основной</span></td></tr>
+      <tr><td><input class="tick" type="checkbox"></td>
+        <td>Задача: AI, ML, Data Science и AI Engineering<br><small>Написать на одной странице своими словами, кто чем занимается. Без копирования.</small></td>
+        <td>0 · AI, ML, DS — в чём разница</td><td class="num">1 ч</td><td><span class="chip seq">Основной</span></td></tr>
+      <tr><td><input class="tick" type="checkbox"></td>
+        <td>Задача: Профиль профессии и T-shaped модель<br><small>По 5 вакансий на каждое направление, требования в одну таблицу.</small></td>
+        <td>0 · Профиль профессии</td><td class="num">49 мин</td><td><span class="chip seq">Основной</span></td></tr>
+    </tbody>
+    <tfoot><tr><td></td><td>Итого за день</td><td></td><td class="num">5 ч 01 мин</td><td></td></tr></tfoot>
+  </table>
+  </div>
+
+  <p style="margin-top:14px"><button class="btn ghost">Заменить тему</button>
+    <button class="btn ghost">Перенести на завтра</button>
+    <button class="btn">Закрыть день</button></p>
+</section>
+
+<!-- ============================ КАЛЕНДАРЬ ============================ -->
+<section class="screen" id="s-calendar" hidden>
+  <h1>Календарь</h1>
+  <p class="lede">Строка — день, колонка — поток. Галочка ставится руками: система ничего не закрывает за вас.</p>
+
+  <div class="kpi">
+    <div class="card"><b>9</b><span>дней закрыто</span></div>
+    <div class="card"><b>2</b><span>пропущено</span></div>
+    <div class="card"><b>4</b><span>дня подряд сейчас</span></div>
+    <div class="card"><b>−3,2 ч</b><span>отставание от плана</span></div>
+  </div>
+
+  <div class="table-scroll card">
+  <table class="sheet">
+    <thead><tr>
+      <th>День</th>
+      <th>Математика <small>52 мин</small></th>
+      <th>Английский <small>20 мин</small></th>
+      <th>Основной этап <small>3 ч 49 мин</small></th>
+      <th class="num">Факт</th><th style="width:130px">Выполнение</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="day">1 сен · вт</td>
+        <td><div class="cell done"><input class="tick" type="checkbox" checked><span class="txt"><span class="t">Дроби, Unit 4</span><span class="h">52 мин</span></span></div></td>
+        <td><div class="cell done"><input class="tick" type="checkbox" checked><span class="txt"><span class="t">Level test</span><span class="h">1 ч</span></span></div></td>
+        <td><div class="cell done"><input class="tick" type="checkbox" checked><span class="txt"><span class="t">Intro to ML + 2 задачи</span><span class="h">3 ч 49 мин</span></span></div></td>
+        <td class="num">5,0</td><td><div class="bar"><i style="width:100%"></i></div></td></tr>
+
+      <tr><td class="day">2 сен · ср</td>
+        <td><div class="cell done"><input class="tick" type="checkbox" checked><span class="txt"><span class="t">Дроби, часть 2</span><span class="h">52 мин</span></span></div></td>
+        <td><div class="cell"><input class="tick" type="checkbox"><span class="txt"><span class="t">—</span><span class="h">выходной по шаблону</span></span></div></td>
+        <td><div class="cell done"><input class="tick" type="checkbox" checked><span class="txt"><span class="t">uv + задача по среде</span><span class="h">3 ч 49 мин</span></span></div></td>
+        <td class="num">4,7</td><td><div class="bar"><i style="width:94%"></i></div></td></tr>
+
+      <tr class="miss"><td class="day">3 сен · чт</td>
+        <td><div class="cell"><input class="tick" type="checkbox"><span class="txt"><span class="t">Дроби, часть 3</span><span class="h">52 мин</span></span></div></td>
+        <td><div class="cell"><input class="tick" type="checkbox"><span class="txt"><span class="t">Anki</span><span class="h">20 мин</span></span></div></td>
+        <td><div class="cell"><input class="tick" type="checkbox"><span class="txt"><span class="t">Диагностика</span><span class="h">3 ч 49 мин</span></span></div></td>
+        <td class="num">0,0</td><td><div class="bar"><i style="width:0"></i></div></td></tr>
+
+      <tr><td class="day">4 сен · пт</td>
+        <td><div class="cell done"><input class="tick" type="checkbox" checked><span class="txt"><span class="t">Дроби, часть 3</span><span class="h">52 мин</span></span></div></td>
+        <td><div class="cell done"><input class="tick" type="checkbox" checked><span class="txt"><span class="t">Anki</span><span class="h">20 мин</span></span></div></td>
+        <td><div class="cell"><input class="tick" type="checkbox"><span class="txt"><span class="t">Диагностика</span><span class="h">3 ч 49 мин</span></span></div></td>
+        <td class="num">1,2</td><td><div class="bar"><i style="width:24%"></i></div></td></tr>
+
+      <tr class="rest"><td class="day">5 сен · сб</td>
+        <td colspan="3">Выходной по шаблону «Лёгкая суббота» — только английский 20 мин</td>
+        <td class="num">0,3</td><td><div class="bar"><i style="width:100%"></i></div></td></tr>
+
+      <tr class="today week-sep"><td class="day">6 сен · вс</td>
+        <td><div class="cell"><input class="tick" type="checkbox"><span class="txt"><span class="t">Дроби, часть 4</span><span class="h">52 мин</span></span></div></td>
+        <td><div class="cell"><input class="tick" type="checkbox"><span class="txt"><span class="t">Anki</span><span class="h">20 мин</span></span></div></td>
+        <td><div class="cell"><input class="tick" type="checkbox"><span class="txt"><span class="t">CS50P, лекция 0</span><span class="h">3 ч 49 мин</span></span></div></td>
+        <td class="num">—</td><td><div class="bar"><i style="width:0"></i></div></td></tr>
+    </tbody>
+    <tfoot><tr>
+      <td>Итого за неделю</td><td class="num">2 ч 36 мин из 4 ч 20 мин</td>
+      <td class="num">1 ч 40 мин из 2 ч 20 мин</td><td class="num">7 ч 38 мин из 26 ч 43 мин</td>
+      <td class="num">11,2</td><td>из 35 ч</td>
+    </tr></tfoot>
+  </table>
+  </div>
+</section>
+
+<!-- ============================ ГРАФИК ЗНАНИЙ ============================ -->
+<section class="screen" id="s-knowledge" hidden>
+  <h1>График знаний</h1>
+  <p class="lede">Девять направлений основного пути, 1609 часов. Цифры, а не картинки: видно, где вы сильны и где дыра.</p>
+
+  <div class="card" style="padding:16px 18px">
+    <div class="tracks">
+      <div class="trow"><span>AI-инженерия</span><div class="bar"><i style="width:8%"></i></div><span class="mono">26 / 320 ч</span></div>
+      <div class="trow"><span>Математика</span><div class="bar"><i style="width:14%"></i></div><span class="mono">39 / 277 ч</span></div>
+      <div class="trow"><span>Machine Learning</span><div class="bar"><i style="width:0%"></i></div><span class="mono">0 / 195 ч</span></div>
+      <div class="trow"><span>Python</span><div class="bar"><i style="width:21%"></i></div><span class="mono">37 / 174 ч</span></div>
+      <div class="trow"><span>Solutions</span><div class="bar"><i style="width:31%"></i></div><span class="mono">52 / 168 ч</span></div>
+      <div class="trow"><span>Данные</span><div class="bar"><i style="width:5%"></i></div><span class="mono">6 / 130 ч</span></div>
+      <div class="trow"><span>Backend</span><div class="bar"><i style="width:0%"></i></div><span class="mono">0 / 120 ч</span></div>
+      <div class="trow"><span>Облако</span><div class="bar"><i style="width:0%"></i></div><span class="mono">0 / 120 ч</span></div>
+      <div class="trow"><span>Английский</span><div class="bar"><i style="width:11%"></i></div><span class="mono">12 / 105 ч</span></div>
+    </div>
+  </div>
+
+  <h2>По типу занятий</h2>
+  <div class="card" style="padding:16px 18px">
+    <div class="tracks">
+      <div class="trow"><span>Теория</span><div class="bar"><i style="width:19%"></i></div><span class="mono">96 / 508 ч</span></div>
+      <div class="trow"><span>Практика</span><div class="bar"><i style="width:7%"></i></div><span class="mono">76 / 1031 ч</span></div>
+      <div class="trow"><span>Проекты</span><div class="bar"><i style="width:0%"></i></div><span class="mono">0 / 70 ч</span></div>
+    </div>
+    <p style="margin:14px 0 0"><small>Практики почти вдвое больше теории — так и задумано: часы темы
+      складываются из материалов и собственного кода.</small></p>
+  </div>
+</section>
+
+<!-- ============================ ШАБЛОНЫ ============================ -->
+<section class="screen" id="s-templates" hidden>
+  <h1>Шаблоны дня</h1>
+  <p class="lede">Шаблон — это раскладка часов по потокам. Вешается на дни недели, правится, сохраняется.</p>
+
+  <div class="tmpl">
+    <div class="card on"><h3>Обычный день <span class="chip">пн–пт, вс</span></h3>
+      <ul><li>Математика — 52 мин</li><li>Английский — 20 мин</li><li>Основной этап — 3 ч 49 мин</li></ul>
+      <p class="mono" style="margin:10px 0 0">= 5 ч 01 мин</p></div>
+
+    <div class="card"><h3>Лёгкая суббота <span class="chip">сб</span></h3>
+      <ul><li>Английский — 20 мин</li></ul>
+      <p class="mono" style="margin:10px 0 0">= 20 мин</p></div>
+
+    <div class="card"><h3>Только проект <span class="chip">по требованию</span></h3>
+      <ul><li>Основной этап — 5 ч</li></ul>
+      <p class="mono" style="margin:10px 0 0">= 5 ч</p></div>
+
+    <div class="card" style="border-style:dashed; display:grid; place-content:center; min-height:120px">
+      <button class="btn ghost">+ Новый шаблон</button></div>
+  </div>
+
+  <h2>Правка шаблона «Обычный день»</h2>
+  <div class="card" style="padding:16px 18px">
+    <div class="form">
+      <div><label>Название</label><input value="Обычный день"></div>
+      <div><label>Математика, часов</label><input class="mono" value="0.86"></div>
+      <div><label>Английский, часов</label><input class="mono" value="0.33"></div>
+      <div><label>Основной этап, часов</label><input class="mono" value="3.81"></div>
+      <div><label>Дни недели</label><input value="пн, вт, ср, чт, пт, вс"></div>
+      <p><button class="btn">Сохранить</button> <button class="btn ghost">Удалить</button></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ СВОИ ТЕМЫ ============================ -->
+<section class="screen" id="s-custom" hidden>
+  <h1>Свои темы</h1>
+  <p class="lede">То, чего в карте нет, но учить надо. Планируются наравне с родными темами и не
+    затираются при обновлении карты.</p>
+
+  <div class="table-scroll card">
+  <table class="sheet">
+    <thead><tr><th>Тема</th><th>Ссылка</th><th style="width:110px">Поток</th><th class="num">Часы</th><th style="width:90px"></th></tr></thead>
+    <tbody>
+      <tr><td>Docker для локальной разработки</td><td><a href="#">docs.docker.com/get-started</a></td>
+        <td><span class="chip seq">Основной</span></td><td class="num">8</td><td><button class="btn ghost">Править</button></td></tr>
+      <tr><td>Английский: собеседование на английском</td><td><a href="#">—</a></td>
+        <td><span class="chip english">Английский</span></td><td class="num">6</td><td><button class="btn ghost">Править</button></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>Новая тема</h2>
+  <div class="card" style="padding:16px 18px">
+    <div class="form">
+      <div><label>Название</label><input placeholder="например, Docker для локальной разработки"></div>
+      <div><label>Ссылка</label><input placeholder="https://…"></div>
+      <div><label>Поток</label><select><option>Основной этап</option><option>Математика</option><option>Английский</option></select></div>
+      <div><label>Часов</label><input class="mono" placeholder="8"></div>
+      <p><button class="btn">Добавить в план</button></p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+// Переключение экранов макета. В настоящем планнере это делает роутер.
+document.querySelectorAll(".screens button").forEach(function (b) {
+  b.addEventListener("click", function () {
+    document.querySelectorAll(".screens button").forEach(function (x) { x.setAttribute("aria-selected", String(x === b)); });
+    document.querySelectorAll(".screen").forEach(function (s) { s.hidden = s.id !== "s-" + b.dataset.s; });
+    window.scrollTo(0, 0);
+  });
+});
+</script>
+</body>
+</html>
