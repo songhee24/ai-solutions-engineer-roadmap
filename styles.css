@@ -515,6 +515,21 @@ td ul { margin: 0; padding-left: 1.1em; }
   border-top: 1px solid var(--border);
   padding: 6px 20px; margin: 0 -20px -8px;
   scrollbar-width: none;
+  /* Затухание у того края, за которым ещё есть пункты. Классы ставит app.js:
+     полоса прокрутки скрыта, и без этого хвост панели остаётся незамеченным. */
+  -webkit-mask-image: none; mask-image: none;
+}
+.section-nav.has-right {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+          mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+}
+.section-nav.has-left {
+  -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 36px), transparent);
+          mask-image: linear-gradient(to left, #000 calc(100% - 36px), transparent);
+}
+.section-nav.has-left.has-right {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 36px, #000 calc(100% - 36px), transparent);
+          mask-image: linear-gradient(to right, transparent, #000 36px, #000 calc(100% - 36px), transparent);
 }
 .section-nav::-webkit-scrollbar { display: none; }
 .section-nav a {

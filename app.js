@@ -1251,6 +1251,23 @@
   function setupSectionNav() {
     // Ссылки меню — обычные якоря вида #/roadmap. Всю работу делает роутер.
     window.addEventListener("hashchange", renderRoute);
+
+    // Панель прокручивается по горизонтали, а полоса прокрутки в ней скрыта
+    // намеренно. Пока пунктов было немного, это не мешало; с тринадцатью
+    // хвост уезжает за край, и о нём просто не догадываются (2026-08-31).
+    // Классы включают затухание у того края, за которым ещё что-то есть.
+    var nav = document.querySelector(".section-nav");
+    if (!nav) return;
+
+    function updateEdges() {
+      var max = nav.scrollWidth - nav.clientWidth;
+      nav.classList.toggle("has-left", nav.scrollLeft > 4);
+      nav.classList.toggle("has-right", max > 4 && nav.scrollLeft < max - 4);
+    }
+
+    nav.addEventListener("scroll", updateEdges, { passive: true });
+    window.addEventListener("resize", updateEdges);
+    updateEdges();
   }
 
   /* --------------------------------- запуск ------------------------------- */

@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>План по дням</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234338ca'/%3E%3Ctext x='50' y='68' font-size='54' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  .plan { max-width: 820px; margin: 0 auto; padding: 22px 18px 60px; }
+  .plan h1 { margin: 0 0 6px; }
+  .plan .lede { color: var(--text-muted); margin: 0 0 20px; }
+  .back { display: inline-block; margin-bottom: 16px; font-size: 14px; }
+
+  .setup { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;
+           background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+           box-shadow: var(--shadow-sm); padding: 14px 16px; margin: 0 0 16px; }
+  .setup label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+  .setup input, .setup select {
+    font: inherit; font-size: 14px; width: 100%; padding: 7px 9px;
+    border-radius: var(--radius-sm); border: 1px solid var(--border);
+    background: var(--surface); color: var(--text);
+  }
+
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 0 0 16px; }
+  .fact { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+          box-shadow: var(--shadow-sm); padding: 11px 13px; }
+  .fact b { display: block; font-size: 19px; font-variant-numeric: tabular-nums; }
+  .fact span { color: var(--text-muted); font-size: 12px; }
+
+  .split-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 0 0 18px; }
+  .split-table th, .split-table td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+  .split-table th { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  .split-table td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .miss { background: var(--warn-soft); border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
+          border-radius: var(--radius); padding: 13px 15px; margin: 0 0 22px; font-size: 14px; }
+  .miss b { color: var(--warn); }
+  .miss .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  .miss input[type="range"] { flex: 1; min-width: 160px; }
+
+  .wk { margin: 26px 0 12px; padding-top: 16px; border-top: 2px solid var(--border-strong); }
+  .day { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);
+         box-shadow: var(--shadow-sm); padding: 13px 15px; margin: 0 0 11px; }
+  .day > h3 { margin: 0 0 9px; font-size: 15px; }
+  .blk { margin: 0 0 11px; }
+  .blk:last-child { margin-bottom: 0; }
+  .blk > b { display: block; font-size: 13px; margin-bottom: 5px; }
+  .blk.math > b    { color: #7c3aed; }
+  .blk.english > b { color: var(--accent); }
+  .blk.seq > b     { color: var(--primary); }
+  .u { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-top: 1px solid var(--border); }
+  .u:first-of-type { border-top: 0; }
+  .u .t { flex: 1; min-width: 0; font-size: 14px; }
+  .u .h { font-size: 13px; color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .u small { display: block; color: var(--text-faint); }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .blk.math > b { color: #a78bfa; }
+  }
+  :root[data-theme="dark"] .blk.math > b { color: #a78bfa; }
+</style>
+</head>
+<body>
+<div class="plan">
+  <a class="back" href="../index.html">← К дорожной карте</a>
+  <h1>План по дням</h1>
+  <p class="lede">Отметьте, когда начинаете — план построится от вашей даты. Ничего не привязано
+    к конкретному числу: начать можно в любой день.</p>
+
+  <div class="setup">
+    <div>
+      <label for="start">Дата старта</label>
+      <input type="date" id="start">
+    </div>
+    <div>
+      <label for="hours">Часов в день</label>
+      <select id="hours">
+        <option value="2">2 ч</option>
+        <option value="3">3 ч</option>
+        <option value="4">4 ч</option>
+        <option value="5" selected>5 ч</option>
+        <option value="6">6 ч</option>
+        <option value="8">8 ч</option>
+      </select>
+    </div>
+    <div>
+      <label for="week">Дней в неделю</label>
+      <select id="week">
+        <option value="7" selected>7 — каждый день</option>
+        <option value="6">6 — кроме воскресенья</option>
+        <option value="5">5 — только будни</option>
+      </select>
+    </div>
+    <div>
+      <label for="profile">Профиль</label>
+      <select id="profile">
+        <option value="novice" selected>Новичок</option>
+        <option value="dev">Разработчик</option>
+      </select>
+    </div>
+    <div>
+      <label for="horizon">Показать</label>
+      <select id="horizon">
+        <option value="14">14 дней</option>
+        <option value="28" selected>28 дней</option>
+        <option value="56">56 дней</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="facts" id="facts"></div>
+
+  <table class="split-table">
+    <thead><tr><th>Поток</th><th class="n">Всего</th><th class="n">В день</th><th class="n">В неделю</th></tr></thead>
+    <tbody id="split"></tbody>
+  </table>
+
+  <p>Три потока идут параллельно — так написано в самой карте: математика «параллельно с
+    программированием», английский «20–30 минут в день». Часы разложены так, чтобы все три
+    закончились одновременно, а не чтобы математика тянулась ещё пару месяцев после последнего этапа.</p>
+
+  <p>Единица плана — конкретный ресурс, а не тема: тема в среднем 16 часов, для дня это слишком
+    крупно. «Часть 3» значит, что вы продолжаете начатое. Блок <b>Задача</b> — практика по теме:
+    часы темы складываются из материалов и собственного кода, и без практики срок соврал бы почти вдвое.</p>
+
+  <div class="miss" id="miss"></div>
+
+  <div id="days"></div>
+</div>
+
+<script src="../roadmap-data.js"></script>
+<script type="module">
+/* Тот же планировщик, что и у генератора расписания, — shared/schedule.mjs.
+   Страница отдельная, поэтому модуль подключается напрямую: сборка не нужна,
+   браузеры понимают ES-модули сами. Карта (index.html + app.js) этого файла
+   не касается и остаётся классическим скриптом. */
+import { buildUnits, dailyBudget, planDays, formatHours, STREAMS } from "../shared/schedule.mjs";
+
+const DATA = window.ROADMAP;
+const $ = (id) => document.getElementById(id);
+
+const WEEKDAY = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
+const MONTH = ["января", "февраля", "марта", "апреля", "мая", "июня",
+               "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+const ruDate = (d) => `${d.getDate()} ${MONTH[d.getMonth()]}`;
+const ruFull = (d) => `${d.getDate()} ${MONTH[d.getMonth()]} ${d.getFullYear()}`;
+const ruNum = (n, digits = 1) => n.toFixed(digits).replace(".", ",");
+
+function plural(n, one, few, many) {
+  if (!Number.isInteger(n)) return few;
+  const m = Math.abs(n) % 100, d = m % 10;
+  if (m >= 11 && m <= 14) return many;
+  if (d === 1) return one;
+  if (d >= 2 && d <= 4) return few;
+  return many;
+}
+const daysWord = (n) => `${n} ${plural(n, "день", "дня", "дней")}`;
+const monthsWord = (n) => `${ruNum(n)} ${plural(n, "месяц", "месяца", "месяцев")}`;
+
+/** Календарная дата N-го учебного дня с учётом выходных по расписанию. */
+function dateAfter(start, studyDays, weekdays) {
+  const d = new Date(start);
+  let left = studyDays;
+  while (left > 0) {
+    d.setDate(d.getDate() + 1);
+    if (weekdays.includes(d.getDay())) left--;
+  }
+  return d;
+}
+
+const WEEKDAYS_BY_MODE = {
+  "7": [0, 1, 2, 3, 4, 5, 6],
+  "6": [1, 2, 3, 4, 5, 6],
+  "5": [1, 2, 3, 4, 5]
+};
+
+function readSetup() {
+  const raw = $("start").value;
+  const [y, m, d] = raw ? raw.split("-").map(Number) : [];
+  return {
+    start: raw ? new Date(y, m - 1, d) : new Date(),
+    hours: Number($("hours").value),
+    weekdays: WEEKDAYS_BY_MODE[$("week").value],
+    profile: $("profile").value,
+    horizon: Number($("horizon").value)
+  };
+}
+
+function render() {
+  const cfg = readSetup();
+  const units = buildUnits(DATA, cfg.profile);
+  const budget = dailyBudget(units, cfg.hours);
+  const days = planDays(units, {
+    hoursPerDay: cfg.hours,
+    days: cfg.horizon,
+    startDate: cfg.start,
+    weekdays: cfg.weekdays
+  });
+
+  const finish = dateAfter(cfg.start, budget.days - 1, cfg.weekdays);
+  const perWeek = cfg.hours * cfg.weekdays.length;
+
+  $("facts").innerHTML = [
+    ["fact", `${daysWord(budget.days)}`, "учебных дней всего"],
+    ["fact", `${monthsWord(budget.days / (cfg.weekdays.length / 7) / 30.44)}`, "по календарю"],
+    ["fact", ruFull(finish), "финиш при этом темпе"],
+    ["fact", `${Math.round(budget.totalHours)} ч`, "основной путь"]
+  ].map(([c, b, s]) => `<div class="${c}"><b>${b}</b><span>${s}</span></div>`).join("");
+
+  $("split").innerHTML = ["math", "english", "seq"].map((s) => {
+    const total = units.filter((u) => u.stream === s).reduce((n, u) => n + u.hours, 0);
+    return `<tr><td>${STREAMS[s].title}</td><td class="n">${Math.round(total)} ч</td>` +
+           `<td class="n"><b>${formatHours(budget.perDay[s])}</b></td>` +
+           `<td class="n">${ruNum(budget.perDay[s] * cfg.weekdays.length)} ч</td></tr>`;
+  }).join("") +
+  `<tr><td><b>Итого</b></td><td class="n"><b>${Math.round(budget.totalHours)} ч</b></td>` +
+  `<td class="n"><b>${cfg.hours} ч</b></td><td class="n"><b>${perWeek} ч</b></td></tr>`;
+
+  renderMiss(cfg, budget, finish);
+  renderDays(days);
+}
+
+/* Пропуски. План не «сгорает» и не переносит темы куда-то вбок: он выводится
+   из того, что ещё не пройдено. Пропустили день — всё сдвигается ровно на день
+   вперёд, а финиш уезжает на столько же. Это и показывает ползунок. */
+function renderMiss(cfg, budget, finish) {
+  const host = $("miss");
+  const prev = host.querySelector("input");
+  const skipped = prev ? Number(prev.value) : 0;
+
+  const shifted = dateAfter(cfg.start, budget.days - 1 + skipped, cfg.weekdays);
+  const lostHours = Math.round(skipped * cfg.hours);
+
+  host.innerHTML =
+    `<b>Что будет, если пропускать</b>` +
+    `<p style="margin:6px 0 0">Ничего не теряется: план строится от того, что ещё не пройдено. ` +
+    `Пропущенный день просто сдвигает всё остальное на день вперёд.</p>` +
+    `<div class="row">` +
+      `<span>Пропущено дней:</span>` +
+      `<input type="range" min="0" max="60" step="1" value="${skipped}" aria-label="Сколько дней пропущено">` +
+      `<b style="font-variant-numeric: tabular-nums">${skipped}</b>` +
+    `</div>` +
+    `<p style="margin:8px 0 0">Финиш: <b>${ruFull(shifted)}</b>` +
+      (skipped ? ` — на ${daysWord(skipped)} позже, недобрано ${lostHours} ч.` : ` — пока без сдвига.`) +
+    `</p>`;
+
+  host.querySelector("input").addEventListener("input", () => renderMiss(cfg, budget, finish));
+}
+
+function renderDays(days) {
+  const out = [];
+  let week = 0;
+  days.forEach((day, i) => {
+    if (i % 7 === 0) { week += 1; out.push(`<h2 class="wk">Неделя ${week}</h2>`); }
+    out.push(`<article class="day"><h3>День ${i + 1} — ${ruDate(day.date)}, ${WEEKDAY[day.weekday]}</h3>`);
+    for (const block of day.blocks) {
+      if (!block.items.length) continue;
+      out.push(`<div class="blk ${block.stream}"><b>${block.title} · ${formatHours(block.budget)}</b>`);
+      for (const it of block.items) {
+        const u = it.unit;
+        const name = u.url
+          ? `<a href="${u.url}" target="_blank" rel="noopener">${escapeHtml(u.title)}</a>`
+          : escapeHtml(u.title);
+        const part = it.part > 1 || it.continues ? ` · часть ${it.part}` : "";
+        out.push(`<div class="u"><div class="t">${name}${part}`);
+        out.push(`<small>${escapeHtml(u.stageNum)}. ${escapeHtml(u.stageTitle)} → ${escapeHtml(u.topicTitle)}</small>`);
+        if (it.isStart && u.scope) out.push(`<small>Объём: ${escapeHtml(u.scope)}</small>`);
+        if (it.isStart && u.detail) out.push(`<small>${escapeHtml(u.detail)}</small>`);
+        out.push(`</div><span class="h">${formatHours(it.hours)}</span></div>`);
+      }
+      out.push(`</div>`);
+    }
+    out.push(`</article>`);
+  });
+  $("days").innerHTML = out.join("");
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Старт по умолчанию — сегодня: у каждого своя дата, привязки к числу нет.
+const today = new Date();
+$("start").value = [today.getFullYear(),
+                    String(today.getMonth() + 1).padStart(2, "0"),
+                    String(today.getDate()).padStart(2, "0")].join("-");
+
+["start", "hours", "week", "profile", "horizon"].forEach((id) =>
+  $(id).addEventListener("change", render));
+
+render();
+</script>
+</body>
+</html>

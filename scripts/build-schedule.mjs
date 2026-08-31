@@ -129,91 +129,9 @@ console.log(`  дней: ${days.length}, часов запланировано: 
 console.log(`  весь путь: ${days_(budget.days)}, ${Math.round(budget.totalHours)} ч`);
 
 /* ---------------------------------------------------------------------------
- * HTML-версия того же расписания. Нужна потому, что GitHub Pages отдаёт .md
- * как простой текст: с телефона это нечитаемо. Страница подключает styles.css
- * сайта, поэтому выглядит его частью и живёт в его же теме.
+ * 2026-08-31: генерация HTML отсюда УБРАНА. Страница плана стала динамической
+ * (docs/plan.html): она сама считает дни от даты, которую выбрал читатель, —
+ * привязка к одному числу была неверной, начать можно в любой день. Здесь
+ * остаётся только markdown для чтения в редакторе и в git.
+ * Прежний HTML-рендер: git show 2421f8e -- scripts/build-schedule.mjs
  * ------------------------------------------------------------------------- */
-
-const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-const html = [];
-html.push('<!doctype html>');
-html.push('<html lang="ru">');
-html.push('<head>');
-html.push('<meta charset="utf-8">');
-html.push('<meta name="viewport" content="width=device-width, initial-scale=1">');
-html.push(`<title>План по дням — первые ${DAYS} дней</title>`);
-html.push('<link rel="stylesheet" href="../styles.css">');
-// Иконка та же, что у сайта: иначе браузер каждый раз ловит 404 на /favicon.ico.
-html.push('<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=\\\\\'http://www.w3.org/2000/svg\\\\\' viewBox=\\\\\'0 0 100 100\\\\\'%3E%3Crect width=\\\\\'100\\\\\' height=\\\\\'100\\\\\' rx=\\\\\'22\\\\\' fill=\\\\\'%234338ca\\\\\'/%3E%3Ctext x=\\\\\'50\\\\\' y=\\\\\'68\\\\\' font-size=\\\\\'54\\\\\' font-family=\\\\\'sans-serif\\\\\' font-weight=\\\\\'bold\\\\\' fill=\\\\\'white\\\\\' text-anchor=\\\\\'middle\\\\\'%3ET%3C/text%3E%3C/svg%3E">');
-html.push('<style>');
-html.push('  .plan { max-width: 780px; margin: 0 auto; padding: 24px 18px 60px; }');
-html.push('  .plan h1 { margin: 0 0 6px; }');
-html.push('  .plan .lede { color: var(--text-muted); margin: 0 0 22px; }');
-html.push('  .plan table { width: 100%; border-collapse: collapse; margin: 0 0 22px; font-size: 14px; }');
-html.push('  .plan th, .plan td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: left; }');
-html.push('  .plan th { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }');
-html.push('  .plan td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }');
-html.push('  .day { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);');
-html.push('         box-shadow: var(--shadow-sm); padding: 14px 16px; margin: 0 0 12px; }');
-html.push('  .day > h3 { margin: 0 0 10px; font-size: 15px; }');
-html.push('  .blk { margin: 0 0 12px; }');
-html.push('  .blk:last-child { margin-bottom: 0; }');
-html.push('  .blk > b { display: block; font-size: 13px; margin-bottom: 6px; }');
-html.push('  .blk.math > b    { color: #7c3aed; }');
-html.push('  .blk.english > b { color: var(--accent); }');
-html.push('  .blk.seq > b     { color: var(--primary); }');
-html.push('  .u { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-top: 1px solid var(--border); }');
-html.push('  .u:first-of-type { border-top: 0; }');
-html.push('  .u .t { flex: 1; min-width: 0; font-size: 14px; }');
-html.push('  .u .h { font-size: 13px; color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }');
-html.push('  .u small { display: block; color: var(--text-faint); }');
-html.push('  .wk { margin: 28px 0 12px; padding-top: 18px; border-top: 2px solid var(--border-strong); }');
-html.push('  .back { display: inline-block; margin-bottom: 18px; font-size: 14px; }');
-html.push('</style>');
-html.push('</head>');
-html.push('<body>');
-html.push('<div class="plan">');
-html.push('<a class="back" href="../index.html">← К дорожной карте</a>');
-html.push(`<h1>План по дням — первые ${DAYS} дней</h1>`);
-html.push(`<p class="lede">Профиль «${PROFILE === "dev" ? "Разработчик" : "Новичок"}», ${HOURS} ч в день, старт ${ruDate(new Date(y, m - 1, d))}. Собрано из карты, а не написано руками.</p>`);
-
-html.push('<table><thead><tr><th>Поток</th><th class="n">Всего</th><th class="n">В день</th><th class="n">В неделю</th></tr></thead><tbody>');
-for (const s of ["math", "english", "seq"]) {
-  const total = units.filter((u) => u.stream === s).reduce((n, u) => n + u.hours, 0);
-  html.push(`<tr><td>${STREAMS[s].title}</td><td class="n">${Math.round(total)} ч</td><td class="n"><b>${formatHours(budget.perDay[s])}</b></td><td class="n">${ruNum(budget.perDay[s] * 7)} ч</td></tr>`);
-}
-html.push(`<tr><td><b>Итого</b></td><td class="n"><b>${Math.round(budget.totalHours)} ч</b></td><td class="n"><b>${HOURS} ч</b></td><td class="n"><b>${HOURS * 7} ч</b></td></tr>`);
-html.push('</tbody></table>');
-
-html.push(`<p>Три потока идут параллельно — так написано в самой карте: математика «параллельно с программированием», английский «20–30 минут в день». Часы разложены так, чтобы все три закончились одновременно. Весь основной путь при этом темпе — <b>${days_(budget.days)} ≈ ${months_(budget.days / 30.44)}</b>.</p>`);
-html.push('<p>Единица плана — конкретный ресурс, а не тема: тема в среднем 16 часов, для дня это слишком крупно. «Часть 3» значит, что вы продолжаете начатое. Блок <b>Задача</b> — практика по теме: часы темы складываются из материалов и собственного кода.</p>');
-
-let hweek = 0;
-days.forEach((day, i) => {
-  if (i % 7 === 0) { hweek += 1; html.push(`<h2 class="wk">Неделя ${hweek}</h2>`); }
-  html.push('<article class="day">');
-  html.push(`<h3>День ${i + 1} — ${ruDate(day.date)}, ${WEEKDAY[day.weekday]}</h3>`);
-  for (const block of day.blocks) {
-    if (!block.items.length) continue;
-    html.push(`<div class="blk ${block.stream}"><b>${block.title} · ${formatHours(block.budget)}</b>`);
-    for (const it of block.items) {
-      const u = it.unit;
-      const name = u.url ? `<a href="${esc(u.url)}" target="_blank" rel="noopener">${esc(u.title)}</a>` : esc(u.title);
-      const part = it.part > 1 || it.continues ? ` · часть ${it.part}` : "";
-      html.push('<div class="u"><div class="t">' + name + part);
-      html.push(`<small>${esc(u.stageNum)}. ${esc(u.stageTitle)} → ${esc(u.topicTitle)}</small>`);
-      if (it.isStart && u.scope) html.push(`<small>Объём: ${esc(u.scope)}</small>`);
-      if (it.isStart && u.detail) html.push(`<small>${esc(u.detail)}</small>`);
-      html.push(`</div><span class="h">${formatHours(it.hours)}</span></div>`);
-    }
-    html.push('</div>');
-  }
-  html.push('</article>');
-});
-
-html.push('</div></body></html>');
-
-const OUT_HTML = OUT.replace(/\.md$/, ".html");
-fs.writeFileSync(OUT_HTML, html.join("\n"));
-console.log(`  и HTML: ${path.relative(ROOT, OUT_HTML)}`);
