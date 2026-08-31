@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Планнер — выбранный вид</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%234338ca%27/%3E%3Ctext x=%2750%27 y=%2768%27 font-size=%2754%27 font-family=%27sans-serif%27 font-weight=%27bold%27 fill=%27white%27 text-anchor=%27middle%27%3EП%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="./mockup-base.css">
+<style>
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+
+.block { padding: 16px 18px; margin-bottom: 14px; }
+.block header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+.block h3 { margin: 0; font-size: 15px; }
+.block .budget { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--text-muted); font-size: 13px; }
+.block.math    { border-left: 4px solid var(--s-math); }
+.block.english { border-left: 4px solid var(--s-english); }
+.block.seq     { border-left: 4px solid var(--s-seq); }
+
+.item { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--border); }
+.item:first-of-type { border-top: 0; }
+.item .body { min-width: 0; flex: 1; }
+.item .title { font-weight: 600; }
+.item .meta { color: var(--text-faint); font-size: 12.5px; margin-top: 2px; }
+.item .hrs { font-variant-numeric: tabular-nums; font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+
+.ring-card { padding: 18px; text-align: center; }
+.ring { display: block; margin: 0 auto 8px; }
+.ring .track { fill: none; stroke: var(--bg-soft); stroke-width: 12; }
+.ring .fill  { fill: none; stroke: var(--ok); stroke-width: 12; stroke-linecap: round;
+               transform: rotate(-90deg); transform-origin: 60px 60px; }
+.ring-num { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stats .card { padding: 12px 14px; }
+.stats b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+.stats span { color: var(--text-muted); font-size: 12px; }
+
+.heat { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 13px); gap: 3px; }
+.heat i { width: 13px; height: 13px; border-radius: 3px; background: var(--bg-soft); display: block; }
+.heat i.d1 { background: color-mix(in srgb, var(--ok) 35%, var(--bg-soft)); }
+.heat i.d2 { background: color-mix(in srgb, var(--ok) 65%, var(--bg-soft)); }
+.heat i.d3 { background: var(--ok); }
+.heat i.miss { background: var(--miss-soft); box-shadow: inset 0 0 0 1px var(--miss); }
+.legend { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); margin-top: 10px; flex-wrap: wrap; }
+.legend i { width: 13px; height: 13px; border-radius: 3px; display: inline-block;
+            vertical-align: -2px; margin-right: 5px; }
+/* Подписи легенды идут парами «квадратик + слово», поэтому между парами
+   нужен зазор больше, чем внутри пары. */
+.legend > span { margin-right: 6px; }
+
+/* ---------- Карта знаний ---------- */
+.map-card { padding: 14px; overflow-x: auto; }
+svg.map { display: block; min-width: 1120px; }
+.map .rail { fill: var(--surface-2); stroke: var(--border); }
+.map .rail.math { fill: color-mix(in srgb, var(--s-math) 8%, var(--surface-2)); stroke: color-mix(in srgb, var(--s-math) 28%, var(--border)); }
+.map .rail.eng  { fill: color-mix(in srgb, var(--s-english) 8%, var(--surface-2)); stroke: color-mix(in srgb, var(--s-english) 28%, var(--border)); }
+.map .rail-done { fill: color-mix(in srgb, var(--ok) 22%, transparent); }
+.map .rail-label { fill: var(--text-muted); font-size: 12px; font-family: var(--font); }
+.map .rail-strong { fill: var(--text); font-weight: 700; }
+
+/* Пройденное — заметно, непройденное — намеренно бледное: раньше россыпь
+   одинаковых точек читалась как «всё сделано». */
+.map .topic { fill: var(--surface); stroke: var(--border); stroke-width: 1.5; }
+.map .topic.done { fill: var(--ok); stroke: var(--ok); }
+.map .topic.opt { fill: var(--surface); stroke: var(--warn); stroke-dasharray: 3 3; }
+
+.map .link { stroke: var(--border); stroke-width: 3; fill: none; }
+.map .link.done { stroke: var(--ok); }
+.map .link.opt { stroke: var(--warn); stroke-width: 2; stroke-dasharray: 5 4; }
+
+.map .node .ring { fill: var(--surface); stroke: var(--border); stroke-width: 3; }
+.map .node .prog { fill: none; stroke: var(--ok); stroke-width: 4; transform: rotate(-90deg); }
+.map .node.done .ring { stroke: var(--ok); }
+.map .node.current .ring { stroke: var(--primary); stroke-width: 4; }
+.map .node .num { fill: var(--text); font-size: 20px; font-weight: 700; text-anchor: middle; font-family: var(--font); }
+.map .node:not(.done):not(.current) .num { fill: var(--text-faint); }
+.map .node-label { fill: var(--text); font-size: 12px; text-anchor: middle; font-family: var(--font); }
+.map .node-hrs { fill: var(--text-faint); font-size: 11px; text-anchor: middle; font-family: var(--font); }
+.map .opt-label { fill: var(--text-muted); font-size: 12.5px; font-family: var(--font); }
+.map .opt-chip rect { fill: var(--surface-2); stroke: var(--warn); stroke-dasharray: 4 3; }
+
+.map .here rect { fill: var(--primary); }
+.map .here text { fill: var(--primary-text); font-size: 11px; font-weight: 700; text-anchor: middle; font-family: var(--font); }
+.map .here path { fill: var(--primary); }
+
+.tracks { display: grid; gap: 8px; }
+.trow { display: grid; grid-template-columns: 118px 1fr 92px; gap: 12px; align-items: center; font-size: 13px; }
+.trow .bar { height: 16px; border-radius: 4px; background: var(--bg-soft); overflow: hidden; }
+.trow .bar > i { display: block; height: 100%; background: var(--primary); }
+.trow .n { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-muted); }
+
+.rowline { display: flex; align-items: center; gap: 12px; padding: 11px 16px; border-top: 1px solid var(--border); }
+.rowline:first-child { border-top: 0; }
+.rowline .name { font-weight: 600; }
+.rowline .meta { color: var(--text-muted); font-size: 13px; }
+.rowline .end { margin-left: auto; }
+
+.btn { font: inherit; font-size: 14px; padding: 8px 16px; border-radius: var(--radius-sm);
+       border: 1px solid var(--primary); background: var(--primary); color: var(--primary-text); cursor: pointer; }
+.btn.ghost { background: var(--surface); color: var(--text); border-color: var(--border); }
+.form { display: grid; gap: 10px; max-width: 520px; }
+.form label { font-size: 13px; font-weight: 600; }
+.form input, .form select { font: inherit; width: 100%; padding: 8px 10px; border-radius: var(--radius-sm);
+       border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.note { background: var(--warn-soft); border: 1px solid color-mix(in srgb, var(--warn) 32%, transparent);
+        border-radius: var(--radius); padding: 11px 14px; font-size: 13px; margin: 0 0 16px; }
+</style>
+</head>
+<body>
+
+<div class="mock-bar"><div class="mock-bar-in">
+  <span class="mock-name">Планнер — выбранный вид</span>
+  <span class="mock-note">дашборд и дерево вместе: «Сегодня» и «Карта знаний» — два экрана одного приложения</span>
+  <span class="spacer"></span>
+  <a class="mock-back" href="./index.html">← к выбору</a>
+</div></div>
+
+<div class="mock-bar"><div class="mock-bar-in">
+  <div class="screens" role="tablist">
+    <button role="tab" aria-selected="true" data-s="today">Сегодня</button>
+    <button role="tab" aria-selected="false" data-s="map">Карта знаний</button>
+    <button role="tab" aria-selected="false" data-s="calendar">Календарь</button>
+    <button role="tab" aria-selected="false" data-s="templates">Шаблоны дня</button>
+    <button role="tab" aria-selected="false" data-s="custom">Свои темы</button>
+  </div>
+</div></div>
+
+<div class="wrap">
+
+<div class="note">Все числа ниже — <b>один и тот же пример</b>: 47-й день из 322, пройдено 234 из 1609 часов.
+  Этап 0 закрыт, этап 1 в работе (7 тем из 9), математика 5 из 19, английский 1 из 6.
+  Раньше макеты показывали разные состояния на разных экранах, и это сбивало с толку.</div>
+
+<!-- ============================ СЕГОДНЯ ============================ -->
+<section class="screen" id="s-today">
+  <h1>Суббота, 17 октября</h1>
+  <p class="lede">День 47 из 322. Пять часов разложены по трём потокам.</p>
+
+  <div class="grid2">
+    <div>
+      <div class="card block math">
+        <header><h3>Математика</h3><span class="chip math">параллельно</span><span class="budget">52 мин</span></header>
+        <div class="item">
+          <input class="tick" type="checkbox">
+          <div class="body">
+            <div class="title">Khan Academy — Arithmetic, Unit 18: Add and subtract negative numbers · часть 6</div>
+            <div class="meta">Трек A → A1.4 Отрицательные числа · продолжаете начатое</div>
+          </div>
+          <span class="hrs">52 мин</span>
+        </div>
+      </div>
+
+      <div class="card block english">
+        <header><h3>Английский</h3><span class="chip english">каждый день</span><span class="budget">20 мин</span></header>
+        <div class="item">
+          <input class="tick" type="checkbox">
+          <div class="body">
+            <div class="title">Longman Dictionary of Contemporary English · часть 3</div>
+            <div class="meta">Трек B → B1. Чтение технических текстов</div>
+          </div>
+          <span class="hrs">20 мин</span>
+        </div>
+      </div>
+
+      <div class="card block seq">
+        <header><h3>Основной этап</h3><span class="chip seq">1. Python и основы CS</span><span class="budget">3 ч 49 мин</span></header>
+        <div class="item">
+          <input class="tick" type="checkbox">
+          <div class="body">
+            <div class="title">Задача: Алгоритмическое мышление и структуры данных · часть 2</div>
+            <div class="meta">Практика по теме: часы темы складываются из материалов и собственного кода</div>
+          </div>
+          <span class="hrs">3 ч 49 мин</span>
+        </div>
+      </div>
+
+      <p><button class="btn ghost">Заменить тему</button>
+         <button class="btn ghost">Перенести на завтра</button>
+         <button class="btn">Закрыть день</button></p>
+    </div>
+
+    <aside>
+      <div class="card ring-card">
+        <svg class="ring" width="120" height="120" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="track" cx="60" cy="60" r="50"></circle>
+          <circle class="fill" cx="60" cy="60" r="50" stroke-dasharray="314" stroke-dashoffset="236"></circle>
+        </svg>
+        <div class="ring-num">6</div>
+        <div><small>дней подряд · рекорд 11</small></div>
+      </div>
+
+      <div class="stats" style="margin-top:14px">
+        <div class="card"><b>44</b><span>дня закрыто</span></div>
+        <div class="card"><b>3</b><span>пропущено</span></div>
+        <div class="card"><b>234 ч</b><span>из 1609 пройдено</span></div>
+        <div class="card"><b>14,5%</b><span>всего пути</span></div>
+      </div>
+
+      <div class="card" style="padding:14px 16px; margin-top:14px">
+        <h3 style="margin:0 0 6px; font-size:14px">Пропуски</h3>
+        <p style="margin:0"><span style="font-variant-numeric:tabular-nums; font-size:20px; color:var(--warn)">−15 ч</span></p>
+        <p style="margin:6px 0 0"><small>Три пропущенных дня сдвинули финиш на три дня — на 21 июля.
+          Ничего не потеряно: план строится от того, что ещё не пройдено.</small></p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ============================ КАРТА ЗНАНИЙ ============================ -->
+<section class="screen" id="s-map" hidden>
+  <h1>Карта знаний</h1>
+  <p class="lede">Хребет — этапы 0–9 по порядку. Сверху и снизу параллельные рельсы: математика и
+    английский идут одновременно с ними, а не после. Пунктиром — дополнительные треки, они вне срока.
+    У каждого рельса теперь стоит своя цифра, а непройденное намеренно бледное.</p>
+
+  <div class="card map-card">
+    <svg class="map" viewBox="0 0 1240 636" width="100%" role="img"
+         aria-label="Карта всех тем: этапы, параллельные треки и дополнительные ветки">
+  <rect class="rail math" x="36" y="119" width="1168" height="46" rx="23"/>
+  <clipPath id="clip-math"><rect x="36" y="119" width="1168" height="46" rx="23"/></clipPath>
+  <rect class="rail-done" x="36" y="119" width="307" height="46" clip-path="url(#clip-math)"/>
+  <circle class="topic done" cx="74" cy="142" r="7"><title>A1.1 Дроби — 24 ч</title></circle>
+  <circle class="topic done" cx="135" cy="142" r="7"><title>A1.2 Десятичные дроби — 12 ч</title></circle>
+  <circle class="topic done" cx="195" cy="142" r="7"><title>A1.3 Отрицательные числа — 12 ч</title></circle>
+  <circle class="topic done" cx="256" cy="142" r="7"><title>A1.4 Проценты, отношения, пропорции — 14 ч</title></circle>
+  <circle class="topic done" cx="317" cy="142" r="7"><title>A1.5 Степени, корни и научная запись — 10 ч</title></circle>
+  <circle class="topic" cx="377" cy="142" r="5"><title>A2.1 Переменные, выражения, линейные уравнения — 30 ч</title></circle>
+  <circle class="topic" cx="438" cy="142" r="5"><title>A2.2 Координаты, графики, наклон — 16 ч</title></circle>
+  <circle class="topic" cx="499" cy="142" r="5"><title>A2.3 Функции и системы уравнений — 20 ч</title></circle>
+  <circle class="topic" cx="559" cy="142" r="5"><title>A2.4 Степени, экспонента и логарифмы — 14 ч</title></circle>
+  <circle class="topic" cx="620" cy="142" r="5"><title>A3.1 Описательная статистика — 14 ч</title></circle>
+  <circle class="topic" cx="681" cy="142" r="5"><title>A3.2 Распределения и связи между переменными — 12 ч</title></circle>
+  <circle class="topic" cx="741" cy="142" r="5"><title>A3.3 Вероятность и теорема Байеса — 14 ч</title></circle>
+  <circle class="topic" cx="802" cy="142" r="5"><title>A3.4 Выборки, дизайн исследований, смещение — 12 ч</title></circle>
+  <circle class="topic" cx="863" cy="142" r="5"><title>A3.5 Проверка гипотез, доверительные интервалы, A/B-тесты — 18 ч</title></circle>
+  <circle class="topic" cx="923" cy="142" r="5"><title>A4.1 Векторы и пространства — 12 ч</title></circle>
+  <circle class="topic" cx="984" cy="142" r="5"><title>A4.2 Матрицы и преобразования — 18 ч</title></circle>
+  <circle class="topic" cx="1045" cy="142" r="5"><title>A5.1 Производная: смысл изменения — 12 ч</title></circle>
+  <circle class="topic" cx="1105" cy="142" r="5"><title>A5.2 Chain rule, частные производные, градиент — 8 ч</title></circle>
+  <circle class="topic" cx="1166" cy="142" r="5"><title>A5.3 Градиентный спуск своими руками — 5 ч</title></circle>
+  <text class="rail-label" x="48" y="107">Трек A · Математика с полного нуля — <tspan class="rail-strong">5 из 19 тем</tspan> · 72 из 277 ч</text>
+  <rect class="rail eng" x="36" y="471" width="1168" height="46" rx="23"/>
+  <clipPath id="clip-eng"><rect x="36" y="471" width="1168" height="46" rx="23"/></clipPath>
+  <rect class="rail-done" x="36" y="471" width="195" height="46" clip-path="url(#clip-eng)"/>
+  <circle class="topic done" cx="74" cy="494" r="7"><title>B0. Замер уровня и настройка инструментов — 5 ч</title></circle>
+  <circle class="topic" cx="292" cy="494" r="5"><title>B1. Правило двух проходов — 10 ч</title></circle>
+  <circle class="topic" cx="511" cy="494" r="5"><title>B2. Личный словарь и интервальное повторение — 28 ч</title></circle>
+  <circle class="topic" cx="729" cy="494" r="5"><title>B3. Пять ошибок, которые выдают русскоязычного — 22 ч</title></circle>
+  <circle class="topic" cx="948" cy="494" r="5"><title>B4. Чтение документации без переводчика — 15 ч</title></circle>
+  <circle class="topic" cx="1166" cy="494" r="5"><title>B5. Слушание и техническое демо — 25 ч</title></circle>
+  <text class="rail-label" x="48" y="537">Трек B · Технический английский — <tspan class="rail-strong">1 из 6 тем</tspan> · 5 из 105 ч</text>
+  <line class="link done" x1="94" y1="318" x2="158" y2="318"/>
+  <line class="link" x1="218" y1="318" x2="281" y2="318"/>
+  <line class="link" x1="341" y1="318" x2="405" y2="318"/>
+  <line class="link" x1="465" y1="318" x2="528" y2="318"/>
+  <line class="link" x1="588" y1="318" x2="652" y2="318"/>
+  <line class="link" x1="712" y1="318" x2="775" y2="318"/>
+  <line class="link" x1="835" y1="318" x2="899" y2="318"/>
+  <line class="link" x1="959" y1="318" x2="1022" y2="318"/>
+  <line class="link" x1="1082" y1="318" x2="1146" y2="318"/>
+  <g class="node done" transform="translate(64,318)">
+    <circle class="ring" r="26"/>
+    <circle class="prog" r="26" stroke-dasharray="163.4 163.4"/>
+    <text class="num" y="7">0</text>
+    <title>Ориентация и диагностика — 4 из 4 тем, 12 ч</title>
+  </g>
+  <text class="node-label" x="64" y="364">Ориентация и</text>
+  <text class="node-label" x="64" y="378">диагностика</text>
+  <text class="node-hrs" x="64" y="394">4 из 4 тем</text>
+  <g class="node current" transform="translate(188,318)">
+    <circle class="ring" r="26"/>
+    <circle class="prog" r="26" stroke-dasharray="127.5 163.4"/>
+    <text class="num" y="7">1</text>
+    <title>Python и основы Computer Science — 7 из 9 тем, 170 ч</title>
+  </g>
+  <text class="node-label" x="188" y="412">Python и основы</text>
+  <text class="node-label" x="188" y="426">Computer…</text>
+  <text class="node-hrs" x="188" y="442">7 из 9 тем</text>
+  <g class="node " transform="translate(311,318)">
+    <circle class="ring" r="26"/>
+    <circle class="prog" r="26" stroke-dasharray="0.0 163.4"/>
+    <text class="num" y="7">2</text>
+    <title>Данные, SQL и аналитика — 0 из 7 тем, 130 ч</title>
+  </g>
+  <text class="node-label" x="311" y="364">Данные, SQL и</text>
+  <text class="node-label" x="311" y="378">аналитика</text>
+  <text class="node-hrs" x="311" y="394">7 тем · 130 ч</text>
+  <g class="node " transform="translate(435,318)">
+    <circle class="ring" r="26"/>
+    <circle class="prog" r="26" stroke-dasharray="0.0 163.4"/>
+    <text class="num" y="7">3</text>
+    <title>Data Science и классический Machine Learning — 0 из 9 тем, 195 ч</title>
+  </g>
+  <text class="node-label" x="435" y="412">Data Science и</text>
+  <text class="node-label" x="435" y="426">классический…</text>
+  <text class="node-hrs" x="435" y="442">9 тем · 195 ч</text>
+  <g class="node " transform="translate(558,318)">
+    <circle class="ring" r="26"/>
+    <circle class="prog" r="26" stroke-dasharray="0.0 163.4"/>
+    <text class="num" y="7">4</text>
+    <title>Backend, API и программная инженерия — 0 из 6 тем, 120 ч</title>
+  </g>
+  <text class="node-label" x="558" y="364">Backend, API и</text>
+  <text class="node-label" x="558" y="378">программная…</text>
+  <text class="node-hrs" x="558" y="394">6 тем · 120 ч</text>
+  <g class="node " transform="translate(682,318)">
+    <circle class="ring" r="26"/>
+    <circle class="prog" r="26" stroke-dasharray="0.0 163.4"/>
+    <text class="num" y="7">5</text>
+    <title>Основы Deep Learning и LLM — 0 из 4 тем, 100 ч</title>
+  </g>
+  <text class="node-label" x="682" y="412">Основы Deep</text>
+  <text class="node-label" x="682" y="426">Learning и LLM</text>
+  <text class="node-hrs" x="682" y="442">4 тем · 100 ч</text>
+  <g class="node " transform="translate(805,318)">
+    <circle class="ring" r="26"/>
+    <circle class="prog" r="26" stroke-dasharray="0.0 163.4"/>
+    <text class="num" y="7">6</text>
+    <title>Глубокая специализация: AI Engineering — 0 из 11 тем, 220 ч</title>
+  </g>
+  <text class="node-label" x="805" y="364">Глубокая</text>
+  <text class="node-label" x="805" y="378">специализация:…</text>
+  <text class="node-hrs" x="805" y="394">11 тем · 220 ч</text>
+  <g class="node " transform="translate(929,318)">
+    <circle class="ring" r="26"/>
+    <circle class="prog" r="26" stroke-dasharray="0.0 163.4"/>
+    <text class="num" y="7">7</text>
+    <title>Production AI, MLOps, Cloud и безопасность — 0 из 6 тем, 120 ч</title>
+  </g>
+  <text class="node-label" x="929" y="412">Production AI,</text>
+  <text class="node-label" x="929" y="426">MLOps, Cloud и…</text>
+  <text class="node-hrs" x="929" y="442">6 тем · 120 ч</text>
+  <g class="node " transform="translate(1052,318)">
+    <circle class="ring" r="26"/>
+    <circle class="prog" r="26" stroke-dasharray="0.0 163.4"/>
+    <text class="num" y="7">8</text>
+    <title>Навыки Solutions Engineer — 0 из 5 тем, 90 ч</title>
+  </g>
+  <text class="node-label" x="1052" y="364">Навыки</text>
+  <text class="node-label" x="1052" y="378">Solutions…</text>
+  <text class="node-hrs" x="1052" y="394">5 тем · 90 ч</text>
+  <g class="node " transform="translate(1176,318)">
+    <circle class="ring" r="26"/>
+    <circle class="prog" r="26" stroke-dasharray="0.0 163.4"/>
+    <text class="num" y="7">9</text>
+    <title>Портфолио и трудоустройство — 0 из 4 тем, 70 ч</title>
+  </g>
+  <text class="node-label" x="1176" y="412">Портфолио и</text>
+  <text class="node-label" x="1176" y="426">трудоустройство</text>
+  <text class="node-hrs" x="1176" y="442">4 тем · 70 ч</text>
+  <g class="here" transform="translate(188,276)">
+    <rect x="-42" y="-19" width="84" height="24" rx="12"/>
+    <text y="-2">вы здесь</text>
+    <path d="M -6 5 L 6 5 L 0 13 Z"/>
+  </g>
+  <text class="rail-label" x="48" y="560">Дополнительные треки — вне общего срока, берутся по выбору</text>
+  <g class="opt-chip" transform="translate(48,578)">
+    <rect width="258" height="38" rx="19"/>
+    <circle class="topic opt" cx="21" cy="19" r="8"/>
+    <text class="opt-label" x="38" y="24">Автоматизация и интеграции · 72 ч</text>
+  </g>
+  <g class="opt-chip" transform="translate(326,578)">
+    <rect width="258" height="38" rx="19"/>
+    <circle class="topic opt" cx="21" cy="19" r="8"/>
+    <text class="opt-label" x="38" y="24">Data Science в глубину · 108 ч</text>
+  </g>
+  <g class="opt-chip" transform="translate(604,578)">
+    <rect width="258" height="38" rx="19"/>
+    <circle class="topic opt" cx="21" cy="19" r="8"/>
+    <text class="opt-label" x="38" y="24">ML Engineering в глубину · 98 ч</text>
+  </g>
+  <path class="link opt" d="M 1176 344 C 1206 528, 704 538, 644 578"/>
+    </svg>
+    <div class="legend">
+      <span><i style="background:var(--ok)"></i>пройдено</span>
+      <span><i style="background:var(--surface); box-shadow:inset 0 0 0 1.5px var(--border)"></i>впереди</span>
+      <span><i style="background:var(--surface); box-shadow:inset 0 0 0 2px var(--primary)"></i>текущий этап</span>
+      <span><i style="background:var(--surface); box-shadow:inset 0 0 0 2px var(--warn)"></i>дополнительно, вне срока</span>
+    </div>
+  </div>
+
+  <h2>По направлениям</h2>
+  <div class="card" style="padding:16px 18px">
+    <div class="tracks">
+      <div class="trow"><span>Python</span><div class="bar"><i style="width:86%"></i></div><span class="n">149 / 174 ч</span></div>
+      <div class="trow"><span>Математика</span><div class="bar"><i style="width:26%"></i></div><span class="n">72 / 277 ч</span></div>
+      <div class="trow"><span>Solutions</span><div class="bar"><i style="width:5%"></i></div><span class="n">8 / 168 ч</span></div>
+      <div class="trow"><span>Английский</span><div class="bar"><i style="width:5%"></i></div><span class="n">5 / 105 ч</span></div>
+      <div class="trow"><span>AI-инженерия</span><div class="bar"><i style="width:0%"></i></div><span class="n">0 / 320 ч</span></div>
+      <div class="trow"><span>Machine Learning</span><div class="bar"><i style="width:0%"></i></div><span class="n">0 / 195 ч</span></div>
+      <div class="trow"><span>Данные</span><div class="bar"><i style="width:0%"></i></div><span class="n">0 / 130 ч</span></div>
+      <div class="trow"><span>Backend</span><div class="bar"><i style="width:0%"></i></div><span class="n">0 / 120 ч</span></div>
+      <div class="trow"><span>Облако</span><div class="bar"><i style="width:0%"></i></div><span class="n">0 / 120 ч</span></div>
+    </div>
+    <p style="margin:14px 0 0"><small>Радар из макета «Дашборд» здесь не стоит: на 47-й день шесть
+      направлений из девяти ещё на нуле, и фигура превратилась бы в одну колючку. Он появится сам,
+      когда будет что показывать — примерно с середины пути.</small></p>
+  </div>
+</section>
+
+<!-- ============================ КАЛЕНДАРЬ ============================ -->
+<section class="screen" id="s-calendar" hidden>
+  <h1>Календарь</h1>
+  <p class="lede">Насыщенность — сколько часов закрыто, красная рамка — пропуск. Галочки ставятся
+    руками: система ничего не закрывает за вас.</p>
+
+  <div class="card" style="padding:18px">
+    <div class="table-scroll"><div class="heat" id="heat"></div></div>
+    <div class="legend">
+      <span>меньше</span>
+      <i style="background:var(--bg-soft)"></i>
+      <i style="background:color-mix(in srgb, var(--ok) 35%, var(--bg-soft))"></i>
+      <i style="background:color-mix(in srgb, var(--ok) 65%, var(--bg-soft))"></i>
+      <i style="background:var(--ok)"></i>
+      <span>больше</span>
+      <span style="margin-left:10px"><i style="background:var(--miss-soft); box-shadow:inset 0 0 0 1px var(--miss)"></i> пропуск</span>
+    </div>
+  </div>
+
+  <h2>Последние дни</h2>
+  <div class="card">
+    <div class="rowline"><span class="name">17 октября, сб</span><span class="meta">сегодня · 0 из 5 ч</span><span class="end"><input class="tick" type="checkbox"></span></div>
+    <div class="rowline"><span class="name">16 октября, пт</span><span class="meta">5,0 из 5 ч</span><span class="end"><input class="tick" type="checkbox" checked></span></div>
+    <div class="rowline"><span class="name">15 октября, чт</span><span class="meta">4,7 из 5 ч</span><span class="end"><input class="tick" type="checkbox" checked></span></div>
+    <div class="rowline"><span class="name">14 октября, ср</span><span class="meta" style="color:var(--miss)">пропущен — финиш сдвинулся на день</span><span class="end"><input class="tick" type="checkbox"></span></div>
+    <div class="rowline"><span class="name">13 октября, вт</span><span class="meta">5,0 из 5 ч</span><span class="end"><input class="tick" type="checkbox" checked></span></div>
+  </div>
+</section>
+
+<!-- ============================ ШАБЛОНЫ ============================ -->
+<section class="screen" id="s-templates" hidden>
+  <h1>Шаблоны дня</h1>
+  <p class="lede">Раскладка часов по потокам, привязанная к дням недели.</p>
+  <div class="card">
+    <div class="rowline"><span class="name">Обычный день</span>
+      <span class="meta">52 мин + 20 мин + 3 ч 49 мин = 5 ч 01 мин</span>
+      <span class="end"><span class="chip">пн вт ср чт пт вс</span></span></div>
+    <div class="rowline"><span class="name">Лёгкая суббота</span>
+      <span class="meta">только английский, 20 мин</span>
+      <span class="end"><span class="chip">сб</span></span></div>
+    <div class="rowline"><span class="name">Только проект</span>
+      <span class="meta">основной этап, 5 ч</span>
+      <span class="end"><span class="chip">по требованию</span></span></div>
+  </div>
+
+  <h2>Правка шаблона «Обычный день»</h2>
+  <div class="card" style="padding:16px 18px"><div class="form">
+    <div><label>Название</label><input value="Обычный день"></div>
+    <div><label>Математика, часов</label><input value="0.86"></div>
+    <div><label>Английский, часов</label><input value="0.33"></div>
+    <div><label>Основной этап, часов</label><input value="3.81"></div>
+    <p style="margin:0"><small>Итого 5 ч 01 мин. Поднимете математику до часа — весь путь удлинится
+      на 11 дней, планнер пересчитает и скажет.</small></p>
+    <p><button class="btn">Сохранить</button> <button class="btn ghost">Удалить</button></p>
+  </div></div>
+</section>
+
+<!-- ============================ СВОИ ТЕМЫ ============================ -->
+<section class="screen" id="s-custom" hidden>
+  <h1>Свои темы</h1>
+  <p class="lede">То, чего в карте нет. Появляются в дереве своим цветом, планируются наравне с
+    родными и не затираются при обновлении карты.</p>
+  <div class="card">
+    <div class="rowline"><span class="name">Docker для локальной разработки</span>
+      <span class="meta">docs.docker.com · 8 ч</span><span class="end"><span class="chip seq">Основной</span></span></div>
+    <div class="rowline"><span class="name">Собеседование на английском</span>
+      <span class="meta">без ссылки · 6 ч</span><span class="end"><span class="chip english">Английский</span></span></div>
+  </div>
+  <h2>Новая тема</h2>
+  <div class="card" style="padding:16px 18px"><div class="form">
+    <div><label>Название</label><input placeholder="например, Docker для локальной разработки"></div>
+    <div><label>Ссылка</label><input placeholder="https://…"></div>
+    <div><label>Поток</label><select><option>Основной этап</option><option>Математика</option><option>Английский</option></select></div>
+    <div><label>Часов</label><input placeholder="8"></div>
+    <p><button class="btn">Добавить в план</button></p>
+  </div></div>
+</section>
+
+</div>
+
+<script>
+// Теплокарта: 26 недель. Данные выдуманы ровно для макета, но согласованы с
+// примером: 44 закрытых дня, 3 пропуска, дальше — будущее.
+(function () {
+  var host = document.getElementById("heat");
+  if (!host) return;
+  var seed = 11;
+  var rnd = function () { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+  for (var i = 0; i < 26 * 7; i++) {
+    var cell = document.createElement("i");
+    var r = rnd();
+    if (i > 47) cell.className = "";
+    else if (r < 0.07) cell.className = "miss";
+    else if (r < 0.30) cell.className = "d1";
+    else if (r < 0.64) cell.className = "d2";
+    else cell.className = "d3";
+    host.appendChild(cell);
+  }
+})();
+
+document.querySelectorAll(".screens button").forEach(function (b) {
+  b.addEventListener("click", function () {
+    document.querySelectorAll(".screens button").forEach(function (x) { x.setAttribute("aria-selected", String(x === b)); });
+    document.querySelectorAll(".screen").forEach(function (s) { s.hidden = s.id !== "s-" + b.dataset.s; });
+    window.scrollTo(0, 0);
+  });
+});
+</script>
+</body>
+</html>

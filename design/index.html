@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Макеты планнера — выбор направления</title>
+<title>Макеты планнера</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%234338ca%27/%3E%3Ctext x=%2750%27 y=%2768%27 font-size=%2754%27 font-family=%27sans-serif%27 font-weight=%27bold%27 fill=%27white%27 text-anchor=%27middle%27%3EП%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="./mockup-base.css">
 <style>
@@ -17,12 +17,12 @@
   border: 1px solid var(--primary); background: var(--primary); color: var(--primary-text); }
 .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin: 18px 0 26px; }
 .facts .card { padding: 12px 14px; }
-.facts b { display: block; font-size: 20px; font-family: var(--mono); }
+.facts b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
 .facts span { color: var(--text-muted); font-size: 12px; }
 table.plain { width: 100%; border-collapse: collapse; font-size: 14px; }
 table.plain th, table.plain td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: left; }
 table.plain th { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
-table.plain td.num { text-align: right; font-family: var(--mono); }
+table.plain td.num { text-align: right; font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -32,22 +32,34 @@ table.plain td.num { text-align: right; font-family: var(--mono); }
   <span class="mock-note">черновики для выбора направления — не рабочий код</span>
   <span class="spacer"></span>
   <a class="mock-back" href="../index.html">← К дорожной карте</a>
-  <a class="mock-back" href="../docs/first-weeks.html">План по дням →</a>
+  <a class="mock-back" href="../docs/plan.html">План по дням →</a>
 </div></div>
 
 <div class="wrap">
-  <h1>Три направления на выбор</h1>
-  <p class="lede">Один и тот же планнер, три разных характера. Данные внутри настоящие — взяты из
-    карты, а не выдуманы. Откройте все три и скажите, какой берём.</p>
+  <h1>Макеты планнера</h1>
+  <p class="lede">Выбран объединённый вид — он первым. Ниже остаются три исходных варианта:
+    по ним принималось решение, и они пригодятся, если захочется что-то оттуда вернуть.</p>
 
   <div class="facts">
     <div class="card"><b>5 ч</b><span>в день</span></div>
-    <div class="card"><b>322</b><span>дня ≈ 10,6 месяцев</span></div>
+    <div class="card"><b>322</b><span>дня ≈ 10,6 месяца</span></div>
     <div class="card"><b>1609 ч</b><span>основной путь</span></div>
     <div class="card"><b>182</b><span>единицы плана</span></div>
   </div>
 
   <div class="pick">
+    <div class="card" style="grid-column: 1 / -1; border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft);">
+      <h2>✓ Выбранный вид — «Сегодня» + «Карта знаний»</h2>
+      <p>Дашборд и дерево не спорят друг с другом, а работают вместе: «Сегодня» — крупные блоки на
+        пять часов, кольцо стрика и честный счётчик пропусков; «Карта знаний» — дерево всей
+        программы во всю ширину. Плюс календарь-теплокарта, шаблоны дня и свои темы.</p>
+      <p class="who">Дерево переделано: у каждого параллельного рельса теперь своя цифра
+        («5 из 19 тем · 72 из 277 ч») и залитая по прогрессу полоса, непройденные точки бледные,
+        на текущем этапе стоит метка «вы здесь». Все экраны показывают одно и то же состояние —
+        раньше числа на разных экранах не сходились, и было непонятно, пройдена математика или нет.</p>
+      <a class="go" href="./planner.html">Открыть выбранный вид</a>
+    </div>
+
     <div class="card">
       <h2>1. Таблица</h2>
       <p>Плотная сетка, как в тех самых экселях из рекламы: строка — день, колонки — потоки,
@@ -74,7 +86,7 @@ table.plain td.num { text-align: right; font-family: var(--mono); }
     </div>
   </div>
 
-  <h2>Раскладка пяти часов — одинаковая во всех трёх</h2>
+  <h2>Раскладка пяти часов — одинаковая во всех вариантах</h2>
   <p class="lede">Она не выдумана: в карте написано, что математика идёт «параллельно с
     программированием», а английский — «20–30 минут в день, параллельно всему». Часы разложены так,
     чтобы все три потока закончились одновременно.</p>
@@ -91,9 +103,8 @@ table.plain td.num { text-align: right; font-family: var(--mono); }
     </table>
   </div>
 
-  <p style="margin-top:18px"><small>Разбор первых четырёх недель по дням лежит в
-    <a href="../docs/first-weeks.md">docs/first-weeks.md</a> — по нему можно заниматься уже сейчас,
-    пока планнер строится.</small></p>
+  <p style="margin-top:18px"><small>Разбор по дням — на странице <a href="../docs/plan.html">«План по дням»</a>:
+    она считает от вашей даты старта. Тот же разбор в markdown — <code>docs/first-weeks.md</code>.</small></p>
 </div>
 
 </body>
