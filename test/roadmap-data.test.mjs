@@ -94,7 +94,11 @@ test("у каждого ресурса заполнены поля карточ�
 
 test("каждая ссылка — http(s) и несёт дату проверки", () => {
   // Карта доверия живёт полем checked: ссылка без даты не проверялась.
-  const today = new Date().toISOString().slice(0, 10);
+  //
+  // Дата берётся ЛОКАЛЬНАЯ, а не через toISOString: тот отдаёт UTC, и в
+  // часовом поясе восточнее Гринвича ссылка, проверенная сегодня ночью,
+  // выглядела «из будущего». Ровно на этом тест и упал 03.09 в 01:04 UTC+6.
+  const today = new Date().toLocaleDateString("sv");
   for (const r of resources) {
     const where = `${r.topic.id} → «${r.title}»`;
     assert.match(r.url, /^https?:\/\//, `${where}: подозрительный URL ${r.url}`);
