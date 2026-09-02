@@ -76,8 +76,10 @@
       : planned;
   }
 
-  /** «Этап 1» или «Трек A» — в карте у треков буквенный номер. */
+  /** «Этап 1» или «Трек A» — в карте у треков буквенный номер.
+   *  У своей темы этапа нет вовсе, и «Трек своё» читалось нелепо. */
   function where(unit) {
+    if (unit.kind === "custom") return "Своя тема";
     const kind = /^\d+$/.test(String(unit.stageNum)) ? "Этап" : "Трек";
     return `${kind} ${unit.stageNum} · ${unit.topicTitle}`;
   }

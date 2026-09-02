@@ -4,6 +4,7 @@
   import { onMount } from "svelte";
   import { buildUnits } from "../../shared/schedule.mjs";
   import { loadRoadmap } from "./lib/roadmap.js";
+  import { customUnits } from "./lib/custom.js";
   import { planner, setScreen, setStart } from "./lib/store.svelte.js";
   import { doneHoursByUnit, groupProgress, stats, todayIso } from "./lib/progress.js";
   import { dateLong } from "./lib/format.js";
@@ -24,7 +25,17 @@
   let showSettings = $state(false);
   let startPick = $state(todayIso());
 
-  let units = $derived(data ? buildUnits(data, planner.profile) : []);
+  /* Свои темы приклеиваются к родным ровно здесь и больше нигде: дальше
+     remainingUnits, planDays, stats и groupProgress работают с ними, не зная,
+     что они не из карты.
+
+     Свои — ПЕРВЫМИ в очереди. planDays берёт единицы по порядку, и в хвосте
+     своя тема всплыла бы через двести с лишним дней, то есть никогда: её
+     заводят, чтобы заняться ею скоро, а не когда-нибудь. Отложить на день
+     по-прежнему можно кнопкой «Не сегодня». */
+  let units = $derived(
+    data ? [...customUnits(planner.custom), ...buildUnits(data, planner.profile)] : []
+  );
   let doneByUnit = $derived(doneHoursByUnit(planner.log));
   let progress = $derived(groupProgress(units, doneByUnit));
   let summary = $derived(stats({ units, planner, todayIso: today }));

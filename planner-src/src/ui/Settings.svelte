@@ -3,9 +3,10 @@
      Отдельная вкладка под три поля была бы лишней сущностью. */
   import {
     planner, setStart, setHoursPerDay, setWeekdays, setProfile,
+    addCustomTopic, updateCustomTopic, removeCustomTopic,
     exportState, importState, resetAll
   } from "../lib/store.svelte.js";
-  import { formatHours, dateDayMonth, WEEKDAY_NAMES } from "../lib/format.js";
+  import { formatHours, ruNum, dateDayMonth, WEEKDAY_NAMES } from "../lib/format.js";
 
   let { today, onclose } = $props();
 
@@ -15,6 +16,30 @@
 
   let confirmReset = $state(false);
   let importError = $state("");
+
+  const STREAM_TITLES = { seq: "Основной этап", math: "Математика", english: "Английский" };
+
+  /* Черновик новой темы. Отдельный объект, а не поля вразброс: так его чистит
+     одна строка после добавления. */
+  let draft = $state({ title: "", url: "", stream: "seq", hours: "" });
+  let draftError = $state("");
+  /** id темы, которую сейчас правят, либо null. */
+  let editing = $state(null);
+  let confirmRemove = $state(null);
+
+  function submitDraft() {
+    draftError = "";
+    const added = addCustomTopic(draft);
+    if (!added) {
+      draftError = "Нужны название и часы больше нуля.";
+      return;
+    }
+    if (draft.url.trim() && !added.url) {
+      // Тема добавлена, но ссылку не взяли — сказать об этом, а не молчать.
+      draftError = "Тема добавлена, но ссылку не взяли: нужен http или https.";
+    }
+    draft = { title: "", url: "", stream: "seq", hours: "" };
+  }
 
   function toggleWeekday(n) {
     const has = planner.weekdays.includes(n);
@@ -90,6 +115,70 @@
     </div>
   </div>
 
+  <details class="section">
+    <summary>Свои темы <span class="count">{planner.custom.length}</span></summary>
+
+    <p class="hint">То, чего в карте нет. Своя тема встаёт <b>ближайшей в своём потоке</b> —
+      её заводят, чтобы заняться скоро; отложить на день можно кнопкой «Не сегодня».
+      При обновлении карты свои темы не пропадают: они хранятся отдельно от неё.
+      Их часы входят в общий объём, поэтому доля пути пересчитается.</p>
+
+    {#if planner.custom.length}
+      <div class="mine">
+        {#each planner.custom as topic (topic.id)}
+          {#if editing === topic.id}
+            <div class="edit">
+              <input class="field" value={topic.title} placeholder="Название"
+                     onchange={(e) => updateCustomTopic(topic.id, { title: e.currentTarget.value })}>
+              <input class="field" value={topic.url ?? ""} placeholder="https://…"
+                     onchange={(e) => updateCustomTopic(topic.id, { url: e.currentTarget.value })}>
+              <select class="field" value={topic.stream}
+                      onchange={(e) => updateCustomTopic(topic.id, { stream: e.currentTarget.value })}>
+                {#each Object.entries(STREAM_TITLES) as [id, title] (id)}
+                  <option value={id}>{title}</option>
+                {/each}
+              </select>
+              <input class="field num" type="number" min="0.25" step="0.25" value={topic.hours}
+                     onchange={(e) => updateCustomTopic(topic.id, { hours: e.currentTarget.value })}>
+              <button class="btn small" onclick={() => (editing = null)}>Готово</button>
+            </div>
+          {:else}
+            <div class="row">
+              <span class="name">{topic.title}</span>
+              <span class="meta">
+                {topic.url ? new URL(topic.url).hostname : "без ссылки"} · {ruNum(topic.hours)} ч
+              </span>
+              <span class="chip {topic.stream}">{STREAM_TITLES[topic.stream]}</span>
+              <button class="btn ghost small" onclick={() => (editing = topic.id)}>Править</button>
+              {#if confirmRemove === topic.id}
+                <button class="btn small danger"
+                        onclick={() => { removeCustomTopic(topic.id); confirmRemove = null; }}>
+                  Удалить вместе с отметками
+                </button>
+                <button class="btn ghost small" onclick={() => (confirmRemove = null)}>Отмена</button>
+              {:else}
+                <button class="btn ghost small" onclick={() => (confirmRemove = topic.id)}>Удалить</button>
+              {/if}
+            </div>
+          {/if}
+        {/each}
+      </div>
+    {/if}
+
+    <div class="edit new">
+      <input class="field" bind:value={draft.title} placeholder="Например, Docker для разработки">
+      <input class="field" bind:value={draft.url} placeholder="https://… (необязательно)">
+      <select class="field" bind:value={draft.stream}>
+        {#each Object.entries(STREAM_TITLES) as [id, title] (id)}
+          <option value={id}>{title}</option>
+        {/each}
+      </select>
+      <input class="field num" type="number" min="0.25" step="0.25" bind:value={draft.hours} placeholder="часов">
+      <button class="btn small" onclick={submitDraft}>Добавить</button>
+    </div>
+    {#if draftError}<p class="err">{draftError}</p>{/if}
+  </details>
+
   <div class="tools">
     <button class="btn ghost small" onclick={download}>Выгрузить в файл</button>
     <label class="btn ghost small file">
@@ -143,5 +232,27 @@
   .tools .danger { background: var(--miss); border-color: var(--miss); color: #fff; }
 
   .err { color: var(--miss); font-size: 13px; margin: 10px 0 0; }
+
+  /* Секции свёрнуты по умолчанию: панель настроек не должна расти в стену.
+     Нативный <details> — без единой строки состояния. */
+  .section { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .section > summary { cursor: pointer; font-size: 14px; font-weight: 600; }
+  .section > summary::marker { color: var(--text-faint); }
+  .section .count { color: var(--text-faint); font-weight: 400; }
+  .section .hint { color: var(--text-muted); font-size: 13px; margin: 10px 0 12px; line-height: 1.45; }
+
+  .mine { display: grid; gap: 6px; margin-bottom: 12px; }
+  .mine .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+               padding: 8px 10px; border: 1px solid var(--border);
+               border-radius: var(--radius-sm); background: var(--surface-2); }
+  .mine .name { font-weight: 600; }
+  .mine .meta { color: var(--text-muted); font-size: 12.5px; }
+  .mine .row > button:first-of-type { margin-left: auto; }
+
+  .edit { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .edit .field { flex: 1; min-width: 130px; }
+  .edit .field.num { flex: 0 0 92px; min-width: 92px; }
+  .edit.new { padding: 10px; border: 1px dashed var(--border-strong);
+              border-radius: var(--radius-sm); }
   .how { margin: 12px 0 0; }
 </style>

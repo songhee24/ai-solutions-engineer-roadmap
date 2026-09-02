@@ -102,6 +102,20 @@ export function hoursOnDay(log, iso) {
   return round2(day.reduce((s, e) => s + e.hours, 0));
 }
 
+/**
+ * Журнал без записей об этой единице — новый объект, исходный не трогается.
+ * Нужен при удалении своей темы: осиротевшие часы иначе продолжают считаться
+ * пройденными, и доля пути уезжает выше ста процентов.
+ */
+export function dropUnitFromLog(log, unitId) {
+  const out = {};
+  for (const iso of Object.keys(log || {})) {
+    const rest = log[iso].filter((e) => e.unitId !== unitId);
+    if (rest.length) out[iso] = rest;
+  }
+  return out;
+}
+
 /* ----------------------------------------------------- остаток программы --- */
 
 /**

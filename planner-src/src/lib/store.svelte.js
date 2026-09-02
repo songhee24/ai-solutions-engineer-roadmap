@@ -8,7 +8,8 @@
  * выводится каждый раз заново — см. lib/progress.js.
  * ========================================================================== */
 
-import { round2 } from "./progress.js";
+import { round2, dropUnitFromLog } from "./progress.js";
+import { nextCustomId, safeUrl } from "./custom.js";
 
 const KEY = "asr:planner:v1";
 
@@ -27,6 +28,10 @@ const DEFAULTS = {
   dayHours: {},
   /** iso -> [unitId] — отложенное на сегодня. Завтра всплывёт снова. */
   skipped: {},
+  /** Свои темы: [{ id: "custom::1", title, url|null, stream, hours }].
+   *  Живут здесь, а не в roadmap-data.js, поэтому обновление карты их не
+   *  задевает — ради этого фича и существует. */
+  custom: [],
   screen: "today"
 };
 
@@ -51,6 +56,26 @@ function sanitizeDayHours(raw) {
   const out = {};
   for (const iso of Object.keys(raw)) {
     if (isIso(iso) && Number.isFinite(raw[iso])) out[iso] = clamp(raw[iso], 0, 16);
+  }
+  return out;
+}
+
+/** Ссылка проверяется схемой на входе И на выходе: сохранённый `javascript:`
+ *  выполнился бы по клику из href на экране «Сегодня». */
+function sanitizeCustom(raw) {
+  const out = [];
+  for (const item of raw) {
+    if (!item || typeof item.id !== "string" || !/^custom::\d+$/.test(item.id)) continue;
+    if (typeof item.title !== "string" || !item.title.trim()) continue;
+    if (!Number.isFinite(item.hours) || item.hours <= 0) continue;
+    if (out.some((x) => x.id === item.id)) continue;
+    out.push({
+      id: item.id,
+      title: item.title.trim().slice(0, 200),
+      url: safeUrl(item.url),
+      stream: item.stream === "math" || item.stream === "english" ? item.stream : "seq",
+      hours: clamp(round2(item.hours), 0.25, 500)
+    });
   }
   return out;
 }
@@ -90,6 +115,7 @@ function load() {
   if (saved.log && typeof saved.log === "object") base.log = sanitizeLog(saved.log);
   if (saved.dayHours && typeof saved.dayHours === "object") base.dayHours = sanitizeDayHours(saved.dayHours);
   if (saved.skipped && typeof saved.skipped === "object") base.skipped = sanitizeSkipped(saved.skipped);
+  if (Array.isArray(saved.custom)) base.custom = sanitizeCustom(saved.custom);
 
   return base;
 }
@@ -180,6 +206,56 @@ export function skipUnit(iso, unitId) {
 
 export function unskipAll(iso) {
   delete planner.skipped[iso];
+  persist();
+}
+
+/* -------------------------------------------------------------- свои темы --- */
+
+export function addCustomTopic({ title, url, stream, hours }) {
+  const clean = String(title || "").trim();
+  const value = Number(hours);
+  if (!clean || !Number.isFinite(value) || value <= 0) return null;
+
+  const topic = {
+    id: nextCustomId(planner.custom),
+    title: clean.slice(0, 200),
+    url: safeUrl(url),
+    stream: stream === "math" || stream === "english" ? stream : "seq",
+    hours: clamp(round2(value), 0.25, 500)
+  };
+  planner.custom = [...planner.custom, topic];
+  persist();
+  return topic;
+}
+
+/** id сохраняется: на него ссылаются записи журнала. */
+export function updateCustomTopic(id, patch) {
+  planner.custom = planner.custom.map((t) => {
+    if (t.id !== id) return t;
+    const hours = Number(patch.hours);
+    return {
+      ...t,
+      title: patch.title !== undefined ? String(patch.title).trim().slice(0, 200) || t.title : t.title,
+      url: patch.url !== undefined ? safeUrl(patch.url) : t.url,
+      stream: patch.stream !== undefined
+        ? (patch.stream === "math" || patch.stream === "english" ? patch.stream : "seq")
+        : t.stream,
+      hours: Number.isFinite(hours) && hours > 0 ? clamp(round2(hours), 0.25, 500) : t.hours
+    };
+  });
+  persist();
+}
+
+/** Записи журнала уносятся вместе с темой: осиротевшие часы иначе продолжают
+ *  считаться пройденными, и доля пути уезжает выше ста процентов. */
+export function removeCustomTopic(id) {
+  planner.custom = planner.custom.filter((t) => t.id !== id);
+  planner.log = dropUnitFromLog(planner.log, id);
+  for (const iso of Object.keys(planner.skipped)) {
+    const rest = planner.skipped[iso].filter((unitId) => unitId !== id);
+    if (rest.length) planner.skipped[iso] = rest;
+    else delete planner.skipped[iso];
+  }
   persist();
 }
 
