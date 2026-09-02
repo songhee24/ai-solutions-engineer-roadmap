@@ -1,4 +1,4 @@
-> Status: ✅ Implemented (2026-08-26 — `.zshrc:51` + backup `e9c46e6`, pushed)
+> Status: ✅ Implemented (2026-08-26 — `~/.zshrc:51` + коммит `e9c46e6` в репозитории **бэкапа**, не в этом; pushed)
 
 # Три незакрытых хвоста после синхронизации 26.08
 
