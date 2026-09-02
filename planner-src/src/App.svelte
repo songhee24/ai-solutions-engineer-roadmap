@@ -103,7 +103,7 @@
 
   {:else}
     {#if showSettings}
-      <Settings {today} onclose={() => (showSettings = false)} />
+      <Settings {today} {units} {summary} onclose={() => (showSettings = false)} />
     {/if}
 
     {#if screen === "today"}

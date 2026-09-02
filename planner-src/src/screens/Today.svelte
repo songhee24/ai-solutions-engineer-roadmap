@@ -6,7 +6,7 @@
     planner, isLogged, logUnit, unlogUnit, setDayHours, skipUnit, unskipAll
   } from "../lib/store.svelte.js";
   import {
-    budgetForDay, doneHoursByUnit, remainingUnits, fromIso, round2
+    budgetForDay, doneHoursByUnit, remainingUnits, fromIso, round2, templateForDay
   } from "../lib/progress.js";
   import { formatHours, ruNum, hoursNum, dateLong, dateDayMonth, plural } from "../lib/format.js";
 
@@ -15,9 +15,17 @@
   /* Внутри одного дня расписание недели уже неважно — день выбран.
      Выходной обрабатывается отдельной веткой ниже, через нулевой бюджет. */
   const ONE_DAY = [0, 1, 2, 3, 4, 5, 6];
+  const STREAM_TITLES = { seq: "основному этапу", math: "математике", english: "английскому" };
   const RING = 2 * Math.PI * 50;
 
   let budget = $derived(budgetForDay(planner, today));
+  /* Шаблон дня недели задаёт раскладку напрямую. Ручной час на конкретный день
+     его сбрасывает — так же, как в budgetForDay: одно правило, а не два. */
+  let template = $derived(
+    Object.prototype.hasOwnProperty.call(planner.dayHours, today)
+      ? null
+      : templateForDay(planner, today)
+  );
   let skippedToday = $derived(planner.skipped[today] || []);
 
   /* План на сегодня строится от того, что закрыто ДО сегодня. Если считать
@@ -41,7 +49,8 @@
           hoursPerDay: budget,
           days: 1,
           startDate: fromIso(today),
-          weekdays: ONE_DAY
+          weekdays: ONE_DAY,
+          perDay: template ? template.hours : undefined
         })[0]
       : null
   );
@@ -121,6 +130,10 @@
           <option value={String(h)}>{h} ч</option>
         {/each}
       </select>
+      {#if template}
+        <!-- Без этой подписи двадцать минут в субботу выглядят поломкой. -->
+        <span class="chip">Сегодня «{template.title}»</span>
+      {/if}
       {#if skippedToday.length}
         <button class="btn ghost small" onclick={() => unskipAll(today)}>
           Вернуть отложенное ({skippedToday.length})
@@ -216,6 +229,18 @@
       <div class="card"><b class="mono">{ruNum(summary.percent)}%</b><span>всего пути</span></div>
     </div>
 
+    {#if summary.starved.length}
+      <div class="card side warn">
+        <h3>Поток стоит на месте</h3>
+        <p><small>Шаблоны не дают часов
+          {summary.starved.map((s) => STREAM_TITLES[s]).join(" и ")}
+          ни в один день недели, поэтому
+          {summary.starved.length > 1 ? "эти потоки не закончатся" : "этот поток не закончится"}
+          никогда, и дата финиша ниже — не настоящая. Дайте им часы в настройках
+          или снимите шаблон хотя бы с одного дня.</small></p>
+      </div>
+    {/if}
+
     <div class="card side">
       <h3>Пропуски</h3>
       {#if summary.missed === 0}
@@ -279,6 +304,9 @@
   .side { padding: 14px 16px; margin-top: 14px; }
   .side h3 { margin: 0 0 6px; font-size: 14px; }
   .side p { margin: 0 0 6px; }
+  .side.warn { border-color: color-mix(in srgb, var(--warn) 40%, var(--border));
+               background: var(--warn-soft); }
+  .side.warn h3 { color: var(--warn); }
   .side .good { font-size: 18px; color: var(--ok); }
   .side .bad  { font-size: 20px; color: var(--warn); }
 </style>

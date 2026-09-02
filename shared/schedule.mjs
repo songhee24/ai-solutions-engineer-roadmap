@@ -151,7 +151,13 @@ export function dailyBudget(units, hoursPerDay) {
  * следующие дни и показывается как продолжение — «часть 2 из 5», а не заново.
  *
  * @param {Array<Unit>} units
- * @param {object} opts { hoursPerDay, days, startDate: Date, weekdays?: number[] }
+ * @param {object} opts { hoursPerDay, days, startDate: Date, weekdays?: number[],
+ *                        perDay?: { seq, math, english } }
+ *
+ * perDay задаёт раскладку дня напрямую вместо выведенной из остатков. Нужен
+ * планнеру для шаблонов дня («лёгкая суббота — только английский»). Два других
+ * потребителя — scripts/build-schedule.mjs и docs/plan.html — его не передают,
+ * и для них ничего не меняется.
  * @returns {Array<Day>} day = { date, iso, weekday, blocks: [{ stream, budget, items }] }
  */
 export function planDays(units, opts) {
@@ -163,6 +169,9 @@ export function planDays(units, opts) {
   // Очередь на каждый поток: сколько часов единицы ещё не распланировано.
   const queues = { seq: [], math: [], english: [] };
   for (const u of units) queues[u.stream].push({ unit: u, left: u.hours, part: 0, parts: 0 });
+
+  // Раскладка дня: заданная снаружи сильнее выведенной из остатков.
+  const split = opts.perDay || budget.perDay;
 
   const days = [];
   const cursor = new Date(opts.startDate);
@@ -180,7 +189,8 @@ export function planDays(units, opts) {
 
     const blocks = [];
     for (const streamId of ["math", "english", "seq"]) {
-      const perDay = budget.perDay[streamId];
+      // || 0 обязателен: неполный perDay иначе дал бы NaN и пустой день.
+      const perDay = split[streamId] || 0;
       if (perDay <= 0) continue;
 
       const items = [];

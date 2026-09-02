@@ -53,17 +53,84 @@ export function todayIso() {
 
 /* --------------------------------------------------------------- бюджет --- */
 
+export const STREAM_IDS = ["seq", "math", "english"];
+
+const hasOwn = (obj, key) => Object.prototype.hasOwnProperty.call(obj || {}, key);
+
+/** Шаблон, назначенный на день недели, либо null. Висячий идентификатор
+ *  (шаблон удалили, назначение осталось) молча откатывается к обычному дню. */
+export function templateForWeekday(planner, weekday) {
+  const id = (planner.weekdayTemplate || {})[String(weekday)];
+  if (!id) return null;
+  return (planner.templates || []).find((t) => t.id === id) || null;
+}
+
+export function templateForDay(planner, iso) {
+  return templateForWeekday(planner, fromIso(iso).getDay());
+}
+
+export function templateHours(tpl) {
+  const h = tpl.hours || {};
+  return round2((h.seq || 0) + (h.math || 0) + (h.english || 0));
+}
+
 /**
  * Сколько часов запланировано на конкретный день.
  * Ручное переопределение сильнее расписания недели, а ноль — это выходной,
  * поэтому отдельного списка выходных нет: одно понятие вместо двух.
+ *
+ * Порядок сверху вниз: ручной час на дату → день вне расписания недели →
+ * шаблон дня недели → обычный бюджет. Сигнатура намеренно не изменилась:
+ * на ней стоят пропуски, серия, отставание и теплокарта, и шаблоны достаются
+ * им бесплатно.
  */
 export function budgetForDay(planner, iso) {
-  if (Object.prototype.hasOwnProperty.call(planner.dayHours || {}, iso)) {
-    return planner.dayHours[iso];
-  }
+  if (hasOwn(planner.dayHours, iso)) return planner.dayHours[iso];
+
   const weekdays = planner.weekdays || [0, 1, 2, 3, 4, 5, 6];
-  return weekdays.includes(fromIso(iso).getDay()) ? planner.hoursPerDay : 0;
+  if (!weekdays.includes(fromIso(iso).getDay())) return 0;
+
+  const tpl = templateForDay(planner, iso);
+  return tpl ? templateHours(tpl) : planner.hoursPerDay;
+}
+
+/**
+ * Раскладка дня по потокам. Шаблон задаёт её прямо; без шаблона часы делятся
+ * пропорционально ещё не пройденному — ровно то, что делает dailyBudget,
+ * чтобы все три потока закончились одновременно.
+ */
+function budgetByStream(planner, iso, left) {
+  const zero = { seq: 0, math: 0, english: 0 };
+  const budget = budgetForDay(planner, iso);
+  if (budget <= 0) return zero;
+
+  // Ручной час на конкретный день сбрасывает шаблон: одно простое правило
+  // вместо масштабирования чужой раскладки под другую сумму.
+  const tpl = hasOwn(planner.dayHours, iso) ? null : templateForDay(planner, iso);
+  if (tpl) {
+    return { seq: tpl.hours.seq || 0, math: tpl.hours.math || 0, english: tpl.hours.english || 0 };
+  }
+
+  const total = left.seq + left.math + left.english;
+  if (total <= 0) return zero;
+  return {
+    seq: budget * (left.seq / total),
+    math: budget * (left.math / total),
+    english: budget * (left.english / total)
+  };
+}
+
+/** Потоки, которым при нынешних шаблонах не достаётся часов ни в один день
+ *  недели. Их остаток не убывает никогда, и прогноз без предупреждения
+ *  упёрся бы в сторож. Хотя бы один день без шаблона кормит все потоки. */
+export function unplannedStreams(planner) {
+  const totals = { seq: 0, math: 0, english: 0 };
+  for (const weekday of planner.weekdays || []) {
+    const tpl = templateForWeekday(planner, weekday);
+    if (!tpl) return [];
+    for (const id of STREAM_IDS) totals[id] += tpl.hours[id] || 0;
+  }
+  return STREAM_IDS.filter((id) => totals[id] <= 0);
 }
 
 /** Рабочие дни от from до to включительно — те, на которые есть часы. */
@@ -181,6 +248,28 @@ export function groupProgress(units, doneByUnit) {
   return { byTopic, byStage, byTrack };
 }
 
+/** Остаток по каждому потоку. Часы обрезаются по объёму единицы: журнал мог
+ *  пережить изменение карты, и переработка не должна давать минус. */
+export function streamRemaining(units, doneByUnit) {
+  const left = { seq: 0, math: 0, english: 0 };
+  for (const u of units) {
+    const done = Math.min(u.hours, doneByUnit[u.id] || 0);
+    left[u.stream] = round2(left[u.stream] + (u.hours - done));
+  }
+  return left;
+}
+
+/** Часы, закрытые за день, разложенные по потокам. */
+function usedByStream(units, log, iso) {
+  const streamOf = new Map(units.map((u) => [u.id, u.stream]));
+  const out = { seq: 0, math: 0, english: 0 };
+  for (const entry of (log || {})[iso] || []) {
+    const stream = streamOf.get(entry.unitId);
+    if (stream) out[stream] = round2(out[stream] + entry.hours);
+  }
+  return out;
+}
+
 /* ------------------------------------------------------------- пропуски --- */
 
 /**
@@ -214,23 +303,42 @@ export function currentStreak(planner, today) {
 
 /**
  * Дата, на которую при нынешнем темпе закончится остаток.
- * usedOnFirstDay — часы, уже закрытые в первый день расчёта: иначе прогноз
- * выдавал бы сегодняшний бюджет за нетронутый.
+ *
+ * Считается ПООТОЧНО, а не одним числом. Скаляр был верен только потому, что
+ * без шаблонов dailyBudget по построению доводит три потока до финиша
+ * одновременно. Шаблон это ломает: «только проект» каждый день двигает seq и
+ * морозит математику, а «остаток / часов в день» бодро рапортует финиш,
+ * которого не будет.
+ *
+ * Без шаблонов ответ прежний: пропорциональная раскладка сохраняет доли
+ * потоков, поэтому сумма убывает ровно на дневной бюджет, как и раньше.
+ * Это закреплено тестом «СВЕДЕНИЕ».
+ *
+ * @param {object} remaining остаток по потокам (streamRemaining)
+ * @param {object} used      часы, уже закрытые в первый день расчёта
  */
-export function finishDate(planner, remainingHours, from, usedOnFirstDay = 0) {
-  let left = round2(remainingHours);
-  if (left <= 0.01) return from;
+export function finishDate(planner, remaining, from, used = {}) {
+  const left = { seq: 0, math: 0, english: 0, ...remaining };
+  // Внутри цикла НЕ округляем: round2 на каждом из трёх потоков каждый день
+  // накапливал по копейке (145,01 вместо 145,00 после первого же дня), и за
+  // месяц набегал лишний день. Двоичная погрешность за триста итераций —
+  // порядка 1e-12, она безобидна, а порог сравнения стоит на сумме.
+  const total = () => left.seq + left.math + left.english;
+  if (total() <= 0.01) return from;
 
   let iso = from;
-  let used = usedOnFirstDay;
-  // Предохранитель: при нулевом расписании цикл иначе не кончится никогда.
+  let first = true;
+  // Предохранитель: шаблон, морозящий поток во все семь дней, иначе зациклится.
+  // О таких потоках предупреждает unplannedStreams — до того, как прогноз
+  // упрётся сюда и выдаст дату через полвека.
   for (let guard = 0; guard < 20000; guard++) {
-    const capacity = Math.max(0, round2(budgetForDay(planner, iso) - used));
-    used = 0;
-    if (capacity > 0) {
-      left = round2(left - capacity);
-      if (left <= 0.01) return iso;
+    const caps = budgetByStream(planner, iso, left);
+    for (const id of STREAM_IDS) {
+      const capacity = first ? Math.max(0, caps[id] - (used[id] || 0)) : caps[id];
+      left[id] = Math.max(0, left[id] - Math.min(capacity, left[id]));
     }
+    first = false;
+    if (total() <= 0.01) return iso;
     iso = addDays(iso, 1);
   }
   return iso;
@@ -247,6 +355,7 @@ export function stats({ units, planner, todayIso: today }) {
   const doneHours = totalDoneHours(planner.log);
   const remainingHours = round2(Math.max(0, totalHours - doneHours));
   const usedToday = hoursOnDay(planner.log, today);
+  const byUnit = doneHoursByUnit(planner.log);
 
   const closedDays = Object.keys(planner.log || {}).filter(
     (iso) => hoursOnDay(planner.log, iso) > 0
@@ -276,6 +385,12 @@ export function stats({ units, planner, todayIso: today }) {
     behindHours: round2(Math.max(0, expected - doneHours)),
     aheadHours: round2(Math.max(0, doneHours - expected)),
     usedToday,
-    finishIso: finishDate(planner, remainingHours, today, usedToday)
+    starved: unplannedStreams(planner),
+    finishIso: finishDate(
+      planner,
+      streamRemaining(units, byUnit),
+      today,
+      usedByStream(units, planner.log, today)
+    )
   };
 }

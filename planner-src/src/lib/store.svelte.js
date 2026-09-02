@@ -28,6 +28,14 @@ const DEFAULTS = {
   dayHours: {},
   /** iso -> [unitId] — отложенное на сегодня. Завтра всплывёт снова. */
   skipped: {},
+  /** Именованные раскладки дня: [{ id, title, hours: { seq, math, english } }].
+   *  Часы АБСОЛЮТНЫЕ, а не доли: «суббота — только английский, 20 минут»
+   *  долями не выразить, пришлось бы заводить рядом ещё и норму дня. */
+  templates: [],
+  /** День недели (0..6) -> id шаблона. Это настройка недели, а не календарь:
+   *  назначения на конкретные даты нет и не будет — она бы вернула ту самую
+   *  календарную сущность, которой в этой архитектуре быть не должно. */
+  weekdayTemplate: {},
   /** Свои темы: [{ id: "custom::1", title, url|null, stream, hours }].
    *  Живут здесь, а не в roadmap-data.js, поэтому обновление карты их не
    *  задевает — ради этого фича и существует. */
@@ -80,6 +88,38 @@ function sanitizeCustom(raw) {
   return out;
 }
 
+function sanitizeTemplates(raw) {
+  const out = [];
+  for (const item of raw) {
+    if (!item || typeof item.id !== "string" || !/^tpl-\d+$/.test(item.id)) continue;
+    if (typeof item.title !== "string" || !item.title.trim()) continue;
+    if (!item.hours || typeof item.hours !== "object") continue;
+    if (out.some((x) => x.id === item.id)) continue;
+
+    const hours = {};
+    for (const stream of ["seq", "math", "english"]) {
+      const value = Number(item.hours[stream]);
+      hours[stream] = Number.isFinite(value) ? clamp(round2(value), 0, 16) : 0;
+    }
+    // Шаблон из одних нулей — это выходной, а он выражается снятой галочкой
+    // дня недели. Двух способов сказать одно и то же быть не должно.
+    if (hours.seq + hours.math + hours.english <= 0) continue;
+    out.push({ id: item.id, title: item.title.trim().slice(0, 60), hours });
+  }
+  return out;
+}
+
+/** Назначения на несуществующие шаблоны отбрасываются при загрузке. */
+function sanitizeWeekdayTemplate(raw, templates) {
+  const known = new Set(templates.map((t) => t.id));
+  const out = {};
+  for (const key of Object.keys(raw)) {
+    if (!/^[0-6]$/.test(key)) continue;
+    if (known.has(raw[key])) out[key] = raw[key];
+  }
+  return out;
+}
+
 function sanitizeSkipped(raw) {
   const out = {};
   for (const iso of Object.keys(raw)) {
@@ -116,6 +156,10 @@ function load() {
   if (saved.dayHours && typeof saved.dayHours === "object") base.dayHours = sanitizeDayHours(saved.dayHours);
   if (saved.skipped && typeof saved.skipped === "object") base.skipped = sanitizeSkipped(saved.skipped);
   if (Array.isArray(saved.custom)) base.custom = sanitizeCustom(saved.custom);
+  if (Array.isArray(saved.templates)) base.templates = sanitizeTemplates(saved.templates);
+  if (saved.weekdayTemplate && typeof saved.weekdayTemplate === "object") {
+    base.weekdayTemplate = sanitizeWeekdayTemplate(saved.weekdayTemplate, base.templates);
+  }
 
   return base;
 }
@@ -206,6 +250,77 @@ export function skipUnit(iso, unitId) {
 
 export function unskipAll(iso) {
   delete planner.skipped[iso];
+  persist();
+}
+
+/* ------------------------------------------------------------ шаблоны дня --- */
+
+function nextTemplateId(list) {
+  let max = 0;
+  for (const t of list) {
+    const match = /^tpl-(\d+)$/.exec(t.id);
+    if (match) max = Math.max(max, Number(match[1]));
+  }
+  return `tpl-${max + 1}`;
+}
+
+export function addTemplate({ title, hours }) {
+  const clean = String(title || "").trim();
+  if (!clean) return null;
+
+  const split = {};
+  for (const stream of ["seq", "math", "english"]) {
+    const value = Number((hours || {})[stream]);
+    split[stream] = Number.isFinite(value) ? clamp(round2(value), 0, 16) : 0;
+  }
+  if (split.seq + split.math + split.english <= 0) return null;
+
+  const tpl = { id: nextTemplateId(planner.templates), title: clean.slice(0, 60), hours: split };
+  planner.templates = [...planner.templates, tpl];
+  persist();
+  return tpl;
+}
+
+export function updateTemplate(id, patch) {
+  planner.templates = planner.templates.map((t) => {
+    if (t.id !== id) return t;
+    const hours = { ...t.hours };
+    for (const stream of ["seq", "math", "english"]) {
+      if (patch.hours && patch.hours[stream] !== undefined) {
+        const value = Number(patch.hours[stream]);
+        hours[stream] = Number.isFinite(value) ? clamp(round2(value), 0, 16) : hours[stream];
+      }
+    }
+    // Совсем обнулить шаблон нельзя: пустой день — это снятая галочка дня недели.
+    if (hours.seq + hours.math + hours.english <= 0) return t;
+    return {
+      ...t,
+      title: patch.title !== undefined ? String(patch.title).trim().slice(0, 60) || t.title : t.title,
+      hours
+    };
+  });
+  persist();
+}
+
+/** Вместе с шаблоном снимаются и его назначения: висячий id иначе молча
+ *  откатывал бы день к обычному бюджету, и человек не понял бы почему. */
+export function removeTemplate(id) {
+  planner.templates = planner.templates.filter((t) => t.id !== id);
+  const left = {};
+  for (const key of Object.keys(planner.weekdayTemplate)) {
+    if (planner.weekdayTemplate[key] !== id) left[key] = planner.weekdayTemplate[key];
+  }
+  planner.weekdayTemplate = left;
+  persist();
+}
+
+/** id === null снимает шаблон с дня недели и возвращает его обычному бюджету. */
+export function assignTemplate(weekday, id) {
+  const key = String(weekday);
+  const next = { ...planner.weekdayTemplate };
+  if (id) next[key] = id;
+  else delete next[key];
+  planner.weekdayTemplate = next;
   persist();
 }
 

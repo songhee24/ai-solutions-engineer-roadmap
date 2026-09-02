@@ -4,11 +4,14 @@
   import {
     planner, setStart, setHoursPerDay, setWeekdays, setProfile,
     addCustomTopic, updateCustomTopic, removeCustomTopic,
+    addTemplate, updateTemplate, removeTemplate, assignTemplate,
     exportState, importState, resetAll
   } from "../lib/store.svelte.js";
-  import { formatHours, ruNum, dateDayMonth, WEEKDAY_NAMES } from "../lib/format.js";
+  import { stats, templateHours } from "../lib/progress.js";
+  import { formatHours, ruNum, dateDayMonth, days as daysWord, WEEKDAY_NAMES } from "../lib/format.js";
+  import { diffDays } from "../lib/progress.js";
 
-  let { today, onclose } = $props();
+  let { today, units, summary, onclose } = $props();
 
   /* Порядок с понедельника: воскресенье первым — привычка англоязычных
      календарей, здесь неуместная. */
@@ -18,6 +21,34 @@
   let importError = $state("");
 
   const STREAM_TITLES = { seq: "Основной этап", math: "Математика", english: "Английский" };
+  const STREAMS = ["seq", "math", "english"];
+
+  let tplDraft = $state({ title: "", seq: "", math: "", english: "" });
+  let tplError = $state("");
+  let editingTpl = $state(null);
+  let confirmTplRemove = $state(null);
+
+  function submitTemplate() {
+    tplError = "";
+    const added = addTemplate({
+      title: tplDraft.title,
+      hours: { seq: tplDraft.seq, math: tplDraft.math, english: tplDraft.english }
+    });
+    if (!added) {
+      tplError = "Нужны название и хотя бы один поток с часами больше нуля.";
+      return;
+    }
+    tplDraft = { title: "", seq: "", math: "", english: "" };
+  }
+
+  /* Во что обходится нынешняя раскладка: сравниваем финиш с шаблонами и без.
+     Это и есть смысл фичи — планнер называет цену, а не молчит. */
+  let plainFinish = $derived.by(() => {
+    if (!Object.keys(planner.weekdayTemplate).length) return null;
+    const plain = { ...planner, weekdayTemplate: {} };
+    return stats({ units, planner: plain, todayIso: today }).finishIso;
+  });
+  let shift = $derived(plainFinish ? diffDays(plainFinish, summary.finishIso) : 0);
 
   /* Черновик новой темы. Отдельный объект, а не поля вразброс: так его чистит
      одна строка после добавления. */
@@ -111,9 +142,101 @@
                   onclick={() => toggleWeekday(n)}>{WEEKDAY_NAMES[n]}</button>
         {/each}
       </div>
-      <small>Невыбранные дни не считаются пропусками. Один день оставить обязательно.</small>
+      <small>Невыбранные дни не считаются пропусками. Один день оставить обязательно.
+        Как именно делятся часы внутри дня — в «Шаблонах дня» ниже.</small>
     </div>
   </div>
+
+  <details class="section">
+    <summary>Шаблоны дня <span class="count">{planner.templates.length}</span></summary>
+
+    <p class="hint">Именованная раскладка пяти часов по потокам, привязанная к дню недели.
+      Нужна, когда неделя неровная: «лёгкая суббота — только английский», «в среду только проект».
+      Часы абсолютные, поэтому шаблон меняет и сумму дня, и её разбивку. Отдельный день правится
+      на экране «Сегодня» и шаблон не трогает.</p>
+
+    {#if planner.templates.length}
+      <div class="mine">
+        {#each planner.templates as tpl (tpl.id)}
+          {#if editingTpl === tpl.id}
+            <div class="edit">
+              <input class="field" value={tpl.title} placeholder="Название"
+                     onchange={(e) => updateTemplate(tpl.id, { title: e.currentTarget.value })}>
+              {#each STREAMS as stream (stream)}
+                <label class="hrs">
+                  <span>{STREAM_TITLES[stream]}</span>
+                  <input class="field num" type="number" min="0" step="0.25" value={tpl.hours[stream]}
+                         onchange={(e) => updateTemplate(tpl.id, { hours: { [stream]: e.currentTarget.value } })}>
+                </label>
+              {/each}
+              <button class="btn small" onclick={() => (editingTpl = null)}>Готово</button>
+            </div>
+          {:else}
+            <div class="row">
+              <span class="name">{tpl.title}</span>
+              <span class="meta">
+                {STREAMS.filter((s) => tpl.hours[s] > 0)
+                  .map((s) => `${STREAM_TITLES[s].toLowerCase()} ${formatHours(tpl.hours[s])}`)
+                  .join(" · ")} = {formatHours(templateHours(tpl))}
+              </span>
+              <button class="btn ghost small" onclick={() => (editingTpl = tpl.id)}>Править</button>
+              {#if confirmTplRemove === tpl.id}
+                <button class="btn small danger"
+                        onclick={() => { removeTemplate(tpl.id); confirmTplRemove = null; }}>
+                  Удалить и снять с дней
+                </button>
+                <button class="btn ghost small" onclick={() => (confirmTplRemove = null)}>Отмена</button>
+              {:else}
+                <button class="btn ghost small" onclick={() => (confirmTplRemove = tpl.id)}>Удалить</button>
+              {/if}
+            </div>
+          {/if}
+        {/each}
+      </div>
+
+      <h4>Какой день чем занят</h4>
+      <div class="assign">
+        {#each WEEK_ORDER.filter((n) => planner.weekdays.includes(n)) as n (n)}
+          <label>
+            <span>{WEEKDAY_NAMES[n]}</span>
+            <select class="field" value={planner.weekdayTemplate[String(n)] ?? ""}
+                    onchange={(e) => assignTemplate(n, e.currentTarget.value || null)}>
+              <option value="">обычный день — {formatHours(planner.hoursPerDay)}</option>
+              {#each planner.templates as tpl (tpl.id)}
+                <option value={tpl.id}>{tpl.title} — {formatHours(templateHours(tpl))}</option>
+              {/each}
+            </select>
+          </label>
+        {/each}
+      </div>
+
+      {#if plainFinish}
+        <p class="price">
+          {#if shift > 0}
+            С этими шаблонами финиш — <b>{dateDayMonth(summary.finishIso)}</b>,
+            это на {daysWord(shift)} позже, чем без них.
+          {:else if shift < 0}
+            С этими шаблонами финиш — <b>{dateDayMonth(summary.finishIso)}</b>,
+            на {daysWord(-shift)} раньше, чем без них.
+          {:else}
+            С этими шаблонами финиш не сдвинулся — <b>{dateDayMonth(summary.finishIso)}</b>.
+          {/if}
+        </p>
+      {/if}
+    {/if}
+
+    <div class="edit new">
+      <input class="field" bind:value={tplDraft.title} placeholder="Например, Лёгкая суббота">
+      {#each STREAMS as stream (stream)}
+        <label class="hrs">
+          <span>{STREAM_TITLES[stream]}</span>
+          <input class="field num" type="number" min="0" step="0.25" bind:value={tplDraft[stream]} placeholder="0">
+        </label>
+      {/each}
+      <button class="btn small" onclick={submitTemplate}>Добавить</button>
+    </div>
+    {#if tplError}<p class="err">{tplError}</p>{/if}
+  </details>
 
   <details class="section">
     <summary>Свои темы <span class="count">{planner.custom.length}</span></summary>
@@ -254,5 +377,17 @@
   .edit .field.num { flex: 0 0 92px; min-width: 92px; }
   .edit.new { padding: 10px; border: 1px dashed var(--border-strong);
               border-radius: var(--radius-sm); }
+  .edit .hrs { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+  .edit .hrs .field.num { flex: 0 0 78px; min-width: 78px; }
+
+  .section h4 { margin: 14px 0 8px; font-size: 13px; }
+  .assign { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; }
+  .assign label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .assign label > span { flex: 0 0 28px; font-weight: 600; }
+  .assign .field { flex: 1; min-width: 0; }
+
+  .price { margin: 12px 0 0; font-size: 13px; color: var(--text-muted);
+           background: var(--surface-2); border: 1px solid var(--border);
+           border-radius: var(--radius-sm); padding: 9px 12px; }
   .how { margin: 12px 0 0; }
 </style>
