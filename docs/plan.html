@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>План по дням</title>
+<title>Прикидка по дням</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234338ca'/%3E%3Ctext x='50' y='68' font-size='54' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="../styles.css">
 <style>
@@ -11,6 +11,17 @@
   .plan h1 { margin: 0 0 6px; }
   .plan .lede { color: var(--text-muted); margin: 0 0 20px; }
   .back { display: inline-block; margin-bottom: 16px; font-size: 14px; }
+
+  /* 2026-09-02: страница и планнер во многом дублировались, и было непонятно,
+     куда идти. Теперь роль объявлена прямо: здесь считают, там ведут учёт. */
+  .to-planner { display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+                background: var(--primary-soft);
+                border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+                border-radius: var(--radius); padding: 12px 15px; margin: 0 0 20px; font-size: 14px; }
+  .to-planner p { margin: 0; flex: 1; min-width: 200px; }
+  .to-planner a { display: inline-block; text-decoration: none; white-space: nowrap;
+                  background: var(--primary); color: var(--primary-text);
+                  border-radius: var(--radius-sm); padding: 8px 16px; font-weight: 600; }
 
   .setup { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;
            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
@@ -64,9 +75,16 @@
 <body>
 <div class="plan">
   <a class="back" href="../index.html">← К дорожной карте</a>
-  <h1>План по дням</h1>
-  <p class="lede">Отметьте, когда начинаете — план построится от вашей даты. Ничего не привязано
-    к конкретному числу: начать можно в любой день.</p>
+  <h1>Прикидка по дням</h1>
+  <p class="lede">Калькулятор до старта: посмотреть, во что вы ввязываетесь, при разном темпе.
+    Отметьте дату — расчёт построится от неё, ничего не привязано к конкретному числу.
+    Страница <b>ничего не запоминает</b>: настройки сбрасываются при перезагрузке.</p>
+
+  <div class="to-planner">
+    <p>Чтобы вести учёт — отмечать сделанное галочками, видеть пропуски и прогресс —
+      нужен планнер. Он помнит, эта страница только считает.</p>
+    <a href="../planner/">Открыть планнер →</a>
+  </div>
 
   <div class="setup">
     <div>
@@ -127,6 +145,12 @@
   <div class="miss" id="miss"></div>
 
   <div id="days"></div>
+
+  <div class="to-planner" style="margin-top: 24px">
+    <p>Досмотрели до конца? Дальше эти дни удобнее закрывать галочками, а не пересчитывать
+      заново — и тогда пропущенный день сам сдвинет остальные.</p>
+    <a href="../planner/">Открыть планнер →</a>
+  </div>
 </div>
 
 <script src="../roadmap-data.js"></script>

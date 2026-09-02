@@ -105,9 +105,29 @@ body {
 
 a { color: var(--primary); }
 
+/* ---------- Полоса «это черновик» ----------
+   2026-09-02: макет приняли за рабочий планнер и поверили выдуманным числам
+   («44 дня закрыто», «234 ч из 1609»). Причина была не в невнимательности:
+   шапка и вкладки макета — почти построчная копия рабочего приложения, а
+   единственной пометкой служили серые 13px в .mock-note. Полоса идёт первой,
+   во всю ширину, липнет к верху — и с неё есть выход на настоящий планнер,
+   которого раньше не было ни с одного макета, кроме каталога. */
+.draft-bar {
+  position: sticky; top: 0; z-index: 30;
+  background: var(--warn-soft);
+  border-bottom: 2px solid var(--warn);
+  color: var(--warn);
+  font-size: 14px; line-height: 1.4;
+  padding: 9px 20px;
+  text-align: center;
+}
+.draft-bar a { color: var(--warn); font-weight: 700; margin-left: 8px; white-space: nowrap; }
+
 /* ---------- Шапка макета: чем этот вариант отличается ---------- */
 .mock-bar {
-  position: sticky; top: 0; z-index: 20;
+  /* Липкой оставлена только .draft-bar: предупреждение должно быть видно
+     всегда, а заголовок макета — нет. Раньше обе .mock-bar в файле липли
+     к top: 0 и вторая накрывала первую. */
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
@@ -117,6 +137,12 @@ a { color: var(--primary); }
   display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
 }
 .mock-name { font-weight: 700; }
+.mock-name::after {
+  content: "черновик";
+  margin-left: 8px; padding: 1px 6px; vertical-align: 1px;
+  font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--warn); border: 1px solid var(--warn); border-radius: 4px;
+}
 .mock-note { color: var(--text-muted); font-size: 13px; }
 .mock-bar .spacer { margin-left: auto; }
 .mock-back { font-size: 13px; text-decoration: none; }
@@ -129,8 +155,12 @@ a { color: var(--primary); }
   border: 1px solid var(--border);
   background: var(--surface-2); color: var(--text-muted);
 }
+/* Выбранная вкладка НЕ повторяет пилюлю рабочего планнера: раньше в обоих
+   стоял залитый --primary, и отличить макет от приложения можно было только
+   пересчитав вкладки (пять против трёх). */
 .screens button[aria-selected="true"] {
-  background: var(--primary); color: var(--primary-text); border-color: var(--primary);
+  background: var(--surface); color: var(--warn);
+  border-color: var(--warn); border-style: dashed; font-weight: 700;
 }
 .screen[hidden] { display: none; }
 

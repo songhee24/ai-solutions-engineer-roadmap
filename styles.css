@@ -550,6 +550,13 @@ td ul { margin: 0; padding-left: 1.1em; }
   background: var(--border-strong); vertical-align: -2px; margin-right: 10px;
 }
 .section-nav a.nav-extra + a.nav-extra::before { display: none; }
+/* Черта и ПОСЛЕ группы: без неё правый край группы ничем не закрыт и
+   «Прикидка по дням» перетекает в «Диагностику» — соседние по виду, разные
+   по природе (страница против маршрута роутера). */
+.section-nav a.nav-extra + a:not(.nav-extra)::before {
+  content: ""; display: inline-block; width: 1px; height: 14px;
+  background: var(--border-strong); vertical-align: -2px; margin-right: 10px;
+}
 
 /* Якоря не должны уезжать под липкую шапку */
 .section, .stage { scroll-margin-top: calc(var(--header-h) + 12px); }
@@ -674,7 +681,7 @@ td ul { margin: 0; padding-left: 1.1em; }
 .review-who { font-size: .86rem; color: var(--text-muted); font-weight: 550; }
 .review-empty { color: var(--text-muted); }
 
-/* Одиннадцать пунктов меню — чуть плотнее, чтобы влезали без прокрутки */
+/* Двенадцать пунктов меню — чуть плотнее, чтобы влезали без прокрутки */
 .section-nav a { padding: 6px 10px; }
 
 /* ---------- Развилка направлений ---------- */
