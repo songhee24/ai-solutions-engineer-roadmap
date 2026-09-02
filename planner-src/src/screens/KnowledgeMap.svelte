@@ -1,12 +1,51 @@
 <script>
   /* Экран «Карта знаний»: вся программа целиком с закраской по мере прохождения.
      Геометрию считает lib/map-layout.js — здесь только разметка. */
+  import { dailyBudget } from "../../../shared/schedule.mjs";
   import { buildMapLayout } from "../lib/map-layout.js";
-  import { ruNum, hoursNum } from "../lib/format.js";
+  import { planner } from "../lib/store.svelte.js";
+  import {
+    remainingUnits, weeklyStreamHours, finishAtWeeklyPace, diffDays
+  } from "../lib/progress.js";
+  import { ruNum, hoursNum, dateDayMonth, days as daysWord, formatHours } from "../lib/format.js";
 
-  let { data, progress, summary, profile } = $props();
+  let { data, progress, summary, units, doneByUnit, today, profile } = $props();
 
   let map = $derived(buildMapLayout(data, progress, profile));
+
+  /* Карта в тексте трека A советует свой темп для математики, а планнер
+     раскладывает часы так, чтобы все три потока финишировали вместе. Числа
+     расходятся, и молчать об этом нечестно: человек читает одно, а делает
+     другое. Совет берём из самого текста, а не из константы, — если текст
+     поправят, блок исчезнет сам. */
+  let mathAdvice = $derived.by(() => {
+    const track = data.stages.find((s) => s.id === "track-math");
+    const found = /(\d+)\s*[–—-]\s*(\d+)\s*час/.exec(track?.subtitle || "");
+    return found ? { min: Number(found[1]), max: Number(found[2]), text: track.subtitle } : null;
+  });
+
+  let mathPace = $derived.by(() => {
+    if (!mathAdvice || !units.length) return null;
+    const left = remainingUnits(units, doneByUnit);
+    if (!left.length) return null;
+
+    // Фактическая выдача: на днях с шаблоном она задана прямо, а не выведена.
+    const proportional = dailyBudget(left, planner.hoursPerDay).perDay.math;
+    const actual = weeklyStreamHours(planner, "math", proportional);
+    if (actual <= mathAdvice.max + 0.05) return null; // расхождения нет — молчим
+
+    const perDay = actual / (planner.weekdays.length || 7);
+
+    const hoursLeft = left.filter((u) => u.stream === "math").reduce((n, u) => n + u.hours, 0);
+    const atAdvice = finishAtWeeklyPace(hoursLeft, mathAdvice.max, today);
+    return {
+      actual,
+      perDay,
+      hoursLeft,
+      atAdvice,
+      lag: atAdvice ? diffDays(summary.finishIso, atAdvice) : 0
+    };
+  });
 </script>
 
 <h1>Карта знаний</h1>
@@ -91,6 +130,21 @@
       </div>
     {/each}
   </div>
+  {#if mathPace}
+    <div class="pace">
+      <h3>Математика идёт быстрее, чем советует карта</h3>
+      <p>Чтобы все три потока закончились одновременно, планнер отдаёт математике
+        {formatHours(mathPace.perDay)} в день — это <b>{ruNum(mathPace.actual)} ч в неделю</b>.
+        А в тексте трека A написано: «{mathAdvice.text}»</p>
+      <p>Если держать {mathAdvice.max} ч в неделю, оставшиеся {hoursNum(mathPace.hoursLeft)} часов
+        математики закончатся {dateDayMonth(mathPace.atAdvice)} — на {daysWord(mathPace.lag)} позже,
+        чем всё остальное ({dateDayMonth(summary.finishIso)}). Программа от этого не удлинится:
+        когда этапы закончатся, их часы перейдут математике.</p>
+      <p><small>Выбирать вам. Держать совет карты — заведите в настройках шаблон дня с
+        математикой {formatHours(mathAdvice.max / 7)} и отдайте остаток основному этапу.</small></p>
+    </div>
+  {/if}
+
   <p class="foot"><small>Полосы, а не радар: пока большинство направлений на нуле, радар
     вырождается в одну колючку и врёт сильнее, чем помогает. Пройдено
     {hoursNum(summary.doneHours)} из {hoursNum(summary.totalHours)} часов основного пути.</small></p>
@@ -151,6 +205,13 @@
   .trow .bar > i { display: block; height: 100%; background: var(--primary); }
   .trow .n { text-align: right; color: var(--text-muted); }
   .foot { margin: 14px 0 0; }
+
+  .pace { margin-top: 16px; padding: 13px 15px; border-radius: var(--radius);
+          background: var(--warn-soft);
+          border: 1px solid color-mix(in srgb, var(--warn) 32%, transparent); }
+  .pace h3 { margin: 0 0 6px; font-size: 14px; color: var(--warn); }
+  .pace p { margin: 0 0 8px; font-size: 13px; line-height: 1.5; }
+  .pace p:last-child { margin-bottom: 0; }
 
   @media (max-width: 560px) {
     .trow { grid-template-columns: 110px 1fr 86px; gap: 8px; font-size: 12px; }

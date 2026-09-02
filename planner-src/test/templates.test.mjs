@@ -11,7 +11,7 @@ import assert from "node:assert/strict";
 import { planDays, dailyBudget } from "../../shared/schedule.mjs";
 import {
   budgetForDay, templateForDay, streamRemaining, unplannedStreams,
-  finishDate, addDays, diffDays, stats
+  finishDate, addDays, diffDays, stats, weeklyStreamHours, finishAtWeeklyPace
 } from "../src/lib/progress.js";
 
 const TPL_USUAL = { id: "tpl-1", title: "Обычный день", hours: { math: 0.86, english: 0.33, seq: 3.81 } };
@@ -176,6 +176,40 @@ test("хотя бы один день без шаблона кормит все 
     weekdayTemplate: { 1: "tpl-3", 2: "tpl-3", 3: "tpl-3", 4: "tpl-3", 5: "tpl-3", 6: "tpl-3" }
   });
   assert.deepEqual(unplannedStreams(p), [], "воскресенье без шаблона раскладывается пропорционально");
+});
+
+/* ------------------------------------------------- фактический темп --- */
+
+test("недельная выдача потока считается по факту, а не долей на число дней", () => {
+  // На днях с шаблоном раскладка задана прямо. Умножать пропорциональную долю
+  // на число дней значит соврать ровно там, где шаблон и стоит.
+  const plain = planner();
+  assert.equal(weeklyStreamHours(plain, "math", 0.86), 6.02, "семь обычных дней по 0,86");
+
+  const light = planner({ templates: [TPL_LIGHT], weekdayTemplate: { 6: "tpl-2" } });
+  assert.equal(weeklyStreamHours(light, "math", 0.86), 5.16, "суббота даёт математике ноль");
+
+  const all = planner({
+    templates: [TPL_USUAL],
+    weekdayTemplate: Object.fromEntries([0, 1, 2, 3, 4, 5, 6].map((d) => [d, "tpl-1"]))
+  });
+  assert.equal(weeklyStreamHours(all, "math", 99), 6.02, "шаблон сильнее пропорции");
+
+  const short = planner({ weekdays: [1, 2, 3, 4, 5] });
+  assert.equal(weeklyStreamHours(short, "math", 0.86), 4.3, "пять дней вместо семи");
+});
+
+test("финиш при заданном недельном темпе считается по календарю", () => {
+  // «Часов в неделю» — уже недельная величина: делить её ещё раз на расписание
+  // значит учесть выходные дважды.
+  assert.equal(finishAtWeeklyPace(7, 7, "2026-09-01"), "2026-09-07", "неделя работы = семь дней");
+  assert.equal(finishAtWeeklyPace(0, 5, "2026-09-01"), null, "нечего проходить — нет и даты");
+  assert.equal(finishAtWeeklyPace(10, 0, "2026-09-01"), null, "нулевой темп не даёт даты");
+
+  // 277 часов математики: при 6 ч/нед — около 323 дней, при 5 — около 388.
+  const fast = finishAtWeeklyPace(277, 6, "2026-09-02");
+  const slow = finishAtWeeklyPace(277, 5, "2026-09-02");
+  assert.ok(diffDays(fast, slow) > 55, `разрыв ${diffDays(fast, slow)} дней, ожидали больше 55`);
 });
 
 /* -------------------------------------------------------------- свод --- */

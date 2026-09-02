@@ -344,6 +344,34 @@ export function finishDate(planner, remaining, from, used = {}) {
   return iso;
 }
 
+/**
+ * Сколько часов в неделю фактически достаётся потоку.
+ *
+ * Считать «доля × число дней» нельзя: на днях с шаблоном раскладка задана
+ * прямо, а не выведена из остатков. Поэтому идём по дням недели и на каждом
+ * берём то, что этому дню действительно назначено.
+ *
+ * @param {number} proportionalPerDay доля потока в обычный день (dailyBudget)
+ */
+export function weeklyStreamHours(planner, stream, proportionalPerDay) {
+  let sum = 0;
+  for (const weekday of planner.weekdays || [0, 1, 2, 3, 4, 5, 6]) {
+    const tpl = templateForWeekday(planner, weekday);
+    sum += tpl ? (tpl.hours[stream] || 0) : proportionalPerDay;
+  }
+  return round2(sum);
+}
+
+/**
+ * Когда закончится поток, если держать его на заданном недельном темпе.
+ * Считается по календарю, а не по рабочим дням: «часов в неделю» — это уже
+ * недельная величина, и делить её ещё раз на расписание значит считать дважды.
+ */
+export function finishAtWeeklyPace(remainingHours, hoursPerWeek, from) {
+  if (hoursPerWeek <= 0 || remainingHours <= 0) return null;
+  return addDays(from, Math.ceil(remainingHours / (hoursPerWeek / 7)) - 1);
+}
+
 /* ----------------------------------------------------------------- свод --- */
 
 /**

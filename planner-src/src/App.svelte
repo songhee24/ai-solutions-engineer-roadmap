@@ -111,7 +111,7 @@
     {:else if screen === "calendar"}
       <Calendar {summary} {today} />
     {:else}
-      <KnowledgeMap {data} {progress} {summary} profile={planner.profile} />
+      <KnowledgeMap {data} {progress} {summary} {units} {doneByUnit} {today} profile={planner.profile} />
     {/if}
   {/if}
 </main>
