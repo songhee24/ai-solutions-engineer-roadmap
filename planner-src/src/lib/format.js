@@ -53,9 +53,10 @@ export function dateShort(iso) {
  *  в следующем году, и «12 сентября» читалось как «через десять дней». */
 export function dateDayMonth(iso) {
   const date = fromIso(iso);
-  return date.getFullYear() === new Date().getFullYear()
-    ? dayMonth.format(date)
-    : dayMonthYear.format(date);
+  if (date.getFullYear() === new Date().getFullYear()) return dayMonth.format(date);
+  // Intl отдаёт «20 июля 2027 г.», а подпись заканчивается точкой предложения —
+  // получалось «20 июля 2027 г..». Сокращение убираем, год остаётся.
+  return dayMonthYear.format(date).replace(/\s*г\.\s*$/, "");
 }
 
 export function monthShort(iso) {
