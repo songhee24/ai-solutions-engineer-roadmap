@@ -205,6 +205,50 @@ test("смена профиля меняет часы, но не трогает 
     "галочка пропала с экрана после смены профиля");
 });
 
+/* ------------------------------------------------ оглавление «Как заниматься» --- */
+
+test("оглавление страницы метода — кнопки, и каждая ведёт к существующему блоку", async () => {
+  const w = await openMap({ hash: "#/method" });
+  const buttons = Array.from(w.document.querySelectorAll(".method-toc-item"));
+  assert.equal(buttons.length, 5, `кнопок ${buttons.length}, ожидали 5`);
+
+  for (const b of buttons) {
+    // Ссылка сломала бы роутер: currentRoute режет хеш по «/», и «#/method#tools»
+    // превращается в неизвестный маршрут, уводящий на главную.
+    assert.equal(b.tagName, "BUTTON", `«${b.textContent.trim()}» не кнопка`);
+    assert.equal(b.hasAttribute("href"), false);
+  }
+
+  // Цели существуют. Переименуют id — тест упадёт, а не оглавление молча онемеет.
+  for (const id of ["sm-rule", "sm-tools", "sm-areas", "sm-notebook", "sm-week"]) {
+    assert.ok(w.document.getElementById(id), `нет цели #${id}`);
+    assert.ok(
+      w.document.getElementById(id).classList.contains("method-anchor"),
+      `#${id} без класса method-anchor — уедет под липкую шапку`
+    );
+  }
+});
+
+test("блок «Чем писать» отрисован из данных", async () => {
+  const w = await openMap({ hash: "#/method" });
+  const tools = w.ROADMAP.studyMethod.tools;
+  assert.equal(w.document.querySelectorAll("#sm-tools-list dt").length, tools.items.length);
+  assert.equal(w.document.querySelectorAll("#sm-tools-list dd").length, tools.items.length);
+
+  const text = w.document.getElementById("sm-tools").textContent;
+  for (const item of tools.items) {
+    assert.ok(text.includes(item.what), `на странице нет «${item.what}»`);
+  }
+});
+
+test("renderStudyMethod не вызывается дважды — ничего не удвоилось", async () => {
+  // Он использует appendChild без очистки: второй вызов удвоил бы содержимое.
+  const w = await openMap({ hash: "#/method" });
+  assert.equal(w.document.querySelectorAll("#sm-areas .method-area").length, 2);
+  assert.equal(w.document.querySelectorAll(".method-toc-item").length, 5);
+  assert.equal(w.document.querySelectorAll("#sm-tools-list dt").length, 3);
+});
+
 /* -------------------------------------------------------------- разметка --- */
 
 test("идентификаторы в документе уникальны после хождения по маршрутам", async () => {

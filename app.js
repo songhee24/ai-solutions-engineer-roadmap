@@ -729,12 +729,82 @@
     DATA.about.honest.forEach(function (h) { honest.appendChild(el("li", null, h)); });
   }
 
+  /* Чем писать: у каждого инструмента причина, а не просто название.
+     dl/dt/dd, потому что это буквально «термин — объяснение». */
+  function renderMethodTools(t) {
+    if (!t) return;
+    document.getElementById("sm-tools-title").textContent = t.title;
+    document.getElementById("sm-tools-intro").textContent = t.intro;
+    document.getElementById("sm-tools-note").textContent = t.note || "";
+
+    var list = document.getElementById("sm-tools-list");
+    t.items.forEach(function (item) {
+      list.appendChild(el("dt", null, item.what));
+      list.appendChild(el("dd", null, item.why));
+    });
+  }
+
+  /* Оглавление страницы «Как заниматься».
+
+     КНОПКИ, а не ссылки, и хеш не трогается вообще. currentRoute() режет
+     location.hash по «/», поэтому «#/method#tools» превращается в неизвестный
+     маршрут и уводит на главную; а любое изменение хеша вызывает renderRoute,
+     который заканчивается window.scrollTo(0, 0) и отменил бы прыжок.
+
+     Прокрутка — только через scrollToNode: в целевом браузере голый
+     scrollIntoView молча не срабатывает (чинили 24.08.2026).
+
+     Наблюдатель создаётся однажды вместе с оглавлением и живёт столько же,
+     сколько страница, — отключать его негде и незачем. */
+  function renderMethodToc(parts) {
+    var host = document.getElementById("sm-toc");
+    if (!host) return;
+
+    var buttons = [];
+    var targets = [];
+
+    parts.forEach(function (part) {
+      var target = document.getElementById(part.id);
+      if (!target) return; // переименовали якорь — пункт просто не появится
+      var btn = el("button", "method-toc-item", part.label);
+      btn.type = "button";
+      btn.addEventListener("click", function () { scrollToNode(target); });
+      host.appendChild(btn);
+      buttons.push(btn);
+      targets.push(target);
+    });
+
+    if (!buttons.length || typeof IntersectionObserver !== "function") return;
+
+    function mark(index) {
+      buttons.forEach(function (b, i) {
+        if (i === index) b.setAttribute("aria-current", "true");
+        else b.removeAttribute("aria-current");
+      });
+    }
+    mark(0);
+
+    var visible = {};
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { visible[e.target.id] = e.isIntersecting; });
+      // Подсвечиваем самый верхний из видимых: при прокрутке вниз это ровно тот
+      // блок, который человек сейчас читает.
+      for (var i = 0; i < targets.length; i++) {
+        if (visible[targets[i].id]) { mark(i); return; }
+      }
+    }, { rootMargin: "-40% 0px -50% 0px" });
+
+    targets.forEach(function (t) { io.observe(t); });
+  }
+
   function renderStudyMethod() {
     var m = DATA.studyMethod;
     if (!m) return;
     document.getElementById("sm-title").textContent = m.title;
     document.getElementById("sm-intro").textContent = m.intro;
     document.getElementById("sm-rule").textContent = m.rule;
+
+    renderMethodTools(m.tools);
 
     var host = document.getElementById("sm-areas");
     m.areas.forEach(function (a) {
@@ -774,6 +844,14 @@
     var wl = document.getElementById("sm-week-items");
     wk.items.forEach(function (x) { wl.appendChild(el("li", null, x)); });
     document.getElementById("sm-week-note").textContent = wk.note;
+
+    renderMethodToc([
+      { id: "sm-rule", label: "Правило" },
+      { id: "sm-tools", label: "Чем писать" },
+      { id: "sm-areas", label: "Где нужна бумага" },
+      { id: "sm-notebook", label: "Что писать в тетради" },
+      { id: "sm-week", label: "Ритм недели" }
+    ]);
   }
 
   function renderThroughline() {

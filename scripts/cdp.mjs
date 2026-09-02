@@ -86,7 +86,15 @@ export async function evalJs(cdp, expression) {
 }
 
 export async function goto(cdp, url, { settleMs = 700 } = {}) {
-  await cdp.send("Page.navigate", { url });
+  // Переход на ТОТ ЖЕ адрес Chrome переходом не считает: документ не
+  // перезагружается, и в памяти остаётся прежний CSS. Проверка тогда показывает
+  // прошлый прогон — только что исправленное «остаётся» сломанным.
+  const here = await evalJs(cdp, "location.href").catch(() => null);
+  if (here === url) {
+    await cdp.send("Page.reload", { ignoreCache: true });
+  } else {
+    await cdp.send("Page.navigate", { url });
+  }
   // Ждём загрузки, но с потолком: подвисшая страница не должна вешать проверку.
   const until = Date.now() + 10000;
   while (Date.now() < until) {

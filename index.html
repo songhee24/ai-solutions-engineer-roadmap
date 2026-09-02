@@ -226,11 +226,26 @@
         <p id="sm-intro"></p>
       </div>
 
-      <div class="method-rule" id="sm-rule"></div>
+      <!-- 2026-09-03: страница на 1700px без единого способа вернуться к нужному
+           куску. Оглавление строится в app.js кнопками, а НЕ ссылками: любая
+           правка хеша перезапускает роутер и делает scrollTo(0,0) — якорь
+           вида #tools увёл бы на главную. -->
+      <div class="method-layout">
+        <nav class="method-toc" id="sm-toc" aria-label="Разделы страницы"></nav>
 
-      <div class="method-grid" id="sm-areas"></div>
+        <div class="method-body">
+      <div class="method-rule method-anchor" id="sm-rule"></div>
 
-      <div class="rules" style="margin-top:16px">
+      <div class="rules method-anchor" id="sm-tools" style="margin-top:16px">
+        <h3 id="sm-tools-title"></h3>
+        <p id="sm-tools-intro"></p>
+        <dl class="tool-list" id="sm-tools-list"></dl>
+        <p class="method-note" id="sm-tools-note"></p>
+      </div>
+
+      <div class="method-grid method-anchor" id="sm-areas"></div>
+
+      <div class="rules method-anchor" id="sm-notebook" style="margin-top:16px">
         <h3 id="sm-nb-title"></h3>
         <p id="sm-nb-intro"></p>
         <div class="method-grid">
@@ -246,10 +261,12 @@
         <div class="callout" id="sm-nb-why"></div>
       </div>
 
-      <div class="rules" style="margin-top:16px">
+      <div class="rules method-anchor" id="sm-week" style="margin-top:16px">
         <h3 id="sm-week-title"></h3>
         <ul id="sm-week-items"></ul>
         <p id="sm-week-note"></p>
+      </div>
+        </div>
       </div>
     </div>
   </section>

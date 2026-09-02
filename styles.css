@@ -559,7 +559,7 @@ td ul { margin: 0; padding-left: 1.1em; }
 }
 
 /* Якоря не должны уезжать под липкую шапку */
-.section, .stage { scroll-margin-top: calc(var(--header-h) + 12px); }
+.section, .stage, .method-anchor { scroll-margin-top: calc(var(--header-h) + 12px); }
 
 @media (max-width: 720px) {
   :root { --header-h: 150px; }
@@ -619,7 +619,72 @@ td ul { margin: 0; padding-left: 1.1em; }
 }
 .method-label.is-need { color: var(--ok); }
 .method-label.is-skip { color: var(--text-faint); }
-.method-area ul { font-size: .92rem; margin-bottom: 0; }
+.method-area ul { font-size: 1rem; line-height: 1.65; margin-bottom: 0; }
+
+/* ---------- Читаемость «Как заниматься» (2026-09-03) ----------
+   Строка держалась на 86 символах на всех десктопных ширинах от 1440 до 820 px
+   при комфортном пределе в 75. Соглашение о мере в проекте уже было —
+   .section-head p с 72ch и .hero .lede с 62ch, — здесь оно просто расширено.
+
+   ⚠ Числа НЕ 72ch: единица ch калибруется по ширине нуля, а кириллическая
+   строчная заметно уже, и 72ch дают на экране 86 реальных символов. Замерено.
+   62ch дают ~74 — это и есть предел комфортного чтения. Тот же 62ch уже стоит
+   у .hero .lede, так что прецедент в проекте есть.
+
+   Правки заужены селектором #study-method: .rules и .callout общие с
+   «Tutorial hell» и «Куда дальше», их трогать нельзя. Глобальный
+   .section-head p с 72ch страдает тем же — это отдельная правка на весь сайт. */
+.method-rule { max-width: 56ch; }
+/* Сами карточки тоже сужаются: текст в них ограничен 62ch, и на всю ширину
+   справа зияла четверть карточки. 78ch оставляют внутреннему двухколоночному
+   гриду в «что писать в тетради» больше 730px — на две колонки хватает с запасом. */
+#study-method .rules { max-width: 78ch; }
+#study-method .section-head p,
+#study-method .rules > p,
+#study-method .rules > ul > li,
+#study-method .callout { max-width: 62ch; }
+
+/* ---------- Оглавление страницы ----------
+   Рельс справа, а не третья липкая полоса сверху: над контентом уже стоят
+   шапка и панель разделов, и ещё одна съела бы шестую часть экрана.
+   Побочный эффект в нашу пользу — содержимое сужается с 1140 до ~920 px,
+   и мера падает сама. */
+.method-layout { display: grid; gap: 28px; }
+.method-toc { display: flex; flex-wrap: wrap; gap: 6px; }
+.method-toc-item {
+  font: inherit; font-size: .84rem; font-weight: 550; cursor: pointer;
+  padding: 7px 12px; border-radius: 999px; text-align: left;
+  border: 1px solid var(--border); background: var(--surface-2); color: var(--text-muted);
+}
+.method-toc-item:hover { color: var(--text); border-color: var(--border-strong); }
+.method-toc-item[aria-current="true"] {
+  background: var(--primary-soft); color: var(--primary); border-color: var(--primary);
+}
+.method-toc-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+@media (min-width: 1024px) {
+  /* Рельс справа: взгляд идёт по тексту слева направо и упирается в него,
+     а не перепрыгивает через оглавление к содержанию. */
+  .method-layout { grid-template-columns: minmax(0, 1fr) 190px; align-items: start; }
+  .method-toc {
+    order: 2; position: sticky; top: calc(var(--header-h) + 16px);
+    flex-direction: column; gap: 2px;
+  }
+  .method-body { order: 1; min-width: 0; }
+  .method-toc-item { border-color: transparent; background: transparent; }
+  .method-toc-item[aria-current="true"] { border-color: var(--primary); }
+}
+
+/* ---------- Чем писать ---------- */
+.tool-list { margin: 12px 0 0; }
+.tool-list dt { font-weight: 650; margin-top: 12px; }
+.tool-list dt:first-child { margin-top: 0; }
+.tool-list dd {
+  margin: 3px 0 0; color: var(--text-muted); max-width: 62ch;
+  border-left: 2px solid var(--border); padding-left: 12px;
+}
+/* Итоговая фраза липла к объяснению последнего инструмента. */
+#sm-tools-note { margin-top: 14px; }
 
 /* ---------- Многостраничность: оглавление карты и страница этапа ---------- */
 .stage-index { display: grid; gap: 10px; margin-top: 8px; }

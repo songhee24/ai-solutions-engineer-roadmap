@@ -200,6 +200,21 @@ test("метаданные на месте и согласованы", () => {
   assert.equal(split.theory + split.practice + split.projects, 100, "доли теории/практики/проектов не дают ста");
 });
 
+test("блок «Чем писать» заполнен и каждый инструмент объяснён", () => {
+  const t = DATA.studyMethod.tools;
+  assert.ok(t, "нет блока tools");
+  assert.ok(t.title && t.intro, "нет заголовка или вступления");
+  assert.equal(t.items.length, 3, "инструментов не три");
+  for (const item of t.items) {
+    assert.ok(item.what, "инструмент без названия");
+    // Причина — смысл блока: список без объяснений превращается в чек-лист
+    // покупок, а вопрос был «какая именно линейка и почему».
+    assert.ok(item.why && item.why.length > 80, `${item.what}: причина слишком коротка`);
+  }
+  assert.match(t.items[1].what, /линейк/i, "второй пункт должен быть про линейку");
+  assert.match(t.items[1].why, /прозрачн/i, "не сказано главное — прозрачность");
+});
+
 test("разделы, на которые ссылается интерфейс, существуют", () => {
   for (const key of ["about", "studyMethod", "throughline", "reviews", "destinations"]) {
     assert.ok(DATA[key], `нет раздела ${key}`);
