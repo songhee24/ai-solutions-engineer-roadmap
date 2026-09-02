@@ -1,0 +1,183 @@
+/* ==========================================================================
+   app.css — глобальный слой планнера: токены и примитивы, общие для всех
+   экранов. Всё, что принадлежит одному экрану, живёт в его .svelte-файле.
+
+   Токены взяты из styles.css карты один в один — планнер должен выглядеть
+   продолжением сайта, а не отдельным приложением.
+   ========================================================================== */
+
+:root {
+  --bg:            #f4f6fb;
+  --bg-soft:       #eceff8;
+  --surface:       #ffffff;
+  --surface-2:     #f8f9fd;
+  --text:          #101426;
+  --text-muted:    #5a6076;
+  --text-faint:    #838aa3;
+  --border:        #dfe3ef;
+  --border-strong: #c6cce0;
+
+  --navy:          #1b2452;
+  --primary:       #4338ca;
+  --primary-soft:  #eef0ff;
+  --primary-text:  #ffffff;
+  --accent:        #0d9488;
+  --accent-soft:   #e3f7f4;
+  --warn:          #b45309;
+  --warn-soft:     #fdf3e3;
+  --ok:            #15803d;
+  --ok-soft:       #e7f6ec;
+  --miss:          #be123c;
+  --miss-soft:     #fdeaee;
+
+  --shadow-sm: 0 1px 2px rgba(16, 20, 38, .06), 0 1px 3px rgba(16, 20, 38, .05);
+  --shadow-md: 0 4px 12px rgba(16, 20, 38, .07), 0 2px 4px rgba(16, 20, 38, .04);
+
+  --radius:    12px;
+  --radius-sm: 8px;
+  --radius-lg: 18px;
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  --maxw: 1180px;
+
+  /* Цвета потоков — те же, что в макетах, чтобы глаз их уже знал */
+  --s-math:    #7c3aed;
+  --s-english: #0d9488;
+  --s-seq:     #4338ca;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:            #090d1a;
+    --bg-soft:       #0e1426;
+    --surface:       #121a30;
+    --surface-2:     #172038;
+    --text:          #e9edf9;
+    --text-muted:    #9aa4c2;
+    --text-faint:    #6f7a99;
+    --border:        #24304e;
+    --border-strong: #35426a;
+
+    --navy:          #c7d0f5;
+    --primary:       #818cf8;
+    --primary-soft:  #1c2450;
+    --primary-text:  #0a0f1f;
+    --accent:        #2dd4bf;
+    --accent-soft:   #10322f;
+    --warn:          #fbbf24;
+    --warn-soft:     #33270d;
+    --ok:            #4ade80;
+    --ok-soft:       #102b1a;
+    --miss:          #fb7185;
+    --miss-soft:     #3a1420;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .5);
+    --shadow-md: 0 6px 18px rgba(0, 0, 0, .45);
+
+    --s-math:    #a78bfa;
+    --s-english: #2dd4bf;
+    --s-seq:     #818cf8;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #090d1a; --bg-soft: #0e1426; --surface: #121a30; --surface-2: #172038;
+  --text: #e9edf9; --text-muted: #9aa4c2; --text-faint: #6f7a99;
+  --border: #24304e; --border-strong: #35426a;
+  --navy: #c7d0f5; --primary: #818cf8; --primary-soft: #1c2450; --primary-text: #0a0f1f;
+  --accent: #2dd4bf; --accent-soft: #10322f; --warn: #fbbf24; --warn-soft: #33270d;
+  --ok: #4ade80; --ok-soft: #102b1a; --miss: #fb7185; --miss-soft: #3a1420;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.5); --shadow-md: 0 6px 18px rgba(0,0,0,.45);
+  --s-math: #a78bfa; --s-english: #2dd4bf; --s-seq: #818cf8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--primary); }
+
+h1, h2, h3 { line-height: 1.25; }
+h1 { font-size: 26px; margin: 0 0 4px; }
+h2 { font-size: 19px; margin: 28px 0 12px; }
+h3 { font-size: 15px; margin: 0 0 8px; }
+.lede { color: var(--text-muted); margin: 0 0 20px; }
+small { color: var(--text-faint); }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 22px 20px 60px; }
+
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-sm);
+}
+
+.chip {
+  display: inline-block; font-size: 12px; padding: 2px 8px;
+  border-radius: 99px; border: 1px solid var(--border);
+  background: var(--surface-2); color: var(--text-muted);
+}
+.chip.math    { color: var(--s-math);    border-color: color-mix(in srgb, var(--s-math) 35%, transparent); }
+.chip.english { color: var(--s-english); border-color: color-mix(in srgb, var(--s-english) 35%, transparent); }
+.chip.seq     { color: var(--s-seq);     border-color: color-mix(in srgb, var(--s-seq) 35%, transparent); }
+
+/* Только выравнивание цифр: моноширинное семейство разреживало кириллицу
+   в подписях вида «52 мин», и это бросалось в глаза. */
+.mono { font-variant-numeric: tabular-nums; }
+
+.btn {
+  font: inherit; font-size: 14px; padding: 8px 16px; border-radius: var(--radius-sm);
+  border: 1px solid var(--primary); background: var(--primary);
+  color: var(--primary-text); cursor: pointer;
+}
+.btn.ghost { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn.small { font-size: 13px; padding: 5px 11px; }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.field { font: inherit; padding: 7px 10px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+
+.tick {
+  appearance: none; width: 22px; height: 22px; flex: 0 0 22px;
+  border: 1.5px solid var(--border-strong); border-radius: 6px;
+  background: var(--surface); cursor: pointer; display: inline-grid; place-content: center;
+}
+.tick::after {
+  content: ""; width: 11px; height: 6px; transform: rotate(-45deg) scale(0);
+  border-left: 2px solid var(--primary-text); border-bottom: 2px solid var(--primary-text);
+  transition: transform .12s ease;
+}
+.tick:checked { background: var(--ok); border-color: var(--ok); }
+.tick:checked::after { transform: rotate(-45deg) scale(1); }
+.tick:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.note {
+  background: var(--warn-soft);
+  border: 1px solid color-mix(in srgb, var(--warn) 32%, transparent);
+  border-radius: var(--radius); padding: 11px 14px; font-size: 13px; margin: 0 0 16px;
+}
+
+@media (max-width: 720px) {
+  .wrap { padding: 16px 14px 48px; }
+  h1 { font-size: 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}

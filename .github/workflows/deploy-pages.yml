@@ -27,6 +27,20 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v6
 
+      # Собранный планнер в репозиторий не коммитится: иначе он молча
+      # расходился бы с planner-src. Карта сборки по-прежнему не требует —
+      # index.html/app.js/styles.css/roadmap-data.js выкладываются как есть.
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: planner-src/package-lock.json
+
+      - name: Build planner
+        run: npm ci && npm run build
+        working-directory: planner-src
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
