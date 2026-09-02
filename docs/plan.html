@@ -39,7 +39,11 @@
   .fact b { display: block; font-size: 19px; font-variant-numeric: tabular-nums; }
   .fact span { color: var(--text-muted); font-size: 12px; }
 
-  .split-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 0 0 18px; }
+  /* Четыре колонки с nowrap не влезают в телефон: на 390px таблица уезжала
+     за край на 268px и тянула за собой всю страницу (найдено 02.09
+     scripts/check-site.mjs). Прокручиваем её саму, а не документ. */
+  .table-wrap { overflow-x: auto; margin: 0 0 18px; }
+  .split-table { width: 100%; min-width: 420px; border-collapse: collapse; font-size: 14px; }
   .split-table th, .split-table td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: left; }
   .split-table th { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
   .split-table td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -129,10 +133,12 @@
 
   <div class="facts" id="facts"></div>
 
-  <table class="split-table">
-    <thead><tr><th>Поток</th><th class="n">Всего</th><th class="n">В день</th><th class="n">В неделю</th></tr></thead>
-    <tbody id="split"></tbody>
-  </table>
+  <div class="table-wrap">
+    <table class="split-table">
+      <thead><tr><th>Поток</th><th class="n">Всего</th><th class="n">В день</th><th class="n">В неделю</th></tr></thead>
+      <tbody id="split"></tbody>
+    </table>
+  </div>
 
   <p>Три потока идут параллельно — так написано в самой карте: математика «параллельно с
     программированием», английский «20–30 минут в день». Часы разложены так, чтобы все три

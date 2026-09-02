@@ -17,6 +17,26 @@
 (или `npm run build` и открыть `/planner/` тем же сервером). Тесты ядра: `node --test
 "planner-src/test/**/*.test.mjs"`.
 
+## Проверки — три слоя, каждый своим инструментом
+
+| Что | Где | Как запустить | Зависимости |
+|---|---|---|---|
+| **Данные карты** | `test/roadmap-data.test.mjs` | `node --test "test/**/*.test.mjs"` | нет, голый Node |
+| **Ядро планнера** | `planner-src/test/*.test.mjs` | `node --test "planner-src/test/**/*.test.mjs"` | нет |
+| **Роутер и разметка карты** | `planner-src/test/map-ui.test.mjs` | там же | jsdom |
+| **Живые страницы** | `scripts/check-site.mjs` | см. шапку файла | свой headless-Chrome |
+
+⚠ **jsdom-тесты карты лежат в `planner-src`, а не в корне, намеренно**: корень обязан оставаться
+без npm, а `planner-src` — единственное место, где сборка разрешена. Проверки данных зависимостей
+не имеют и живут в корне.
+
+⚠ В jsdom обязательно **ждать событие `load`** перед исполнением `app.js`: сразу после конструктора
+`document.readyState === "loading"`, и app.js уходит ждать `DOMContentLoaded` — `init()` не
+запускается, ничего не рисуется, тесты падают загадочно.
+
+⚠ `scripts/check-site.mjs` и `check-links.mjs` **отключают кеш Chrome**. Без этого проверка
+показывает прошлый прогон, и только что исправленное «остаётся» сломанным.
+
 Деплой: push в `main` публикует **корень репо** на GitHub Pages
 (`.github/workflows/deploy-pages.yml`); планнер собирается там же шагом `npm ci && npm run build`.
 **Собранный `planner/` не коммитится** (он в `.gitignore`): закоммиченная сборка молча

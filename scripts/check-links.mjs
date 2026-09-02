@@ -14,6 +14,7 @@
  * ========================================================================== */
 
 import fs from "node:fs";
+import { connect } from "./cdp.mjs";
 
 const args = process.argv.slice(2);
 const file = args.find((a) => !a.startsWith("--"));
@@ -26,46 +27,7 @@ if (!file) {
 const raw = JSON.parse(fs.readFileSync(file, "utf8"));
 const urls = raw.map((x) => (typeof x === "string" ? x : x.url));
 
-/* ------------------------------------------------------------------- CDP --- */
-
-async function connect() {
-  const list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
-  const target =
-    list.find((t) => t.type === "page") ||
-    (await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: "PUT" })).json());
-
-  const ws = new WebSocket(target.webSocketDebuggerUrl);
-  await new Promise((res, rej) => {
-    ws.onopen = res;
-    ws.onerror = () => rej(new Error(`CDP на ${port} не отвечает`));
-  });
-
-  let id = 0;
-  const pending = new Map();
-  const listeners = new Set();
-  ws.onmessage = (m) => {
-    const msg = JSON.parse(m.data);
-    if (msg.id && pending.has(msg.id)) {
-      const { res, rej } = pending.get(msg.id);
-      pending.delete(msg.id);
-      msg.error ? rej(new Error(JSON.stringify(msg.error))) : res(msg.result);
-    } else if (msg.method) {
-      for (const fn of listeners) fn(msg);
-    }
-  };
-  const send = (method, params = {}) =>
-    new Promise((res, rej) => {
-      const mid = ++id;
-      pending.set(mid, { res, rej });
-      ws.send(JSON.stringify({ id: mid, method, params }));
-      setTimeout(() => {
-        if (pending.has(mid)) { pending.delete(mid); rej(new Error(`таймаут ${method}`)); }
-      }, 45000);
-    });
-  return { send, on: (fn) => listeners.add(fn), off: (fn) => listeners.delete(fn), close: () => ws.close() };
-}
-
-const cdp = await connect();
+const cdp = await connect(port);
 await cdp.send("Page.enable");
 await cdp.send("Runtime.enable");
 await cdp.send("Network.enable");
