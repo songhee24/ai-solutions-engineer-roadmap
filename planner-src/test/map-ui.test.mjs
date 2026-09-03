@@ -271,3 +271,58 @@ test("на странице этапа каждая ссылка ресурса 
     assert.match(a.getAttribute("rel") || "", /noopener/, `${a.href}: нет rel=noopener`);
   }
 });
+
+/* ------------------------------------------ русские ссылки и уровень --- */
+
+test("у ресурса Khan рисуется вторая ссылка на русскую версию", async () => {
+  const w = await openMap({ hash: "#/stage/track-math" });
+  await goto(w, "#/stage/track-math");
+
+  const ru = Array.from(w.document.querySelectorAll("#stage-page .res-ru"));
+  assert.ok(ru.length > 0, "ни одной русской ссылки на треке математики");
+  for (const a of ru) {
+    assert.match(a.href, /^https:\/\/ru\.khanacademy\.org\//, "русская ссылка ведёт не туда");
+    assert.equal(a.target, "_blank");
+    assert.ok(a.title, "у русской ссылки нет подсказки");
+  }
+
+  // Английская остаётся основной: она первая в строке и несёт заголовок.
+  const first = w.document.querySelector("#stage-page .res .res-title");
+  assert.match(first.href, /^https:\/\/www\.khanacademy\.org\//);
+});
+
+test("переключатель уровня стоит только на треке английского", async () => {
+  const w = await openMap();
+
+  await goto(w, "#/stage/track-english");
+  const buttons = w.document.querySelectorAll("#stage-page .level-btn");
+  assert.equal(buttons.length, 5, "уровней не пять");
+  assert.equal(
+    Array.from(buttons).filter((b) => b.getAttribute("aria-pressed") === "true").length, 1,
+    "нажатым должен быть ровно один уровень"
+  );
+
+  await goto(w, "#/stage/track-math");
+  assert.equal(w.document.querySelectorAll("#stage-page .level-pick").length, 0,
+    "переключатель уровня протёк на чужой трек");
+});
+
+test("смена уровня меняет адрес ссылок British Council и переживает перезагрузку", async () => {
+  const w = await openMap();
+  await goto(w, "#/stage/track-english");
+
+  const listening = () =>
+    Array.from(w.document.querySelectorAll("#stage-page .res-title"))
+      .find((a) => a.textContent.includes("Listening"));
+
+  assert.match(listening().href, /\/listening\/b1$/, "по умолчанию должен быть B1");
+
+  const a1 = Array.from(w.document.querySelectorAll("#stage-page .level-btn"))
+    .find((b) => b.textContent === "A1");
+  a1.click();
+  await new Promise((r) => setTimeout(r, 10));
+
+  assert.match(listening().href, /\/listening\/a1$/, "ссылка не переехала на A1");
+  assert.equal(JSON.parse(w.localStorage.getItem("asr:v1")).englishLevel, "a1",
+    "уровень не сохранился");
+});

@@ -50,11 +50,19 @@ function streamOfStage(stageId) {
  *
  * @param {object} data     window.ROADMAP
  * @param {string} profile  "novice" | "dev"
+ * @param {string} [englishLevel]  a1 | a2 | b1 | b2 | c1 — подставляет адрес
+ *   тем ресурсам British Council, у которых страница своя на каждый уровень.
+ *   Необязательный: без него берётся значение по умолчанию из карты.
  * @returns {Array<Unit>}   unit = { id, stream, stageId, stageNum, topicId,
- *                                   topicTitle, kind, title, url, hours, ... }
+ *                                   topicTitle, kind, title, url, ru, hours, ... }
  */
-export function buildUnits(data, profile) {
+export function buildUnits(data, profile, englishLevel) {
   const units = [];
+  const level = englishLevel || data.meta.defaultEnglishLevel || "b1";
+
+  /* Та же развилка, что в app.js. Продублирована намеренно: карта грузится
+     классическим скриптом и импортировать этот модуль не может. */
+  const urlOf = (r) => (r.byLevel && r.byLevel[level]) || r.url;
 
   for (const stage of data.stages) {
     if (stage.optional) continue;
@@ -84,7 +92,8 @@ export function buildUnits(data, profile) {
           track: topic.track || null,
           kind: "resource",
           title: r.title,
-          url: r.url,
+          url: urlOf(r),
+          ru: r.ru || null,
           hours,
           scope: r.scope || null,
           study: r.study || null,
@@ -107,6 +116,7 @@ export function buildUnits(data, profile) {
           title: `Задача: ${topic.title}`,
           detail: topic.task || "Практика по теме своими руками.",
           url: null,
+          ru: null,
           hours: practice,
           scope: null,
           study: null,

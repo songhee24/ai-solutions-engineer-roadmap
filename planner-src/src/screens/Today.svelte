@@ -182,7 +182,17 @@
                     {:else}
                       {item.unit.title}
                     {/if}
+                    <!-- Русская версия Khan второй ссылкой. Основной остаётся
+                         английская: нумерация юнитов совпадает только с ней. -->
+                    {#if item.unit.ru}
+                      <a class="ru" href={item.unit.ru.url} target="_blank" rel="noopener noreferrer"
+                         title={item.unit.ru.note ?? "Та же тема на ru.khanacademy.org"}
+                         aria-label={`Открыть на русском: ${item.unit.title}`}>RU</a>
+                    {/if}
                   </div>
+                  {#if item.unit.ru?.note}
+                    <div class="meta detail">Про ссылку RU: {item.unit.ru.note}</div>
+                  {/if}
                   <div class="meta">{where(item.unit)}</div>
                   {#if item.unit.kind === "task" && item.unit.detail}
                     <div class="meta detail">{item.unit.detail}</div>
@@ -280,6 +290,16 @@
   .item.closed .body { opacity: .55; }
   .item .body { min-width: 0; flex: 1; }
   .item .title { font-weight: 600; overflow-wrap: anywhere; }
+  /* Мельче основной ссылки — намеренно: английская остаётся главной. */
+  .item .title a.ru {
+    margin-left: 7px; font-size: .68rem; font-weight: 700; letter-spacing: .06em;
+    padding: 1px 6px; border-radius: 999px; text-decoration: none;
+    color: var(--text-muted); border: 1px solid var(--border); background: var(--surface);
+    vertical-align: 1px; white-space: nowrap;
+  }
+  .item .title a.ru:hover, .item .title a.ru:focus-visible {
+    color: var(--primary); border-color: var(--primary); background: var(--primary-soft);
+  }
   .item .meta { color: var(--text-faint); font-size: 12.5px; margin-top: 2px; }
   .item .meta.detail { color: var(--text-muted); }
   .item .end { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }

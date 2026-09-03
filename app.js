@@ -15,6 +15,7 @@
     return {
       v: 1,
       profile: DATA.meta.defaultProfile || "novice",
+      englishLevel: DATA.meta.defaultEnglishLevel || "b1",
       pace: DATA.meta.defaultPace || 15,
       theme: null,
       startDate: null,
@@ -22,6 +23,23 @@
       open: {},
       openTopics: {}
     };
+  }
+
+  /* Уровень английского меняет адрес трёх ресурсов British Council: у них
+     разбивка по уровням своя, поэтому она лежит в данных полем byLevel, а не
+     собирается из шаблона. Всё остальное от уровня не зависит. */
+  function englishLevels() {
+    return DATA.meta.englishLevels || ["a1", "a2", "b1", "b2", "c1"];
+  }
+
+  function isEnglishLevel(value) {
+    return englishLevels().indexOf(value) !== -1;
+  }
+
+  /* Единственное место, где решается, какой адрес открывать у ресурса. */
+  function resourceUrl(r) {
+    if (r.byLevel && r.byLevel[state.englishLevel]) return r.byLevel[state.englishLevel];
+    return r.url;
   }
 
   function loadState() {
@@ -32,6 +50,7 @@
         var parsed = JSON.parse(raw);
         if (parsed && typeof parsed === "object") {
           s.profile = parsed.profile === "dev" ? "dev" : "novice";
+          if (isEnglishLevel(parsed.englishLevel)) s.englishLevel = parsed.englishLevel;
           s.pace = Number(parsed.pace) > 0 ? Number(parsed.pace) : s.pace;
           s.theme = parsed.theme === "dark" || parsed.theme === "light" ? parsed.theme : null;
           s.startDate = typeof parsed.startDate === "string" ? parsed.startDate : null;
@@ -439,6 +458,8 @@
       why.appendChild(el("p", null, stage.why));
       body.appendChild(why);
 
+      if (stage.id === "track-english") body.appendChild(englishLevelPicker());
+
       if (stage.courseNote) {
         var scn = el("div", "course-note");
         scn.appendChild(el("strong", null, "Объём курсов"));
@@ -484,6 +505,35 @@
     status.textContent = filtersActive()
       ? "Показано " + shownTopics + " " + plural(shownTopics, "тема", "темы", "тем") + " в " + shownStages + " " + plural(shownStages, "этапе", "этапах", "этапах")
       : "";
+  }
+
+  /* Переключатель уровня. Живёт на треке B рядом с материалами, которые от него
+     зависят, — искать его в общей шапке сайта было бы негде. */
+  function englishLevelPicker() {
+    var box = el("div", "level-pick");
+    box.appendChild(el("strong", null, "Ваш уровень английского"));
+    box.appendChild(el("p", null,
+      "Ссылки на грамматику, лексику и слушание подстраиваются под него. " +
+      "Уровень берётся из теста British Council в теме B0."));
+
+    var row = el("div", "level-row");
+    row.setAttribute("role", "group");
+    row.setAttribute("aria-label", "Уровень английского");
+    englishLevels().forEach(function (lv) {
+      var btn = el("button", "level-btn", lv.toUpperCase());
+      btn.type = "button";
+      btn.setAttribute("aria-pressed", String(lv === state.englishLevel));
+      btn.addEventListener("click", function () {
+        if (state.englishLevel === lv) return;
+        state.englishLevel = lv;
+        saveState();
+        renderRoute();
+        toast("Уровень " + lv.toUpperCase() + ": ссылки British Council обновлены");
+      });
+      row.appendChild(btn);
+    });
+    box.appendChild(row);
+    return box;
   }
 
   function renderTopic(stage, topic) {
@@ -618,10 +668,22 @@
       var res = el("div", "res");
       var line = el("div");
       var a = el("a", "res-title", r.title);
-      a.href = r.url;
+      a.href = resourceUrl(r);
       a.target = "_blank";
       a.rel = "noopener noreferrer";
       line.appendChild(a);
+
+      /* Вторая ссылка на русскую версию Khan. Основной остаётся английская:
+         нумерация юнитов в карте совпадает только с ней. */
+      if (r.ru) {
+        var ru = el("a", "res-ru", "RU");
+        ru.href = r.ru.url;
+        ru.target = "_blank";
+        ru.rel = "noopener noreferrer";
+        ru.title = r.ru.note || "Та же тема на ru.khanacademy.org";
+        ru.setAttribute("aria-label", "Открыть на русском: " + r.title);
+        line.appendChild(ru);
+      }
 
       var badges = el("span", "res-badges");
       badges.appendChild(el("span", "badge " + (r.cost === "paid" ? "paid" : "free"), r.cost === "paid" ? "платно" : "бесплатно"));
@@ -638,6 +700,13 @@
         sc.appendChild(el("b", null, "Объём: "));
         sc.appendChild(document.createTextNode(r.scope));
         res.appendChild(sc);
+      }
+
+      if (r.ru && r.ru.note) {
+        var rn = el("div", "res-meta res-ru-note");
+        rn.appendChild(el("b", null, "Про ссылку RU: "));
+        rn.appendChild(document.createTextNode(r.ru.note));
+        res.appendChild(rn);
       }
 
       var what = el("div", "res-meta");
@@ -1061,6 +1130,7 @@
           var incoming = parsed && parsed.state ? parsed.state : parsed;
           if (!incoming || typeof incoming !== "object" || !incoming.topics) throw new Error("Неверная структура файла");
           state.profile = incoming.profile === "dev" ? "dev" : "novice";
+          if (isEnglishLevel(incoming.englishLevel)) state.englishLevel = incoming.englishLevel;
           state.pace = Number(incoming.pace) > 0 ? Number(incoming.pace) : state.pace;
           state.startDate = typeof incoming.startDate === "string" ? incoming.startDate : state.startDate;
           state.topics = incoming.topics;

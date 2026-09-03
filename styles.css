@@ -375,6 +375,20 @@ a:hover { text-decoration: underline; }
 .badge.must { color: var(--primary); border-color: transparent; background: var(--primary-soft); }
 .res-meta { color: var(--text-muted); font-size: .85rem; margin-top: 3px; }
 .res-meta b { color: var(--text); font-weight: 600; }
+
+/* Вторая ссылка — русская версия Khan. Намеренно мельче основной: английская
+   остаётся главной, потому что нумерация юнитов в карте совпадает только с ней. */
+.res-ru {
+  margin-left: 7px; font-size: .68rem; font-weight: 700; letter-spacing: .06em;
+  padding: 1px 6px; border-radius: 999px; text-decoration: none;
+  color: var(--text-muted); border: 1px solid var(--border); background: var(--surface);
+  vertical-align: 1px;
+}
+.res-ru:hover, .res-ru:focus-visible {
+  color: var(--primary); border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  background: var(--primary-soft);
+}
+.res-ru-note b { color: var(--text-muted); }
 .res-checked { color: var(--text-faint); font-size: .76rem; }
 
 .task {
@@ -475,6 +489,28 @@ td ul { margin: 0; padding-left: 1.1em; }
 }
 .course-note p { margin: 0; }
 .res-scope b { color: var(--warn); }
+
+/* ---------- Уровень английского: переключатель на треке B ---------- */
+.level-pick {
+  background: var(--primary-soft); border-left: 3px solid var(--primary);
+  padding: 11px 13px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: 0 0 14px; font-size: .89rem;
+}
+.level-pick strong {
+  display: block; font-size: .72rem; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--primary); margin-bottom: 4px;
+}
+.level-pick p { margin: 0 0 9px; max-width: 62ch; }
+.level-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.level-btn {
+  font: inherit; font-weight: 700; font-size: .76rem; letter-spacing: .06em;
+  padding: 5px 13px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
+}
+.level-btn:hover { border-color: color-mix(in srgb, var(--primary) 45%, var(--border)); }
+.level-btn[aria-pressed="true"] {
+  background: var(--primary); border-color: var(--primary); color: #fff;
+}
 
 /* ---------- Пошаговый приём, пример «до/после», критерий проверки ---------- */
 .howto, .example, .check-note {

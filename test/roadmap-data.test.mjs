@@ -220,3 +220,86 @@ test("разделы, на которые ссылается интерфейс,
     assert.ok(DATA[key], `нет раздела ${key}`);
   }
 });
+
+/* ------------------------------------------- русские ссылки Khan Academy --- */
+
+/* Проверено вживую 03.09.2026: у русского Khan те же слаги, но переведены не
+   все курсы. Эти четыре юнита русской версии не имеют вообще — русской ссылки
+   у них быть не должно, и «починить» их нельзя. */
+const KHAN_БЕЗ_РУССКОГО = new Set([
+  "https://www.khanacademy.org/math/algebra2/x2ec2f6f830c9fb89:logs",
+  "https://www.khanacademy.org/math/linear-algebra/vectors-and-spaces",
+  "https://www.khanacademy.org/math/linear-algebra/matrix-transformations",
+  "https://www.khanacademy.org/math/multivariable-calculus/multivariable-derivatives"
+]);
+
+test("у каждого ресурса Khan есть русская ссылка, кроме непереведённых курсов", () => {
+  const khan = resources.filter((r) => r.url.includes("khanacademy.org"));
+  assert.equal(khan.length, 45, "число ресурсов Khan изменилось — пересними замер русских версий");
+
+  for (const r of khan) {
+    const ожидаем = !KHAN_БЕЗ_РУССКОГО.has(r.url);
+    assert.equal(Boolean(r.ru), ожидаем,
+      ожидаем ? `${r.title}: нет русской ссылки` : `${r.title}: русской версии нет, ссылку надо убрать`);
+  }
+  assert.equal(khan.filter((r) => r.ru).length, 41);
+});
+
+test("русская ссылка ведёт на ru.khanacademy.org и объясняет расхождение", () => {
+  for (const r of resources.filter((x) => x.ru)) {
+    assert.match(r.ru.url, /^https:\/\/ru\.khanacademy\.org\//, `${r.title}: чужой хост в русской ссылке`);
+    if (r.ru.note !== undefined) {
+      // Пометка есть только там, где русский модуль ШИРЕ английского юнита.
+      // Без неё ссылка выглядит ошибочной: жмёшь «дроби целиком» вместо
+      // «умножение дробей» и думаешь, что промахнулись адресом.
+      assert.ok(r.ru.note.length > 30, `${r.title}: пометка слишком коротка, чтобы что-то объяснить`);
+    }
+  }
+  const сПометкой = resources.filter((r) => r.ru && r.ru.note);
+  assert.equal(сПометкой.length, 12, "число крупнее нарезанных русских модулей изменилось");
+});
+
+/* ------------------------------------------------- уровень английского --- */
+
+test("уровни английского объявлены и значение по умолчанию среди них", () => {
+  const levels = DATA.meta.englishLevels;
+  assert.deepEqual(levels, ["a1", "a2", "b1", "b2", "c1"]);
+  assert.ok(levels.includes(DATA.meta.defaultEnglishLevel));
+});
+
+test("ресурсы с byLevel закрывают все уровни и ведут на British Council", () => {
+  const byLevel = resources.filter((r) => r.byLevel);
+  assert.equal(byLevel.length, 3, "разбивку по уровням имеют ровно грамматика, лексика и слушание");
+
+  for (const r of byLevel) {
+    for (const level of DATA.meta.englishLevels) {
+      const url = r.byLevel[level];
+      assert.ok(url, `${r.title}: нет адреса для уровня ${level}`);
+      assert.match(url, /^https:\/\/learnenglish\.britishcouncil\.org\//, `${r.title}: чужой хост на ${level}`);
+    }
+    // url по умолчанию обязан совпадать с уровнем по умолчанию, иначе карта и
+    // планнер разойдутся: планнер берёт byLevel, а старые ссылки — url.
+    assert.equal(r.url, r.byLevel[DATA.meta.defaultEnglishLevel],
+      `${r.title}: url не совпадает с уровнем по умолчанию`);
+  }
+});
+
+test("buildUnits подставляет адрес по уровню английского", () => {
+  const b1 = buildUnits(DATA, "novice", "b1");
+  const a1 = buildUnits(DATA, "novice", "a1");
+  const listening = (list) => list.find((u) => u.title.includes("Listening"));
+
+  assert.match(listening(b1).url, /\/listening\/b1$/);
+  assert.match(listening(a1).url, /\/listening\/a1$/);
+  // Без третьего аргумента — уровень по умолчанию из карты, а не пусто.
+  assert.equal(listening(buildUnits(DATA, "novice")).url, listening(b1).url);
+});
+
+test("buildUnits проносит русскую ссылку в единицу плана", () => {
+  const units = buildUnits(DATA, "novice");
+  const сРусской = units.filter((u) => u.ru);
+  assert.ok(сРусской.length > 0, "ни одна единица не получила русскую ссылку");
+  for (const u of сРусской) {
+    assert.match(u.ru.url, /^https:\/\/ru\.khanacademy\.org\//);
+  }
+});

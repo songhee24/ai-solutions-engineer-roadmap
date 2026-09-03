@@ -13,6 +13,28 @@ import { nextCustomId, safeUrl } from "./custom.js";
 
 const KEY = "asr:planner:v1";
 
+/** Ключ КАРТЫ. Планнер читает оттуда одно поле — уровень английского. */
+const MAP_KEY = "asr:v1";
+
+/**
+ * Уровень английского принадлежит карте: там стоит переключатель, рядом с
+ * материалами, которые от него зависят. Планнер его только читает — второй
+ * переключатель на ту же настройку путал бы больше, чем помогал.
+ *
+ * @returns {string|null} a1|a2|b1|b2|c1, либо null — тогда берётся значение
+ *   по умолчанию из самой карты.
+ */
+export function mapEnglishLevel() {
+  try {
+    const raw = localStorage.getItem(MAP_KEY);
+    if (!raw) return null;
+    const level = JSON.parse(raw)?.englishLevel;
+    return typeof level === "string" ? level : null;
+  } catch {
+    return null;
+  }
+}
+
 const DEFAULTS = {
   v: 1,
   /** null, пока человек не отметил, когда начал. Хардкодить дату нельзя:
