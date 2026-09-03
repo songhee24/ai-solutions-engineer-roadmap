@@ -5,7 +5,8 @@
     planner, setStart, setHoursPerDay, setWeekdays, setProfile,
     addCustomTopic, updateCustomTopic, removeCustomTopic,
     addTemplate, updateTemplate, removeTemplate, assignTemplate,
-    exportState, importState, resetAll
+    exportState, importState, resetAll,
+    english, setEnglishLevel, ENGLISH_LEVELS
   } from "../lib/store.svelte.js";
   import { stats, templateHours } from "../lib/progress.js";
   import { formatHours, ruNum, dateDayMonth, days as daysWord, WEEKDAY_NAMES } from "../lib/format.js";
@@ -132,6 +133,21 @@
         <option value="dev">Разработчик — часть тем короче</option>
       </select>
       <small>Профиль меняет часы у тем, а значит и весь срок. Журнал при этом не трогается.</small>
+    </div>
+
+    <div class="row">
+      <label for="set-english">Уровень английского</label>
+      <select id="set-english" class="field" value={english.choice ?? ""}
+              onchange={(e) => setEnglishLevel(e.currentTarget.value)}>
+        {#if english.choice === null}
+          <option value="" disabled>Ещё не выбран — по умолчанию B1</option>
+        {/if}
+        {#each ENGLISH_LEVELS as lv (lv)}
+          <option value={lv}>{lv.toUpperCase()}</option>
+        {/each}
+      </select>
+      <small>Меняет адрес трёх ссылок British Council — грамматика, лексика, слушание.
+        Настройка общая с картой: там тот же переключатель на треке B.</small>
     </div>
 
     <div class="row wide">

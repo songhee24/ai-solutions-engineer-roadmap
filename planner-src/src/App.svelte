@@ -5,7 +5,7 @@
   import { buildUnits } from "../../shared/schedule.mjs";
   import { loadRoadmap } from "./lib/roadmap.js";
   import { customUnits } from "./lib/custom.js";
-  import { planner, setScreen, setStart, mapEnglishLevel } from "./lib/store.svelte.js";
+  import { planner, setScreen, setStart, english } from "./lib/store.svelte.js";
   import { doneHoursByUnit, groupProgress, stats, todayIso } from "./lib/progress.js";
   import { dateLong } from "./lib/format.js";
   import Settings from "./ui/Settings.svelte";
@@ -33,14 +33,12 @@
      своя тема всплыла бы через двести с лишним дней, то есть никогда: её
      заводят, чтобы заняться ею скоро, а не когда-нибудь. Отложить на день
      по-прежнему можно кнопкой «Не сегодня». */
-  /* Уровень английского задаётся на карте; здесь он только читается, один раз
-     при загрузке. Переключить его в планнере нельзя — и незачем: это настройка
-     содержания трека, а не расписания. */
-  const englishLevel = mapEnglishLevel();
-
+  /* Уровень английского — общая с картой настройка (свой ключ в localStorage).
+     Реактивный: выбрал уровень под карточкой замера — ссылки в дне меняются
+     сразу, без перезагрузки. */
   let units = $derived(
     data
-      ? [...customUnits(planner.custom), ...buildUnits(data, planner.profile, englishLevel)]
+      ? [...customUnits(planner.custom), ...buildUnits(data, planner.profile, english.choice)]
       : []
   );
   let doneByUnit = $derived(doneHoursByUnit(planner.log));

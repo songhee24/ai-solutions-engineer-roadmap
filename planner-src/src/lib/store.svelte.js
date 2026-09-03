@@ -13,25 +13,44 @@ import { nextCustomId, safeUrl } from "./custom.js";
 
 const KEY = "asr:planner:v1";
 
-/** Ключ КАРТЫ. Планнер читает оттуда одно поле — уровень английского. */
+/* Уровень английского. Ключ СВОЙ — ни планнера, ни карты: настройку задают в
+   обоих местах, и держать её в состоянии одного значило бы, что второй пишет в
+   чужое хранилище. Здесь же он не может лежать ещё и потому, что «Сбросить всё»
+   в планнере стирал бы замер, к делу не относящийся.
+
+   Пусто — значит человек ещё не выбирал, и это НЕ то же самое, что B1: пока
+   пусто, экран «Сегодня» показывает подсказку под карточкой замера. */
+const ENGLISH_LEVEL_KEY = "asr:english-level";
+
+/** Ключ КАРТЫ — только для переезда с 03.09.2026, когда уровень лежал внутри него. */
 const MAP_KEY = "asr:v1";
 
-/**
- * Уровень английского принадлежит карте: там стоит переключатель, рядом с
- * материалами, которые от него зависят. Планнер его только читает — второй
- * переключатель на ту же настройку путал бы больше, чем помогал.
- *
- * @returns {string|null} a1|a2|b1|b2|c1, либо null — тогда берётся значение
- *   по умолчанию из самой карты.
- */
-export function mapEnglishLevel() {
+/** Совпадает с meta.englishLevels в карте; тест это сходство проверяет. */
+export const ENGLISH_LEVELS = ["a1", "a2", "b1", "b2", "c1"];
+const LEVELS = ENGLISH_LEVELS;
+
+function readEnglishChoice() {
   try {
+    const own = localStorage.getItem(ENGLISH_LEVEL_KEY);
+    if (LEVELS.includes(own)) return own;
     const raw = localStorage.getItem(MAP_KEY);
-    if (!raw) return null;
-    const level = JSON.parse(raw)?.englishLevel;
-    return typeof level === "string" ? level : null;
+    const old = raw ? JSON.parse(raw)?.englishLevel : null;
+    return LEVELS.includes(old) ? old : null;
   } catch {
     return null;
+  }
+}
+
+/** Выбранный уровень или null, если человек ещё не выбирал. */
+export const english = $state({ choice: readEnglishChoice() });
+
+export function setEnglishLevel(value) {
+  if (!LEVELS.includes(value)) return;
+  english.choice = value;
+  try {
+    localStorage.setItem(ENGLISH_LEVEL_KEY, value);
+  } catch (e) {
+    console.warn("Не удалось сохранить уровень английского:", e);
   }
 }
 

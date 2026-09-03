@@ -15,7 +15,6 @@
     return {
       v: 1,
       profile: DATA.meta.defaultProfile || "novice",
-      englishLevel: DATA.meta.defaultEnglishLevel || "b1",
       pace: DATA.meta.defaultPace || 15,
       theme: null,
       startDate: null,
@@ -27,7 +26,15 @@
 
   /* Уровень английского меняет адрес трёх ресурсов British Council: у них
      разбивка по уровням своя, поэтому она лежит в данных полем byLevel, а не
-     собирается из шаблона. Всё остальное от уровня не зависит. */
+     собирается из шаблона. Всё остальное от уровня не зависит.
+
+     Ключ СВОЙ, отдельный и от карты, и от планнера: настройку задают в обоих
+     местах, и класть её в чужое хранилище значило бы, что один пишет в состояние
+     другого. Пусто — значит человек ещё не выбирал: планнер по этому отличию
+     показывает подсказку под карточкой замера, а карта берёт значение по
+     умолчанию. Поэтому «пусто» и «B1» здесь разные вещи. */
+  var ENGLISH_LEVEL_KEY = "asr:english-level";
+
   function englishLevels() {
     return DATA.meta.englishLevels || ["a1", "a2", "b1", "b2", "c1"];
   }
@@ -36,9 +43,48 @@
     return englishLevels().indexOf(value) !== -1;
   }
 
+  /* Переезд с 03.09.2026: несколько часов уровень лежал внутри asr:v1. Забрать
+     его ЛЕНИВО, при первом обращении, нельзя — карта перезаписывает asr:v1 на
+     первом же saveState(), и старое поле пропадает раньше, чем его прочитают.
+     Поэтому переносим один раз на старте. Тест на это есть. */
+  function migrateEnglishLevel() {
+    try {
+      if (localStorage.getItem(ENGLISH_LEVEL_KEY)) return;
+      var raw = localStorage.getItem(STORAGE_KEY);
+      var old = raw ? JSON.parse(raw).englishLevel : null;
+      if (isEnglishLevel(old)) localStorage.setItem(ENGLISH_LEVEL_KEY, old);
+    } catch (e) {
+      /* Нет хранилища — переезжать нечего. */
+    }
+  }
+
+  /** Выбранный уровень или null, если человек ещё не выбирал. */
+  function englishChoice() {
+    try {
+      var own = localStorage.getItem(ENGLISH_LEVEL_KEY);
+      return isEnglishLevel(own) ? own : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /** Уровень для подстановки: выбранный, иначе значение по умолчанию из карты. */
+  function englishLevel() {
+    return englishChoice() || DATA.meta.defaultEnglishLevel || "b1";
+  }
+
+  function setEnglishLevel(value) {
+    try {
+      localStorage.setItem(ENGLISH_LEVEL_KEY, value);
+    } catch (e) {
+      toast("Не удалось сохранить уровень: браузер запретил localStorage");
+    }
+  }
+
   /* Единственное место, где решается, какой адрес открывать у ресурса. */
   function resourceUrl(r) {
-    if (r.byLevel && r.byLevel[state.englishLevel]) return r.byLevel[state.englishLevel];
+    var level = englishLevel();
+    if (r.byLevel && r.byLevel[level]) return r.byLevel[level];
     return r.url;
   }
 
@@ -50,7 +96,6 @@
         var parsed = JSON.parse(raw);
         if (parsed && typeof parsed === "object") {
           s.profile = parsed.profile === "dev" ? "dev" : "novice";
-          if (isEnglishLevel(parsed.englishLevel)) s.englishLevel = parsed.englishLevel;
           s.pace = Number(parsed.pace) > 0 ? Number(parsed.pace) : s.pace;
           s.theme = parsed.theme === "dark" || parsed.theme === "light" ? parsed.theme : null;
           s.startDate = typeof parsed.startDate === "string" ? parsed.startDate : null;
@@ -74,6 +119,7 @@
     }
   }
 
+  migrateEnglishLevel();
   var state = loadState();
 
   function topicState(id) {
@@ -514,19 +560,20 @@
     box.appendChild(el("strong", null, "Ваш уровень английского"));
     box.appendChild(el("p", null,
       "Ссылки на грамматику, лексику и слушание подстраиваются под него. " +
-      "Уровень берётся из теста British Council в теме B0."));
+      "Уровень берётся из теста British Council в теме B0. " +
+      "Настройка общая с планнером: там он тоже спросит после замера."));
 
+    var current = englishLevel();
     var row = el("div", "level-row");
     row.setAttribute("role", "group");
     row.setAttribute("aria-label", "Уровень английского");
     englishLevels().forEach(function (lv) {
       var btn = el("button", "level-btn", lv.toUpperCase());
       btn.type = "button";
-      btn.setAttribute("aria-pressed", String(lv === state.englishLevel));
+      btn.setAttribute("aria-pressed", String(lv === current));
       btn.addEventListener("click", function () {
-        if (state.englishLevel === lv) return;
-        state.englishLevel = lv;
-        saveState();
+        if (englishChoice() === lv) return;
+        setEnglishLevel(lv);
         renderRoute();
         toast("Уровень " + lv.toUpperCase() + ": ссылки British Council обновлены");
       });
@@ -667,23 +714,30 @@
     topic.resources.forEach(function (r) {
       var res = el("div", "res");
       var line = el("div");
-      var a = el("a", "res-title", r.title);
-      a.href = resourceUrl(r);
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      line.appendChild(a);
+      line.appendChild(el("span", "res-title", r.title));
 
-      /* Вторая ссылка на русскую версию Khan. Основной остаётся английская:
-         нумерация юнитов в карте совпадает только с ней. */
+      /* Язык выбирается кнопкой, а не спрятан в заголовке: у русской и
+         английской версии равные права. Метка берётся из самого ресурса —
+         у русскоязычных источников это RU, а не ENG. */
+      var langs = el("span", "res-langs");
+      var own = el("a", null, r.lang === "ru" ? "RU" : "ENG");
+      own.href = resourceUrl(r);
+      own.target = "_blank";
+      own.rel = "noopener noreferrer";
+      own.setAttribute("aria-label",
+        "Открыть " + (r.lang === "ru" ? "по-русски" : "по-английски") + ": " + r.title);
+      langs.appendChild(own);
+
       if (r.ru) {
-        var ru = el("a", "res-ru", "RU");
+        var ru = el("a", null, "RU");
         ru.href = r.ru.url;
         ru.target = "_blank";
         ru.rel = "noopener noreferrer";
         ru.title = r.ru.note || "Та же тема на ru.khanacademy.org";
         ru.setAttribute("aria-label", "Открыть на русском: " + r.title);
-        line.appendChild(ru);
+        langs.appendChild(ru);
       }
+      line.appendChild(langs);
 
       var badges = el("span", "res-badges");
       badges.appendChild(el("span", "badge " + (r.cost === "paid" ? "paid" : "free"), r.cost === "paid" ? "платно" : "бесплатно"));
@@ -1130,7 +1184,6 @@
           var incoming = parsed && parsed.state ? parsed.state : parsed;
           if (!incoming || typeof incoming !== "object" || !incoming.topics) throw new Error("Неверная структура файла");
           state.profile = incoming.profile === "dev" ? "dev" : "novice";
-          if (isEnglishLevel(incoming.englishLevel)) state.englishLevel = incoming.englishLevel;
           state.pace = Number(incoming.pace) > 0 ? Number(incoming.pace) : state.pace;
           state.startDate = typeof incoming.startDate === "string" ? incoming.startDate : state.startDate;
           state.topics = incoming.topics;

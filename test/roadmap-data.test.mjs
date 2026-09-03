@@ -303,3 +303,11 @@ test("buildUnits проносит русскую ссылку в единицу 
     assert.match(u.ru.url, /^https:\/\/ru\.khanacademy\.org\//);
   }
 });
+
+test("замер уровня помечен ровно один раз — планнер спрашивает под ним", () => {
+  const probes = resources.filter((r) => r.levelProbe);
+  assert.equal(probes.length, 1, "пометка levelProbe должна стоять на одном ресурсе");
+  assert.match(probes[0].url, /britishcouncil\.org\/level$/, "помечен не тест уровня");
+  assert.equal(buildUnits(DATA, "novice").filter((u) => u.levelProbe).length, 1,
+    "флаг не дошёл до единицы плана — подсказка в планнере не появится");
+});

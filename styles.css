@@ -376,15 +376,15 @@ a:hover { text-decoration: underline; }
 .res-meta { color: var(--text-muted); font-size: .85rem; margin-top: 3px; }
 .res-meta b { color: var(--text); font-weight: 600; }
 
-/* Вторая ссылка — русская версия Khan. Намеренно мельче основной: английская
-   остаётся главной, потому что нумерация юнитов в карте совпадает только с ней. */
-.res-ru {
-  margin-left: 7px; font-size: .68rem; font-weight: 700; letter-spacing: .06em;
-  padding: 1px 6px; border-radius: 999px; text-decoration: none;
+/* Кнопки языка. Обе одного размера: заголовок больше не ссылка, и ни одна
+   версия не объявлена главной — выбирает читатель. */
+.res-langs { display: inline-flex; gap: 6px; margin-left: 8px; vertical-align: 1px; }
+.res-langs a {
+  font-size: .68rem; font-weight: 700; letter-spacing: .06em;
+  padding: 1px 8px; border-radius: 999px; text-decoration: none; white-space: nowrap;
   color: var(--text-muted); border: 1px solid var(--border); background: var(--surface);
-  vertical-align: 1px;
 }
-.res-ru:hover, .res-ru:focus-visible {
+.res-langs a:hover, .res-langs a:focus-visible {
   color: var(--primary); border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
   background: var(--primary-soft);
 }

@@ -274,21 +274,32 @@ test("на странице этапа каждая ссылка ресурса 
 
 /* ------------------------------------------ русские ссылки и уровень --- */
 
-test("у ресурса Khan рисуется вторая ссылка на русскую версию", async () => {
+test("у ресурса Khan обе версии стоят равными кнопками", async () => {
   const w = await openMap({ hash: "#/stage/track-math" });
   await goto(w, "#/stage/track-math");
 
-  const ru = Array.from(w.document.querySelectorAll("#stage-page .res-ru"));
-  assert.ok(ru.length > 0, "ни одной русской ссылки на треке математики");
-  for (const a of ru) {
-    assert.match(a.href, /^https:\/\/ru\.khanacademy\.org\//, "русская ссылка ведёт не туда");
-    assert.equal(a.target, "_blank");
-    assert.ok(a.title, "у русской ссылки нет подсказки");
-  }
+  const cards = Array.from(w.document.querySelectorAll("#stage-page .res"));
+  const khan = cards.filter((c) => {
+    const first = c.querySelector(".res-langs a");
+    return first && first.href.includes("khanacademy.org");
+  });
+  assert.ok(khan.length > 0, "на треке математики нет карточек Khan");
 
-  // Английская остаётся основной: она первая в строке и несёт заголовок.
-  const first = w.document.querySelector("#stage-page .res .res-title");
-  assert.match(first.href, /^https:\/\/www\.khanacademy\.org\//);
+  let сРусской = 0;
+  for (const card of khan) {
+    const links = Array.from(card.querySelectorAll(".res-langs a"));
+    assert.equal(links[0].textContent, "ENG", "первой должна стоять кнопка языка самого ресурса");
+    assert.match(links[0].href, /^https:\/\/www\.khanacademy\.org\//);
+    if (links.length === 2) {
+      сРусской++;
+      assert.equal(links[1].textContent, "RU");
+      assert.match(links[1].href, /^https:\/\/ru\.khanacademy\.org\//, "русская ведёт не туда");
+      assert.ok(links[1].title, "у русской кнопки нет подсказки");
+    }
+    // Заголовок больше НЕ ссылка: язык выбирается кнопкой.
+    assert.equal(card.querySelector(".res-title").tagName, "SPAN");
+  }
+  assert.ok(сРусской > 0, "ни одной пары ENG/RU");
 });
 
 test("переключатель уровня стоит только на треке английского", async () => {
@@ -312,8 +323,9 @@ test("смена уровня меняет адрес ссылок British Counc
   await goto(w, "#/stage/track-english");
 
   const listening = () =>
-    Array.from(w.document.querySelectorAll("#stage-page .res-title"))
-      .find((a) => a.textContent.includes("Listening"));
+    Array.from(w.document.querySelectorAll("#stage-page .res"))
+      .find((c) => c.querySelector(".res-title").textContent.includes("Listening"))
+      .querySelector(".res-langs a");
 
   assert.match(listening().href, /\/listening\/b1$/, "по умолчанию должен быть B1");
 
@@ -323,6 +335,21 @@ test("смена уровня меняет адрес ссылок British Counc
   await new Promise((r) => setTimeout(r, 10));
 
   assert.match(listening().href, /\/listening\/a1$/, "ссылка не переехала на A1");
-  assert.equal(JSON.parse(w.localStorage.getItem("asr:v1")).englishLevel, "a1",
-    "уровень не сохранился");
+  // Ключ СВОЙ, не внутри asr:v1: настройку задают и на карте, и в планнере.
+  assert.equal(w.localStorage.getItem("asr:english-level"), "a1", "уровень не сохранился");
+  assert.equal(JSON.parse(w.localStorage.getItem("asr:v1")).englishLevel, undefined,
+    "уровень не должен дублироваться в состоянии карты");
+});
+
+test("уровень, оставшийся в старом месте, подхватывается при переезде", () => {
+  // Короткое время 03.09.2026 уровень лежал внутри asr:v1. Тест держит запасной
+  // путь живым: без него молча вернулся бы B1 и выбор человека пропал.
+  return openMap({ storage: { v: 1, englishLevel: "b2", topics: {}, open: {}, openTopics: {} } })
+    .then(async (w) => {
+      await goto(w, "#/stage/track-english");
+      const listening = Array.from(w.document.querySelectorAll("#stage-page .res"))
+        .find((c) => c.querySelector(".res-title").textContent.includes("Listening"))
+        .querySelector(".res-langs a");
+      assert.match(listening.href, /\/listening\/b2$/, "старый уровень потерян");
+    });
 });

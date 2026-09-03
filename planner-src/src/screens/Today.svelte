@@ -3,7 +3,8 @@
      Ничего не закрывается само — отмечает человек. */
   import { planDays } from "../../../shared/schedule.mjs";
   import {
-    planner, isLogged, logUnit, unlogUnit, setDayHours, skipUnit, unskipAll
+    planner, isLogged, logUnit, unlogUnit, setDayHours, skipUnit, unskipAll,
+    english, setEnglishLevel, ENGLISH_LEVELS
   } from "../lib/store.svelte.js";
   import {
     budgetForDay, doneHoursByUnit, remainingUnits, fromIso, round2, templateForDay
@@ -176,22 +177,38 @@
                        onchange={() => toggle(item)}
                        aria-label={`Закрыть: ${item.unit.title}`}>
                 <div class="body">
-                  <div class="title">
-                    {#if item.unit.url}
-                      <a href={item.unit.url} target="_blank" rel="noopener noreferrer">{item.unit.title}</a>
-                    {:else}
-                      {item.unit.title}
-                    {/if}
-                    <!-- Русская версия Khan второй ссылкой. Основной остаётся
-                         английская: нумерация юнитов совпадает только с ней. -->
-                    {#if item.unit.ru}
-                      <a class="ru" href={item.unit.ru.url} target="_blank" rel="noopener noreferrer"
-                         title={item.unit.ru.note ?? "Та же тема на ru.khanacademy.org"}
-                         aria-label={`Открыть на русском: ${item.unit.title}`}>RU</a>
-                    {/if}
-                  </div>
+                  <div class="title">{item.unit.title}</div>
+                  <!-- Язык выбирается кнопкой, а не спрятан в заголовке: у русской
+                       и английской версии равные права. Метка берётся из самого
+                       ресурса — у русскоязычных источников это RU, а не ENG. -->
+                  {#if item.unit.url}
+                    <div class="langs">
+                      <a href={item.unit.url} target="_blank" rel="noopener noreferrer"
+                         aria-label={`Открыть ${item.unit.lang === "ru" ? "по-русски" : "по-английски"}: ${item.unit.title}`}
+                        >{item.unit.lang === "ru" ? "RU" : "ENG"}</a>
+                      {#if item.unit.ru}
+                        <a href={item.unit.ru.url} target="_blank" rel="noopener noreferrer"
+                           title={item.unit.ru.note ?? "Та же тема на ru.khanacademy.org"}
+                           aria-label={`Открыть на русском: ${item.unit.title}`}>RU</a>
+                      {/if}
+                    </div>
+                  {/if}
                   {#if item.unit.ru?.note}
                     <div class="meta detail">Про ссылку RU: {item.unit.ru.note}</div>
+                  {/if}
+                  <!-- Спрашиваем ровно там, где человек только что прошёл замер,
+                       и ровно до тех пор, пока он не ответил. Потом строка
+                       исчезает навсегда; передумать можно в настройках. -->
+                  {#if item.unit.levelProbe && english.choice === null}
+                    <div class="level-ask">
+                      <span>Какой результат? Ссылки на грамматику, лексику и слушание
+                        подстроятся под него.</span>
+                      <div class="levels" role="group" aria-label="Ваш уровень английского">
+                        {#each ENGLISH_LEVELS as lv (lv)}
+                          <button onclick={() => setEnglishLevel(lv)}>{lv.toUpperCase()}</button>
+                        {/each}
+                      </div>
+                    </div>
                   {/if}
                   <div class="meta">{where(item.unit)}</div>
                   {#if item.unit.kind === "task" && item.unit.detail}
@@ -290,14 +307,26 @@
   .item.closed .body { opacity: .55; }
   .item .body { min-width: 0; flex: 1; }
   .item .title { font-weight: 600; overflow-wrap: anywhere; }
-  /* Мельче основной ссылки — намеренно: английская остаётся главной. */
-  .item .title a.ru {
-    margin-left: 7px; font-size: .68rem; font-weight: 700; letter-spacing: .06em;
-    padding: 1px 6px; border-radius: 999px; text-decoration: none;
-    color: var(--text-muted); border: 1px solid var(--border); background: var(--surface);
-    vertical-align: 1px; white-space: nowrap;
+  .level-ask {
+    margin-top: 7px; padding: 9px 11px; border-radius: 8px;
+    background: var(--primary-soft); border-left: 3px solid var(--primary);
+    font-size: .85rem; color: var(--text);
   }
-  .item .title a.ru:hover, .item .title a.ru:focus-visible {
+  .level-ask .levels { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .level-ask button {
+    font: inherit; font-weight: 700; font-size: .76rem; letter-spacing: .06em;
+    padding: 4px 12px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  }
+  .level-ask button:hover { border-color: var(--primary); background: var(--primary-soft); }
+  /* Кнопки языка — одного размера обе: ни одна версия не главнее. */
+  .langs { display: flex; gap: 6px; margin-top: 5px; }
+  .langs a {
+    font-size: .68rem; font-weight: 700; letter-spacing: .06em;
+    padding: 2px 9px; border-radius: 999px; text-decoration: none; white-space: nowrap;
+    color: var(--text-muted); border: 1px solid var(--border); background: var(--surface);
+  }
+  .langs a:hover, .langs a:focus-visible {
     color: var(--primary); border-color: var(--primary); background: var(--primary-soft);
   }
   .item .meta { color: var(--text-faint); font-size: 12.5px; margin-top: 2px; }
