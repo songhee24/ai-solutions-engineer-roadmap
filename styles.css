@@ -678,6 +678,7 @@ td ul { margin: 0; padding-left: 1.1em; }
 #study-method .section-head p,
 #study-method .rules > p,
 #study-method .rules > ul > li,
+#study-method .rules > ol > li,
 #study-method .callout { max-width: 62ch; }
 
 /* ---------- Оглавление страницы ----------
@@ -712,6 +713,12 @@ td ul { margin: 0; padding-left: 1.1em; }
 }
 
 /* ---------- Чем писать ---------- */
+/* День по шагам: порядок здесь — часть смысла, поэтому нумерация видимая. */
+.day-steps { margin: 12px 0 0; padding-left: 1.35em; }
+.day-steps li { margin-top: 10px; line-height: 1.65; }
+.day-steps li:first-child { margin-top: 0; }
+.day-steps b { color: var(--text); font-weight: 650; }
+
 .tool-list { margin: 12px 0 0; }
 .tool-list dt { font-weight: 650; margin-top: 12px; }
 .tool-list dt:first-child { margin-top: 0; }

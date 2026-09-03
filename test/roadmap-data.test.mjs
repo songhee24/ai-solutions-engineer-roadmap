@@ -311,3 +311,22 @@ test("замер уровня помечен ровно один раз — пл
   assert.equal(buildUnits(DATA, "novice").filter((u) => u.levelProbe).length, 1,
     "флаг не дошёл до единицы плана — подсказка в планнере не появится");
 });
+
+test("«День 1 по шагам» покрывает и математику, и английский", () => {
+  const w = DATA.studyMethod.walkthrough;
+  assert.ok(w, "нет блока walkthrough");
+  assert.ok(w.title && w.intro && w.note, "нет заголовка, вступления или примечания");
+  assert.ok(w.steps.length >= 10, `шагов ${w.steps.length} — день так не разберёшь`);
+
+  for (const step of w.steps) {
+    assert.ok(step.when && step.when.trim(), "шаг без момента");
+    // Шаг без внятного действия бесполезен: он снова оставит читателя с
+    // вопросом «а что именно делать», ради которого блок и заведён.
+    assert.ok(step.what && step.what.length > 60, `«${step.when}»: действие слишком коротко`);
+  }
+
+  const всё = w.steps.map((s) => s.when + " " + s.what).join(" ");
+  assert.match(всё, /чист(ый|ом) лист/i, "нет шага про проверку на чистом листе");
+  assert.match(всё, /Anki/, "нет шага про Anki — английский не покрыт");
+  assert.match(всё, /бумаг/i, "нигде не сказано про бумагу");
+});

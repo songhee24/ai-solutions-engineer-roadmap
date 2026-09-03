@@ -867,6 +867,23 @@
     });
   }
 
+  /* День по шагам: момент — что делать. Нумерованный список, потому что здесь
+     важен порядок, а не пары «термин — объяснение», как в «Чем писать». */
+  function renderMethodDay(d) {
+    if (!d) return;
+    document.getElementById("sm-day-title").textContent = d.title;
+    document.getElementById("sm-day-intro").textContent = d.intro;
+    document.getElementById("sm-day-note").textContent = d.note || "";
+
+    var list = document.getElementById("sm-day-list");
+    d.steps.forEach(function (step) {
+      var li = el("li");
+      li.appendChild(el("b", null, step.when + ". "));
+      li.appendChild(document.createTextNode(step.what));
+      list.appendChild(li);
+    });
+  }
+
   /* Оглавление страницы «Как заниматься».
 
      КНОПКИ, а не ссылки, и хеш не трогается вообще. currentRoute() режет
@@ -928,6 +945,7 @@
     document.getElementById("sm-rule").textContent = m.rule;
 
     renderMethodTools(m.tools);
+    renderMethodDay(m.walkthrough);
 
     var host = document.getElementById("sm-areas");
     m.areas.forEach(function (a) {
@@ -971,6 +989,7 @@
     renderMethodToc([
       { id: "sm-rule", label: "Правило" },
       { id: "sm-tools", label: "Чем писать" },
+      { id: "sm-day", label: "День по шагам" },
       { id: "sm-areas", label: "Где нужна бумага" },
       { id: "sm-notebook", label: "Что писать в тетради" },
       { id: "sm-week", label: "Ритм недели" }

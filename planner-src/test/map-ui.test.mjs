@@ -210,7 +210,7 @@ test("смена профиля меняет часы, но не трогает 
 test("оглавление страницы метода — кнопки, и каждая ведёт к существующему блоку", async () => {
   const w = await openMap({ hash: "#/method" });
   const buttons = Array.from(w.document.querySelectorAll(".method-toc-item"));
-  assert.equal(buttons.length, 5, `кнопок ${buttons.length}, ожидали 5`);
+  assert.equal(buttons.length, 6, `кнопок ${buttons.length}, ожидали 6`);
 
   for (const b of buttons) {
     // Ссылка сломала бы роутер: currentRoute режет хеш по «/», и «#/method#tools»
@@ -220,7 +220,7 @@ test("оглавление страницы метода — кнопки, и к
   }
 
   // Цели существуют. Переименуют id — тест упадёт, а не оглавление молча онемеет.
-  for (const id of ["sm-rule", "sm-tools", "sm-areas", "sm-notebook", "sm-week"]) {
+  for (const id of ["sm-rule", "sm-tools", "sm-day", "sm-areas", "sm-notebook", "sm-week"]) {
     assert.ok(w.document.getElementById(id), `нет цели #${id}`);
     assert.ok(
       w.document.getElementById(id).classList.contains("method-anchor"),
@@ -241,12 +241,30 @@ test("блок «Чем писать» отрисован из данных", as
   }
 });
 
+test("блок «День 1 по шагам» отрисован из данных, по шагу на пункт", async () => {
+  const w = await openMap({ hash: "#/method" });
+  const day = w.ROADMAP.studyMethod.walkthrough;
+  const items = Array.from(w.document.querySelectorAll("#sm-day-list li"));
+  assert.equal(items.length, day.steps.length, "число шагов на странице разошлось с данными");
+
+  const text = w.document.getElementById("sm-day").textContent;
+  for (const step of day.steps) {
+    assert.ok(text.includes(step.when), `на странице нет шага «${step.when}»`);
+  }
+  // Список нумерованный: порядок здесь — часть смысла, ul его не передаёт.
+  assert.equal(w.document.getElementById("sm-day-list").tagName, "OL");
+});
+
 test("renderStudyMethod не вызывается дважды — ничего не удвоилось", async () => {
   // Он использует appendChild без очистки: второй вызов удвоил бы содержимое.
   const w = await openMap({ hash: "#/method" });
   assert.equal(w.document.querySelectorAll("#sm-areas .method-area").length, 2);
-  assert.equal(w.document.querySelectorAll(".method-toc-item").length, 5);
+  assert.equal(w.document.querySelectorAll(".method-toc-item").length, 6);
   assert.equal(w.document.querySelectorAll("#sm-tools-list dt").length, 3);
+  assert.equal(
+    w.document.querySelectorAll("#sm-day-list li").length,
+    w.ROADMAP.studyMethod.walkthrough.steps.length
+  );
 });
 
 /* -------------------------------------------------------------- разметка --- */
