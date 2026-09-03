@@ -3,10 +3,14 @@
      Плюс возможность объявить день выходным задним числом — тогда он перестаёт
      считаться прогулом, но и часы за него не начисляются. */
   import { planner, setDayHours } from "../lib/store.svelte.js";
-  import { addDays, diffDays, budgetForDay, hoursOnDay, fromIso } from "../lib/progress.js";
+  import { addDays, diffDays, budgetForDay, hoursOnDay, fromIso, dayLog } from "../lib/progress.js";
   import { dateShort, formatHours, hoursNum, plural, monthShort } from "../lib/format.js";
 
-  let { summary, today } = $props();
+  let { units, summary, today } = $props();
+
+  /* Какой день развёрнут. Локально, а не в хранилище: это взгляд, а не
+     настройка — незачем переживать перезагрузку. */
+  let open = $state(null);
 
   const RECENT = 14;
   /** Предел на ширину полосы: 60 недель заведомо перекрывают любой темп. */
@@ -124,18 +128,24 @@
 <div class="card">
   {#each recent as day (day.iso)}
     <div class="row">
-      <span class="name">{dateShort(day.iso)}</span>
-      <span class="meta" class:miss={day.missed}>
-        {#if day.isToday}
-          сегодня · {formatHours(day.hours)} из {formatHours(day.budget)}
-        {:else if day.off}
-          выходной
-        {:else if day.missed}
-          пропущен — финиш сдвинулся на день
-        {:else}
-          {formatHours(day.hours)} из {formatHours(day.budget)}
-        {/if}
-      </span>
+      <!-- Переключателем стала только область названия. Кнопки действий —
+           её СОСЕДИ: кнопка внутри кнопки это невалидная разметка. -->
+      <button class="peek" aria-expanded={open === day.iso} aria-controls="day-{day.iso}"
+              onclick={() => (open = open === day.iso ? null : day.iso)}>
+        <span class="chev" aria-hidden="true">{open === day.iso ? "−" : "+"}</span>
+        <span class="name">{dateShort(day.iso)}</span>
+        <span class="meta" class:miss={day.missed}>
+          {#if day.isToday}
+            сегодня · {formatHours(day.hours)} из {formatHours(day.budget)}
+          {:else if day.off}
+            выходной
+          {:else if day.missed}
+            пропущен — финиш сдвинулся на день
+          {:else}
+            {formatHours(day.hours)} из {formatHours(day.budget)}
+          {/if}
+        </span>
+      </button>
       <span class="end">
         <!-- Ярлыка «закрыт» здесь нет намеренно: 52 минуты из пяти часов —
              ещё не закрытый день, а соседняя колонка и так называет цифры. -->
@@ -148,6 +158,24 @@
         {/if}
       </span>
     </div>
+    {#if open === day.iso}
+      {@const closed = dayLog(units, planner.log, day.iso)}
+      <div class="detail" id="day-{day.iso}">
+        {#if closed.length === 0}
+          <p class="empty">В этот день ничего не закрыто. Недоделанное не пропало — оно стоит первым в очереди следующего рабочего дня.</p>
+        {:else}
+          <ul>
+            {#each closed as item, i (item.unitId + i)}
+              <li>
+                <span class="what">{item.unit ? item.unit.title : "Тема больше не в карте"}</span>
+                <span class="hrs">{formatHours(item.hours)}</span>
+              </li>
+            {/each}
+          </ul>
+          <p class="sum">Всего за день — {formatHours(day.hours)}</p>
+        {/if}
+      </div>
+    {/if}
   {/each}
 </div>
 
@@ -191,4 +219,28 @@
   .row .meta { color: var(--text-muted); font-size: 13px; }
   .row .meta.miss { color: var(--miss); }
   .row .end { margin-left: auto; }
+
+  /* Кнопка-переключатель прикидывается частью строки: у неё нет ни рамки, ни
+     фона, чтобы «Последние дни» выглядели так же, как раньше. */
+  .peek {
+    display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;
+    font: inherit; color: inherit; text-align: left; cursor: pointer;
+    background: none; border: 0; padding: 0;
+  }
+  .peek:hover .name, .peek:focus-visible .name { color: var(--primary); }
+  .peek .chev {
+    width: 16px; flex: none; text-align: center; color: var(--text-faint);
+    font-weight: 700;
+  }
+
+  .detail { padding: 0 16px 12px 44px; border-top: 0; }
+  .detail ul { list-style: none; margin: 0; padding: 0; }
+  .detail li {
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 5px 0; font-size: 13px;
+  }
+  .detail .what { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .detail .hrs { color: var(--text-muted); white-space: nowrap; }
+  .detail .sum { margin: 6px 0 0; color: var(--text-muted); font-size: 12.5px; }
+  .detail .empty { margin: 0; color: var(--text-muted); font-size: 13px; max-width: 62ch; }
 </style>

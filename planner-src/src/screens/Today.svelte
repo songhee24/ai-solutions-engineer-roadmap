@@ -11,7 +11,7 @@
   } from "../lib/progress.js";
   import { formatHours, ruNum, hoursNum, dateLong, dateDayMonth, plural } from "../lib/format.js";
 
-  let { units, doneByUnit, summary, today } = $props();
+  let { units, doneByUnit, firstDay, summary, today } = $props();
 
   /* Внутри одного дня расписание недели уже неважно — день выбран.
      Выходной обрабатывается отдельной веткой ниже, через нулевой бюджет. */
@@ -98,8 +98,15 @@
   function volume(item) {
     const parts = [];
     if (item.unit.doneOfUnit > 0) {
+      /* Тему, начатую раньше, называем днём: «продолжаете» и «тянется с 3
+         сентября» говорят одно и то же, но второе отвечает на вопрос «а не
+         потерялось ли». Строка от этого не длиннее. */
+      const начато = firstDay?.[item.unit.id];
+      const откуда = начато && начато !== today
+        ? `тянется с ${dateDayMonth(начато)}`
+        : "продолжаете";
       parts.push(
-        `продолжаете: закрыто ${ruNum(item.unit.doneOfUnit)} из ${ruNum(item.unit.fullHours)} ч`
+        `${откуда}: закрыто ${ruNum(item.unit.doneOfUnit)} из ${ruNum(item.unit.fullHours)} ч`
       );
     }
     if (item.continues) {

@@ -14,6 +14,9 @@ import {
   doneHoursByUnit,
   totalDoneHours,
   hoursOnDay,
+  dayLog,
+  firstDayByUnit,
+  round2,
   remainingUnits,
   scheduledDays,
   missedDays,
@@ -214,4 +217,54 @@ test("прогресс и доля пути считаются от полног
   assert.equal(s.percent, 25);
   assert.equal(s.closedDays, 1);
   assert.equal(s.missed, 0, "первый же день не может быть пропущенным");
+});
+
+/* ------------------------------------------------------- состав дня --- */
+
+test("dayLog отдаёт состав дня в порядке журнала, с названиями тем", () => {
+  const units = [
+    { id: "a", title: "Дроби" },
+    { id: "b", title: "Английский" }
+  ];
+  const log = { "2026-09-03": [{ unitId: "b", hours: 1 }, { unitId: "a", hours: 2 }] };
+
+  const day = dayLog(units, log, "2026-09-03");
+  assert.deepEqual(day.map((e) => e.unit.title), ["Английский", "Дроби"], "порядок журнала не сохранён");
+  assert.deepEqual(day.map((e) => e.hours), [1, 2]);
+
+  assert.deepEqual(dayLog(units, log, "2026-09-04"), [], "день без записей должен быть пустым массивом");
+});
+
+test("dayLog не выбрасывает запись, для которой темы больше нет", () => {
+  // Единицы в журнале живут вечно, а карта меняется. Выбросить такую запись
+  // значило бы спрятать часы, которые продолжают считаться в итогах: день
+  // перестал бы сходиться сам с собой.
+  const log = { "2026-09-03": [{ unitId: "исчезнувшая", hours: 3 }] };
+  const day = dayLog([{ id: "a", title: "Дроби" }], log, "2026-09-03");
+
+  assert.equal(day.length, 1, "запись пропала");
+  assert.equal(day[0].unit, null);
+  assert.equal(day[0].unitId, "исчезнувшая");
+  assert.equal(day[0].hours, 3);
+});
+
+test("сумма развёрнутого дня сходится с суммой в строке", () => {
+  const log = { "2026-09-03": [{ unitId: "a", hours: 1.5 }, { unitId: "b", hours: 2 }] };
+  const units = [{ id: "a", title: "A" }, { id: "b", title: "B" }];
+
+  const сумма = dayLog(units, log, "2026-09-03").reduce((s, e) => s + e.hours, 0);
+  assert.equal(round2(сумма), hoursOnDay(log, "2026-09-03"));
+});
+
+test("firstDayByUnit берёт САМЫЙ РАННИЙ день, а не первый попавшийся ключ", () => {
+  // Ключи нарочно в обратном порядке: без сортировки внутри функции «первым»
+  // стал бы сентябрь 5-е, и подпись врала бы на два дня.
+  const log = {
+    "2026-09-05": [{ unitId: "a", hours: 1 }],
+    "2026-09-03": [{ unitId: "a", hours: 2 }, { unitId: "b", hours: 1 }],
+    "2026-09-04": [{ unitId: "a", hours: 1 }]
+  };
+  assert.deepEqual(firstDayByUnit(log), { a: "2026-09-03", b: "2026-09-03" });
+  assert.deepEqual(firstDayByUnit({}), {});
+  assert.deepEqual(firstDayByUnit(null), {});
 });

@@ -6,7 +6,7 @@
   import { loadRoadmap } from "./lib/roadmap.js";
   import { customUnits } from "./lib/custom.js";
   import { planner, setScreen, setStart, english } from "./lib/store.svelte.js";
-  import { doneHoursByUnit, groupProgress, stats, todayIso } from "./lib/progress.js";
+  import { doneHoursByUnit, firstDayByUnit, groupProgress, stats, todayIso } from "./lib/progress.js";
   import { dateLong } from "./lib/format.js";
   import Settings from "./ui/Settings.svelte";
   import Today from "./screens/Today.svelte";
@@ -42,6 +42,9 @@
       : []
   );
   let doneByUnit = $derived(doneHoursByUnit(planner.log));
+  /* Когда каждую единицу тронули впервые — для подписи «тянется с 3 сентября».
+     doneByUnit этого не знает: он схлопывает даты в сумму. */
+  let firstDay = $derived(firstDayByUnit(planner.log));
   let progress = $derived(groupProgress(units, doneByUnit));
   let summary = $derived(stats({ units, planner, todayIso: today }));
   let screen = $derived(SCREENS.some((s) => s.id === planner.screen) ? planner.screen : "today");
@@ -112,9 +115,9 @@
     {/if}
 
     {#if screen === "today"}
-      <Today {units} {doneByUnit} {summary} {today} />
+      <Today {units} {doneByUnit} {firstDay} {summary} {today} />
     {:else if screen === "calendar"}
-      <Calendar {summary} {today} />
+      <Calendar {units} {summary} {today} />
     {:else}
       <KnowledgeMap {data} {progress} {summary} {units} {doneByUnit} {today} profile={planner.profile} />
     {/if}

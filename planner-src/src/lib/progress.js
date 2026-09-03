@@ -155,6 +155,45 @@ export function doneHoursByUnit(log) {
   return acc;
 }
 
+/**
+ * Состав одного дня: что именно закрыто и на сколько часов, в порядке журнала.
+ *
+ * Единицы в журнале живут вечно, а карта меняется — своя тема удалена,
+ * обновление карты убрало юнит. Такую запись НЕЛЬЗЯ выбросить молча: её часы
+ * продолжают считаться в итогах, и день перестал бы сходиться сам с собой.
+ * Поэтому она возвращается с `unit: null`, а называет её интерфейс.
+ *
+ * @returns {Array<{ unit: object|null, unitId: string, hours: number }>}
+ */
+export function dayLog(units, log, iso) {
+  const day = (log || {})[iso];
+  if (!day) return [];
+  const byId = new Map((units || []).map((u) => [u.id, u]));
+  return day.map((entry) => ({
+    unit: byId.get(entry.unitId) || null,
+    unitId: entry.unitId,
+    hours: entry.hours
+  }));
+}
+
+/**
+ * Самый первый день, в который единицу трогали: { unitId: iso }.
+ * Нужен подписи «тянется с 3 сентября» — doneHoursByUnit даты схлопывает.
+ *
+ * Ключи сортируются, а не берутся как есть: порядок ключей объекта после
+ * JSON.parse не гарантирован, и без сортировки «первой» оказалась бы
+ * случайная дата.
+ */
+export function firstDayByUnit(log) {
+  const acc = {};
+  for (const iso of Object.keys(log || {}).sort()) {
+    for (const entry of log[iso]) {
+      if (acc[entry.unitId] === undefined) acc[entry.unitId] = iso;
+    }
+  }
+  return acc;
+}
+
 export function totalDoneHours(log) {
   let sum = 0;
   for (const iso of Object.keys(log || {})) {
