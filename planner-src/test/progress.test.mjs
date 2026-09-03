@@ -16,6 +16,11 @@ import {
   hoursOnDay,
   dayLog,
   firstDayByUnit,
+  logBefore,
+  plannedOnDay,
+  movedFromDay,
+  carriedFrom,
+  nextScheduledDay,
   round2,
   remainingUnits,
   scheduledDays,
@@ -267,4 +272,94 @@ test("firstDayByUnit берёт САМЫЙ РАННИЙ день, а не пер
   assert.deepEqual(firstDayByUnit(log), { a: "2026-09-03", b: "2026-09-03" });
   assert.deepEqual(firstDayByUnit({}), {});
   assert.deepEqual(firstDayByUnit(null), {});
+});
+
+/* ------------------------------------------------- план прошлого дня --- */
+
+/** Три единицы по часу в каждом потоке — день на 3 ч закрывает ровно все три. */
+function трёхпоточныйНабор() {
+  return [
+    { id: "m1", stream: "math", hours: 2, title: "Дроби" },
+    { id: "e1", stream: "english", hours: 1, title: "Тест уровня" },
+    { id: "s1", stream: "seq", hours: 2, title: "Введение в ML" }
+  ];
+}
+
+test("logBefore берёт дни строго раньше даты", () => {
+  const log = {
+    "2026-09-02": [{ unitId: "a", hours: 1 }],
+    "2026-09-03": [{ unitId: "b", hours: 1 }],
+    "2026-09-04": [{ unitId: "c", hours: 1 }]
+  };
+  assert.deepEqual(Object.keys(logBefore(log, "2026-09-04")).sort(), ["2026-09-02", "2026-09-03"]);
+  assert.deepEqual(logBefore(log, "2026-09-02"), {}, "сам день входить не должен");
+  assert.deepEqual(logBefore(null, "2026-09-04"), {});
+});
+
+test("plannedOnDay пересчитывает план прошедшего дня из журнала", () => {
+  const units = трёхпоточныйНабор();
+  const planner = {
+    startDate: "2026-09-03", hoursPerDay: 5, weekdays: [0, 1, 2, 3, 4, 5, 6],
+    log: { "2026-09-03": [{ unitId: "e1", hours: 1 }] }, dayHours: {}, templates: [], weekdayTemplate: {}
+  };
+
+  // 3-е считается ОТ ПУСТОГО журнала: свой же день в расчёт не идёт.
+  const третьего = plannedOnDay(units, planner, "2026-09-03").map((i) => i.unit.id);
+  assert.ok(третьего.includes("e1"), "тест уровня должен был стоять в плане 3-го");
+
+  // 4-е уже знает, что английский закрыт, и в план его не ставит.
+  const четвёртого = plannedOnDay(units, planner, "2026-09-04").map((i) => i.unit.id);
+  assert.equal(четвёртого.includes("e1"), false, "закрытая тема снова попала в план");
+});
+
+test("объявленный выходной не имеет плана", () => {
+  const units = трёхпоточныйНабор();
+  const planner = {
+    startDate: "2026-09-03", hoursPerDay: 5, weekdays: [0, 1, 2, 3, 4, 5, 6],
+    log: {}, dayHours: { "2026-09-04": 0 }, templates: [], weekdayTemplate: {}
+  };
+  assert.deepEqual(plannedOnDay(units, planner, "2026-09-04"), []);
+});
+
+test("movedFromDay отдаёт остаток, а не всю тему целиком", () => {
+  const units = трёхпоточныйНабор();
+  const planner = {
+    startDate: "2026-09-03", hoursPerDay: 5, weekdays: [0, 1, 2, 3, 4, 5, 6],
+    log: { "2026-09-03": [{ unitId: "e1", hours: 1 }, { unitId: "m1", hours: 0.5 }] },
+    dayHours: {}, templates: [], weekdayTemplate: {}
+  };
+
+  const moved = movedFromDay(units, planner, "2026-09-03");
+  const ids = moved.map((m) => m.unit.id);
+  assert.equal(ids.includes("e1"), false, "закрытая целиком тема не могла уехать");
+
+  const дроби = moved.find((m) => m.unit.id === "m1");
+  assert.ok(дроби, "начатая, но не добитая тема должна уехать остатком");
+  assert.equal(дроби.done, 0.5);
+  assert.equal(round2(дроби.moved), round2(дроби.planned - 0.5));
+});
+
+test("carriedFrom называет самый ранний день, в который тему уже планировали", () => {
+  const units = трёхпоточныйНабор();
+  const planner = {
+    startDate: "2026-09-03", hoursPerDay: 5, weekdays: [0, 1, 2, 3, 4, 5, 6],
+    log: {}, dayHours: {}, templates: [], weekdayTemplate: {}
+  };
+
+  const carried = carriedFrom(units, planner, "2026-09-05");
+  assert.equal(carried.m1, "2026-09-03", "должен быть первый день, а не вчерашний");
+
+  // В первый же день переносить нечего — прошлого ещё нет.
+  assert.deepEqual(carriedFrom(units, planner, "2026-09-03"), {});
+  assert.deepEqual(carriedFrom(units, { ...planner, startDate: null }, "2026-09-05"), {});
+});
+
+test("nextScheduledDay перешагивает через выходные", () => {
+  const planner = {
+    startDate: "2026-09-03", hoursPerDay: 5, weekdays: [0, 1, 2, 3, 4, 5, 6],
+    log: {}, dayHours: { "2026-09-04": 0, "2026-09-05": 0 }, templates: [], weekdayTemplate: {}
+  };
+  assert.equal(nextScheduledDay(planner, "2026-09-03"), "2026-09-06");
+  assert.equal(nextScheduledDay({ ...planner, weekdays: [1] }, "2026-09-03", 3), null,
+    "за пределом поиска возвращается null, а не бесконечный цикл");
 });

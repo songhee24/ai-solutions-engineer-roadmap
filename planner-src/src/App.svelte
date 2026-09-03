@@ -6,7 +6,7 @@
   import { loadRoadmap } from "./lib/roadmap.js";
   import { customUnits } from "./lib/custom.js";
   import { planner, setScreen, setStart, english } from "./lib/store.svelte.js";
-  import { doneHoursByUnit, firstDayByUnit, groupProgress, stats, todayIso } from "./lib/progress.js";
+  import { carriedFrom, doneHoursByUnit, firstDayByUnit, groupProgress, stats, todayIso } from "./lib/progress.js";
   import { dateLong } from "./lib/format.js";
   import Settings from "./ui/Settings.svelte";
   import Today from "./screens/Today.svelte";
@@ -45,6 +45,9 @@
   /* Когда каждую единицу тронули впервые — для подписи «тянется с 3 сентября».
      doneByUnit этого не знает: он схлопывает даты в сумму. */
   let firstDay = $derived(firstDayByUnit(planner.log));
+  /* Темы, стоявшие в плане раньше и до сих пор не закрытые. firstDay их не
+     видит: в журнал они не попадали — их просто не начинали. */
+  let carried = $derived(data ? carriedFrom(units, planner, today) : {});
   let progress = $derived(groupProgress(units, doneByUnit));
   let summary = $derived(stats({ units, planner, todayIso: today }));
   let screen = $derived(SCREENS.some((s) => s.id === planner.screen) ? planner.screen : "today");
@@ -115,7 +118,7 @@
     {/if}
 
     {#if screen === "today"}
-      <Today {units} {doneByUnit} {firstDay} {summary} {today} />
+      <Today {units} {doneByUnit} {firstDay} {carried} {summary} {today} />
     {:else if screen === "calendar"}
       <Calendar {units} {summary} {today} />
     {:else}

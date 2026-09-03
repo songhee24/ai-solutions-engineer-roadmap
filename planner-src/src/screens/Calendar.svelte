@@ -3,7 +3,10 @@
      Плюс возможность объявить день выходным задним числом — тогда он перестаёт
      считаться прогулом, но и часы за него не начисляются. */
   import { planner, setDayHours } from "../lib/store.svelte.js";
-  import { addDays, diffDays, budgetForDay, hoursOnDay, fromIso, dayLog } from "../lib/progress.js";
+  import {
+    addDays, diffDays, budgetForDay, hoursOnDay, fromIso,
+    dayLog, movedFromDay, nextScheduledDay
+  } from "../lib/progress.js";
   import { dateShort, formatHours, hoursNum, plural, monthShort } from "../lib/format.js";
 
   let { units, summary, today } = $props();
@@ -174,6 +177,29 @@
           </ul>
           <p class="sum">Всего за день — {formatHours(day.hours)}</p>
         {/if}
+
+        <!-- Что стояло в плане, но не закрылось. Только для прошедших дней:
+             сегодня ещё не кончилось, и объявлять его хвост «уехавшим» значило
+             бы ругать авансом. -->
+        {#if !day.isToday}
+          {@const moved = movedFromDay(units, planner, day.iso)}
+          {#if moved.length}
+            {@const куда = nextScheduledDay(planner, day.iso)}
+            <p class="moved-head">
+              Уехало на {куда ? dateShort(куда) : "следующий рабочий день"}
+            </p>
+            <ul class="moved">
+              {#each moved as m (m.unit.id)}
+                <li>
+                  <span class="what">{m.unit.title}</span>
+                  <span class="hrs">
+                    {formatHours(m.moved)}{#if m.done > 0} из {formatHours(m.planned)}{/if}
+                  </span>
+                </li>
+              {/each}
+            </ul>
+          {/if}
+        {/if}
       </div>
     {/if}
   {/each}
@@ -181,6 +207,10 @@
 
 <p><small>Объявленный выходной не считается пропуском и не идёт в отставание — но и часы за него
   не начисляются, поэтому финиш всё равно отодвигается. Прятать это было бы нечестно.</small></p>
+
+<p><small>План прошлого дня нигде не хранится — он пересчитывается заново из журнала по нынешним
+  настройкам. Поменяете часы в день, выходные или профиль — состав «уехало» за прошлые дни станет
+  другим. Закрытые часы при этом не меняются никогда: они и есть факт.</small></p>
 
 <style>
   .pad { padding: 18px; }
@@ -243,4 +273,8 @@
   .detail .hrs { color: var(--text-muted); white-space: nowrap; }
   .detail .sum { margin: 6px 0 0; color: var(--text-muted); font-size: 12.5px; }
   .detail .empty { margin: 0; color: var(--text-muted); font-size: 13px; max-width: 62ch; }
+  .detail .moved-head {
+    margin: 10px 0 2px; color: var(--miss); font-size: 12.5px; font-weight: 600;
+  }
+  .detail ul.moved li { color: var(--text-muted); }
 </style>

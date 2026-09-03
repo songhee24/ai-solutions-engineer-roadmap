@@ -12,6 +12,8 @@
  * Ничего «сгорать» не может, потому что гореть нечему.
  * ========================================================================== */
 
+import { planDays } from "../../../shared/schedule.mjs";
+
 export const round2 = (n) => Math.round(n * 100) / 100;
 
 /* ------------------------------------------------------------------ даты --- */
@@ -153,6 +155,100 @@ export function doneHoursByUnit(log) {
     }
   }
   return acc;
+}
+
+/** Журнал, обрезанный по дате: только дни СТРОГО раньше iso. */
+export function logBefore(log, iso) {
+  const out = {};
+  for (const key of Object.keys(log || {})) {
+    if (diffDays(key, iso) > 0) out[key] = log[key];
+  }
+  return out;
+}
+
+/**
+ * Что стояло в плане на КОНКРЕТНЫЙ день — включая уже прошедший.
+ *
+ * План нигде не хранится: планнер держит журнал, а день выводит из остатка.
+ * Значит прошлый день можно только пересчитать заново — обрезать журнал по дате
+ * и прогнать ту же машинку. Отсюда и оговорка в интерфейсе: поменяются часы в
+ * день, выходные или профиль — пересчитается и прошлое.
+ *
+ * Это НЕ то же самое, что план на экране «Сегодня». Тот дополнительно держит
+ * сегодняшний журнал за скобками (чтобы отмеченная строка не исчезала под
+ * курсором) и учитывает отложенное кнопкой «Не сегодня». Здесь вопрос другой:
+ * что стояло в расписании на эту дату.
+ */
+export function plannedOnDay(units, planner, iso) {
+  const budget = budgetForDay(planner, iso);
+  if (budget <= 0) return [];
+
+  const pool = remainingUnits(units, doneHoursByUnit(logBefore(planner.log, iso)));
+  if (!pool.length) return [];
+
+  const tpl = Object.prototype.hasOwnProperty.call(planner.dayHours || {}, iso)
+    ? null
+    : templateForDay(planner, iso);
+
+  const day = planDays(pool, {
+    hoursPerDay: budget,
+    days: 1,
+    startDate: fromIso(iso),
+    weekdays: [0, 1, 2, 3, 4, 5, 6],
+    perDay: tpl ? tpl.hours : undefined
+  })[0];
+
+  return day ? day.blocks.flatMap((b) => b.items) : [];
+}
+
+/** Ближайший рабочий день после iso. Предел — чтобы не искать вечно. */
+export function nextScheduledDay(planner, iso, limit = 60) {
+  for (let i = 1; i <= limit; i++) {
+    const next = addDays(iso, i);
+    if (budgetForDay(planner, next) > 0) return next;
+  }
+  return null;
+}
+
+/**
+ * Что стояло в плане на этот день, но закрыто не было, — то есть уехало дальше.
+ * Частично закрытая тема попадает сюда с остатком, а не целиком.
+ */
+export function movedFromDay(units, planner, iso) {
+  const closed = {};
+  for (const entry of (planner.log || {})[iso] || []) {
+    closed[entry.unitId] = round2((closed[entry.unitId] || 0) + entry.hours);
+  }
+
+  const out = [];
+  for (const item of plannedOnDay(units, planner, iso)) {
+    const done = closed[item.unit.id] || 0;
+    const moved = round2(item.hours - done);
+    if (moved > 0.01) out.push({ unit: item.unit, planned: item.hours, done, moved });
+  }
+  return out;
+}
+
+/**
+ * Единицы, стоявшие в плане РАНЬШЕ и до сих пор не закрытые:
+ * { unitId: самый ранний такой день }. Для подписи «перенесено с 3 сентября».
+ *
+ * Заглядываем не дальше CARRY_LOOKBACK рабочих дней: за этой границей разговор
+ * уже не про вчерашний хвост, а про отставание, и для него есть своя карточка.
+ */
+const CARRY_LOOKBACK = 7;
+
+export function carriedFrom(units, planner, today) {
+  const out = {};
+  if (!planner.startDate || diffDays(planner.startDate, today) <= 0) return out;
+
+  const days = scheduledDays(planner, planner.startDate, addDays(today, -1)).slice(-CARRY_LOOKBACK);
+  for (const iso of days) {
+    for (const item of plannedOnDay(units, planner, iso)) {
+      if (out[item.unit.id] === undefined) out[item.unit.id] = iso;
+    }
+  }
+  return out;
 }
 
 /**

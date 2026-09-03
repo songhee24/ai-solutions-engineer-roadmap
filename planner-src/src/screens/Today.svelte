@@ -11,7 +11,7 @@
   } from "../lib/progress.js";
   import { formatHours, ruNum, hoursNum, dateLong, dateDayMonth, plural } from "../lib/format.js";
 
-  let { units, doneByUnit, firstDay, summary, today } = $props();
+  let { units, doneByUnit, firstDay, carried, summary, today } = $props();
 
   /* Внутри одного дня расписание недели уже неважно — день выбран.
      Выходной обрабатывается отдельной веткой ниже, через нулевой бюджет. */
@@ -97,6 +97,15 @@
   /** Честная подпись про объём: что уже закрыто и что останется после сегодня. */
   function volume(item) {
     const parts = [];
+
+    /* Тема, которая стояла в плане раньше, но её не начинали: в журнале её нет,
+       поэтому «тянется с» про неё ничего не знает. Ветки не спорят — вторая
+       работает только там, где первой нечего сказать. */
+    if (item.unit.doneOfUnit <= 0) {
+      const было = carried?.[item.unit.id];
+      if (было) parts.push(`перенесено с ${dateDayMonth(было)}`);
+    }
+
     if (item.unit.doneOfUnit > 0) {
       /* Тему, начатую раньше, называем днём: «продолжаете» и «тянется с 3
          сентября» говорят одно и то же, но второе отвечает на вопрос «а не
