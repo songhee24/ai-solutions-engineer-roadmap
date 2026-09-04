@@ -68,6 +68,65 @@ test("висячий идентификатор шаблона откатыва�
   assert.equal(budgetForDay(p, "2026-09-05"), 5);
 });
 
+/* ------------------------------------------------ английский как доза --- */
+
+/* Карта пишет про трек B: «20–30 минут в день, параллельно всему остальному».
+   Пропорция это правило держала случайно — при пяти часах доля и так давала
+   двадцать минут. На двухчасовом дне оставалось восемь. */
+
+test("на коротком дне английскому достаётся 20 минут, а не его доля", () => {
+  const b = dailyBudget(units, 2);
+  assert.equal(Math.round(b.perDay.english * 60), 20, "доля дала бы 8 минут");
+
+  const rest = b.perDay.seq + b.perDay.math;
+  assert.equal(Math.round(rest * 60), 100, "остаток дня целиком уходит seq и math");
+  assert.ok(
+    Math.abs(b.perDay.seq / rest - 100 / 140) < 1e-9,
+    "пропорция между seq и math прежняя — 100 к 40"
+  );
+});
+
+test("НЕПРОРЕГРЕССИЯ: при пяти часах порог не срабатывает", () => {
+  // У этой фикстуры доля английского при пяти часах — ровно двадцать минут,
+  // поэтому раскладка обязана остаться прежней до последнего знака.
+  const b = dailyBudget(units, 5);
+  assert.ok(Math.abs(b.perDay.seq - 100 / 30) < 1e-9);
+  assert.ok(Math.abs(b.perDay.math - 40 / 30) < 1e-9);
+  assert.ok(Math.abs(b.perDay.english - 10 / 30) < 1e-9);
+});
+
+test("получасовой день не становится английским: порог не выше трети дня", () => {
+  const b = dailyBudget(units, 0.5);
+  assert.equal(Math.round(b.perDay.english * 60), 10, "треть от получаса");
+  assert.ok(b.perDay.seq > 0 && b.perDay.math > 0, "остальным потокам осталось");
+  assert.ok(Math.abs(b.perDay.seq + b.perDay.math + b.perDay.english - 0.5) < 1e-9);
+});
+
+test("порог не выдумывает часы там, где английский уже закрыт", () => {
+  const noEnglish = units.filter((u) => u.stream !== "english");
+  const b = dailyBudget(noEnglish, 2);
+  assert.equal(b.perDay.english, 0);
+  assert.ok(Math.abs(b.perDay.seq + b.perDay.math - 2) < 1e-9, "день делят двое");
+});
+
+test("порог не тормозит английский, когда он остался один", () => {
+  // Иначе хвост трека B полз бы по трети дня, хотя занять его больше нечем.
+  const onlyEnglish = units.filter((u) => u.stream === "english");
+  const b = dailyBudget(onlyEnglish, 2);
+  assert.equal(b.perDay.english, 2);
+});
+
+test("порог меняет очередь потоков, а не срок", () => {
+  // Час, отданный английскому сверх доли, не пропадает: как только трек B
+  // закрыт, его минуты возвращаются остальным. Поэтому инвариант «три потока
+  // финишируют одновременно» слабеет до «ничего не простаивает», а общая дата
+  // остаётся прежней. Это и проверяем — иначе порог был бы платой в сроке.
+  const p = planner({ hoursPerDay: 2 });
+  const left = streamRemaining(units, {});
+  const scalar = addDays("2026-09-01", Math.ceil(150 / 2) - 1);
+  assert.equal(finishDate(p, left, "2026-09-01"), scalar);
+});
+
 /* ------------------------------------------------- раскладка внутри дня --- */
 
 test("planDays с perDay следует шаблону, а не пропорции", () => {

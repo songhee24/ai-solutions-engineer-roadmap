@@ -139,23 +139,69 @@ export function streamTotals(units) {
 }
 
 /**
- * Сколько часов в день отдавать каждому потоку, чтобы все три закончились
- * одновременно. Иначе математика (277 ч) тянулась бы ещё два месяца после
- * последнего этапа.
+ * Английский — суточная доза, а не доля дня.
+ *
+ * Карта пишет это прямым текстом в подзаголовке трека B: «20–30 минут в день,
+ * параллельно всему остальному». Пропорция это правило держала случайно —
+ * при пяти часах доля английского и так давала двадцать минут. На двухчасовом
+ * дне оставалось восемь, и разбор дня («первые 10 минут — Anki, вторые 10 —
+ * второй проход») становился невыполним. 05.09.2026.
+ */
+const ENGLISH_MIN_PER_DAY = 1 / 3;
+
+/**
+ * Раскладка одного дня по трём потокам: пропорционально ещё не пройденному,
+ * чтобы все три закончились одновременно. Иначе математика (277 ч) тянулась бы
+ * ещё два месяца после последнего этапа.
+ *
+ * Исключение одно — английский, см. ENGLISH_MIN_PER_DAY. Порог сам ограничен
+ * третью дня, иначе получасовой день стал бы целиком английским. И он именно
+ * пол, а не норма: когда английский остался один, его доля и есть весь день,
+ * опустить её порог не может — хвост трека B иначе полз бы по трети дня, хотя
+ * занять его больше нечем.
+ *
+ * Порог меняет очередь, а не срок: минуты, отданные английскому сверх доли,
+ * возвращаются остальным, как только трек B закрыт. Общая дата финиша от него
+ * не двигается — это закреплено тестом «порог меняет очередь потоков».
+ *
+ * @param {{seq: number, math: number, english: number}} remaining остаток по потокам
+ * @param {number} dayHours бюджет дня
+ */
+export function splitDay(remaining, dayHours) {
+  const zero = { seq: 0, math: 0, english: 0 };
+  const total = remaining.seq + remaining.math + remaining.english;
+  if (!(dayHours > 0) || total <= 0) return zero;
+
+  const share = dayHours * (remaining.english / total);
+  const floor = Math.min(ENGLISH_MIN_PER_DAY, dayHours / 3);
+  // Больше остатка не резервируем: иначе в последний день трека B порог держал
+  // бы под английский треть дня ради нескольких минут, и эта треть пропадала бы
+  // впустую — на семидесяти пяти днях это стоило ровно один лишний день.
+  const english = Math.min(Math.max(share, floor), remaining.english);
+
+  const rest = Math.max(0, dayHours - english);
+  const restTotal = remaining.seq + remaining.math;
+  if (restTotal <= 0) return { ...zero, english };
+
+  return {
+    seq: rest * (remaining.seq / restTotal),
+    math: rest * (remaining.math / restTotal),
+    english
+  };
+}
+
+/**
+ * Сколько часов в день отдавать каждому потоку и за сколько дней это сойдётся.
+ *
+ * days считается по сумме, и порог английского его не смещает: работа не
+ * пропадает, а переставляется. Проверено на настоящих данных — при двух часах
+ * в день и days = 805 finishDate даёт ровно 805-й день.
  */
 export function dailyBudget(units, hoursPerDay) {
   const totals = streamTotals(units);
   const all = totals.seq + totals.math + totals.english;
   const days = Math.max(1, Math.ceil(all / hoursPerDay));
-  return {
-    days,
-    totalHours: all,
-    perDay: {
-      seq: totals.seq / days,
-      math: totals.math / days,
-      english: totals.english / days
-    }
-  };
+  return { days, totalHours: all, perDay: splitDay(totals, all / days) };
 }
 
 /**

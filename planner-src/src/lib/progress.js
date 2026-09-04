@@ -12,7 +12,7 @@
  * Ничего «сгорать» не может, потому что гореть нечему.
  * ========================================================================== */
 
-import { planDays } from "../../../shared/schedule.mjs";
+import { planDays, splitDay } from "../../../shared/schedule.mjs";
 
 export const round2 = (n) => Math.round(n * 100) / 100;
 
@@ -97,9 +97,10 @@ export function budgetForDay(planner, iso) {
 }
 
 /**
- * Раскладка дня по потокам. Шаблон задаёт её прямо; без шаблона часы делятся
- * пропорционально ещё не пройденному — ровно то, что делает dailyBudget,
- * чтобы все три потока закончились одновременно.
+ * Раскладка дня по потокам. Шаблон задаёт её прямо; без шаблона день делит
+ * splitDay — та же функция, через которую идёт dailyBudget и план дня. Держать
+ * здесь вторую копию правила нельзя: прогноз и план разошлись бы на пороге
+ * английского, и было бы не понять, какой из них главный.
  */
 function budgetByStream(planner, iso, left) {
   const zero = { seq: 0, math: 0, english: 0 };
@@ -113,13 +114,7 @@ function budgetByStream(planner, iso, left) {
     return { seq: tpl.hours.seq || 0, math: tpl.hours.math || 0, english: tpl.hours.english || 0 };
   }
 
-  const total = left.seq + left.math + left.english;
-  if (total <= 0) return zero;
-  return {
-    seq: budget * (left.seq / total),
-    math: budget * (left.math / total),
-    english: budget * (left.english / total)
-  };
+  return splitDay(left, budget);
 }
 
 /** Потоки, которым при нынешних шаблонах не достаётся часов ни в один день
@@ -453,6 +448,12 @@ export function currentStreak(planner, today) {
  * Без шаблонов ответ прежний: пропорциональная раскладка сохраняет доли
  * потоков, поэтому сумма убывает ровно на дневной бюджет, как и раньше.
  * Это закреплено тестом «СВЕДЕНИЕ».
+ *
+ * Порог английского (splitDay) на этот ответ не влияет, хотя доли и перестают
+ * быть равными: недобранного дня он не создаёт, потому что минуты сверх доли
+ * возвращаются остальным, как только трек B закрыт. Закреплено тестом
+ * «порог меняет очередь потоков, а не срок» — и один лишний день там уже
+ * ловился, когда порог резервировал больше, чем у английского оставалось.
  *
  * @param {object} remaining остаток по потокам (streamRemaining)
  * @param {object} used      часы, уже закрытые в первый день расчёта

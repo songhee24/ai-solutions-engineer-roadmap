@@ -2,7 +2,7 @@
  * scripts/build-schedule.mjs — генерирует docs/first-weeks.md: разбор первых
  * недель по дням, чтобы можно было сесть заниматься, пока планнер строится.
  *
- *   node scripts/build-schedule.mjs [--days 28] [--hours 5] [--start 2026-09-01]
+ *   node scripts/build-schedule.mjs [--days 28] [--hours 2] [--start 2026-09-01]
  *                                   [--profile novice|dev] [--out docs/first-weeks.md]
  * ========================================================================== */
 
@@ -27,7 +27,8 @@ function loadRoadmap() {
 }
 
 const DAYS = Number(arg("days", 28));
-const HOURS = Number(arg("hours", 5));
+/* Дефолт совпадает с планнером (store.svelte.js) и с meta.defaultPace карты. */
+const HOURS = Number(arg("hours", 2));
 const PROFILE = arg("profile", "novice");
 const START = arg("start", "2026-09-01");
 const OUT = path.join(ROOT, arg("out", "docs/first-weeks.md"));
