@@ -37,8 +37,22 @@ jobs:
           cache: npm
           cache-dependency-path: planner-src/package-lock.json
 
+      # Тесты гоняются ДО сборки: красные должны останавливать деплой.
+      # Раньше их здесь не было вовсе, и на Pages мог уехать сломанный планнер.
+      - name: Install planner deps
+        run: npm ci
+        working-directory: planner-src
+
+      # Данные карты проверяются голым Node: в корне репозитория нет npm.
+      - name: Test map data
+        run: node --test "test/**/*.test.mjs"
+
+      - name: Test planner
+        run: npm test
+        working-directory: planner-src
+
       - name: Build planner
-        run: npm ci && npm run build
+        run: npm run build
         working-directory: planner-src
 
       - name: Upload artifact

@@ -4,7 +4,7 @@
  * ничего не теряет, а лишь сдвигает финиш.
  * ========================================================================== */
 
-import test from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 
 import {

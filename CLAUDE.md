@@ -14,21 +14,30 @@
 расписания — `scripts/build-schedule.mjs` → `docs/first-weeks.md`.
 
 Локальный запуск карты: `python3 -m http.server 8765`. Планнер: `npm --prefix planner-src run dev`
-(или `npm run build` и открыть `/planner/` тем же сервером). Тесты ядра: `node --test
-"planner-src/test/**/*.test.mjs"`.
+(или `npm run build` и открыть `/planner/` тем же сервером). Тесты планнера: `npm --prefix planner-src test`.
 
-## Проверки — три слоя, каждый своим инструментом
+## Проверки — четыре слоя, каждый своим инструментом
 
 | Что | Где | Как запустить | Зависимости |
 |---|---|---|---|
 | **Данные карты** | `test/roadmap-data.test.mjs` | `node --test "test/**/*.test.mjs"` | нет, голый Node |
-| **Ядро планнера** | `planner-src/test/*.test.mjs` | `node --test "planner-src/test/**/*.test.mjs"` | нет |
-| **Роутер и разметка карты** | `planner-src/test/map-ui.test.mjs` | там же | jsdom |
+| **Ядро планнера** | `planner-src/test/*.test.mjs` | `npm --prefix planner-src test` | vitest |
+| **Роутер и разметка карты** | `planner-src/test/map-ui.test.mjs` | там же | vitest + свой jsdom |
+| **Экраны планнера** | `planner-src/test-ui/*.test.js` | там же | vitest + jsdom, `mount()` |
 | **Живые страницы** | `scripts/check-site.mjs` | см. шапку файла | свой headless-Chrome |
 
-⚠ **jsdom-тесты карты лежат в `planner-src`, а не в корне, намеренно**: корень обязан оставаться
-без npm, а `planner-src` — единственное место, где сборка разрешена. Проверки данных зависимостей
-не имеют и живут в корне.
+⚠ **Два прогона, и граница между ними — граница npm.** Данные карты остаются на голом
+`node --test`, потому что в корне репозитория нет и не будет npm. Всё внутри `planner-src`
+гоняет vitest. jsdom-тесты карты лежат в `planner-src` намеренно, по той же причине.
+
+⚠ **Тесты экранов** монтируют компоненты через `mount()` из svelte. Два подводных камня:
+`store.svelte.js` читает `localStorage` на уровне модуля, поэтому засев идёт ДО первого импорта
+(отсюда динамический `await import()` в шапке каждого файла); и под vitest svelte резолвится в
+серверную сборку, из-за чего `mount()` падает — лечится `resolve.conditions: ["browser"]`
+в `vite.config.js`.
+
+⚠ **CI гоняет оба набора перед сборкой** (`.github/workflows/deploy-pages.yml`). До 04.09.2026
+не гонял вовсе, и на Pages мог уехать сломанный планнер.
 
 ⚠ В jsdom обязательно **ждать событие `load`** перед исполнением `app.js`: сразу после конструктора
 `document.readyState === "loading"`, и app.js уходит ждать `DOMContentLoaded` — `init()` не

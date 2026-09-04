@@ -3,11 +3,9 @@
      Плюс возможность объявить день выходным задним числом — тогда он перестаёт
      считаться прогулом, но и часы за него не начисляются. */
   import { planner, setDayHours } from "../lib/store.svelte.js";
-  import {
-    addDays, diffDays, budgetForDay, hoursOnDay, fromIso,
-    dayLog, movedFromDay, nextScheduledDay
-  } from "../lib/progress.js";
+  import { addDays, diffDays, budgetForDay, hoursOnDay, fromIso } from "../lib/progress.js";
   import { dateShort, formatHours, hoursNum, plural, monthShort } from "../lib/format.js";
+  import DayDetail from "../ui/DayDetail.svelte";
 
   let { units, summary, today } = $props();
 
@@ -15,7 +13,10 @@
      настройка — незачем переживать перезагрузку. */
   let open = $state(null);
 
-  const RECENT = 14;
+  /* Сколько дней списка показано. Растёт кнопкой «Показать ещё» — иначе дальше
+     двух недель заглянуть было нельзя, а путь длиной в 322 дня. */
+  let shown = $state(14);
+  const RECENT_STEP = 14;
   /** Предел на ширину полосы: 60 недель заведомо перекрывают любой темп. */
   const MAX_WEEKS = 60;
 
@@ -71,7 +72,7 @@
     const start = planner.startDate;
     if (!start) return [];
     const out = [];
-    for (let i = 0; i < RECENT; i++) {
+    for (let i = 0; i < shown; i++) {
       const iso = addDays(today, -i);
       if (diffDays(start, iso) < 0) break;
       const budget = budgetForDay(planner, iso);
@@ -87,6 +88,11 @@
     }
     return out;
   });
+
+  /* Кнопка «Показать ещё» исчезает, когда список упёрся в дату старта. */
+  let allShown = $derived(
+    !planner.startDate || diffDays(planner.startDate, addDays(today, -(shown - 1))) <= 0
+  );
 </script>
 
 <h1>Календарь</h1>
@@ -103,13 +109,30 @@
         {#each weeks as week, i (i)}
           <div class="week">
             {#each week.days as day (day.iso)}
-              <i class={day.cls} title={day.title}></i>
+              <!-- tabindex="-1" НЕ ошибка: клеток больше четырёхсот, и пускать
+                   их в обход по Tab нельзя, а растянуть до 44 px значит убить
+                   теплокарту. Клетка — мышиный способ; для клавиатуры и
+                   скринридера есть полный список «Последних дней» ниже. -->
+              <button class="cell {day.cls}" title={day.title} aria-label={day.title}
+                      tabindex="-1" disabled={day.cls === "void"}
+                      onclick={() => (open = open === day.iso ? null : day.iso)}
+              ></button>
             {/each}
           </div>
         {/each}
       </div>
     </div>
   </div>
+
+  {#if open}
+    <div class="picked">
+      <p class="picked-head">
+        <span>{dateShort(open)}</span>
+        <button class="btn ghost small" onclick={() => (open = null)}>Закрыть</button>
+      </p>
+      <DayDetail {units} iso={open} isToday={open === today} />
+    </div>
+  {/if}
 
   <div class="legend">
     <span>меньше</span>
@@ -162,47 +185,16 @@
       </span>
     </div>
     {#if open === day.iso}
-      {@const closed = dayLog(units, planner.log, day.iso)}
-      <div class="detail" id="day-{day.iso}">
-        {#if closed.length === 0}
-          <p class="empty">В этот день ничего не закрыто. Недоделанное не пропало — оно стоит первым в очереди следующего рабочего дня.</p>
-        {:else}
-          <ul>
-            {#each closed as item, i (item.unitId + i)}
-              <li>
-                <span class="what">{item.unit ? item.unit.title : "Тема больше не в карте"}</span>
-                <span class="hrs">{formatHours(item.hours)}</span>
-              </li>
-            {/each}
-          </ul>
-          <p class="sum">Всего за день — {formatHours(day.hours)}</p>
-        {/if}
-
-        <!-- Что стояло в плане, но не закрылось. Только для прошедших дней:
-             сегодня ещё не кончилось, и объявлять его хвост «уехавшим» значило
-             бы ругать авансом. -->
-        {#if !day.isToday}
-          {@const moved = movedFromDay(units, planner, day.iso)}
-          {#if moved.length}
-            {@const куда = nextScheduledDay(planner, day.iso)}
-            <p class="moved-head">
-              Уехало на {куда ? dateShort(куда) : "следующий рабочий день"}
-            </p>
-            <ul class="moved">
-              {#each moved as m (m.unit.id)}
-                <li>
-                  <span class="what">{m.unit.title}</span>
-                  <span class="hrs">
-                    {formatHours(m.moved)}{#if m.done > 0} из {formatHours(m.planned)}{/if}
-                  </span>
-                </li>
-              {/each}
-            </ul>
-          {/if}
-        {/if}
-      </div>
+      <DayDetail {units} iso={day.iso} isToday={day.isToday} id="day-{day.iso}" />
     {/if}
   {/each}
+  {#if !allShown}
+    <div class="more">
+      <button class="btn ghost small" onclick={() => (shown += RECENT_STEP)}>
+        Показать ещё {RECENT_STEP} дней
+      </button>
+    </div>
+  {/if}
 </div>
 
 <p><small>Объявленный выходной не считается пропуском и не идёт в отставание — но и часы за него
@@ -222,14 +214,30 @@
 
   .heat { display: flex; gap: 3px; }
   .week { display: grid; grid-template-rows: repeat(7, 13px); gap: 3px; }
-  .heat i, .lv { width: 13px; height: 13px; border-radius: 3px; background: var(--bg-soft); display: block; }
-  .heat i.void { background: transparent; }
-  .heat i.off, .lv.off { background: transparent; box-shadow: inset 0 0 0 1px var(--border); }
-  .heat i.now, .lv.now { background: var(--surface); box-shadow: inset 0 0 0 2px var(--primary); }
-  .heat i.d1, .lv.d1 { background: color-mix(in srgb, var(--ok) 35%, var(--bg-soft)); }
-  .heat i.d2, .lv.d2 { background: color-mix(in srgb, var(--ok) 65%, var(--bg-soft)); }
-  .heat i.d3, .lv.d3 { background: var(--ok); }
-  .heat i.miss, .lv.miss { background: var(--miss-soft); box-shadow: inset 0 0 0 1px var(--miss); }
+  /* Клетка теперь <button>, а легенда осталась <i class="lv"> — поэтому пары
+     селекторов расщеплены. Дефолты кнопки гасятся явно: без border: 0 и
+     box-sizing рамка съела бы те самые 13 px. */
+  .cell, .lv { width: 13px; height: 13px; border-radius: 3px; background: var(--bg-soft); display: block; }
+  .cell {
+    padding: 0; border: 0; box-sizing: border-box; font: inherit; cursor: pointer;
+  }
+  .cell:disabled { cursor: default; }
+  .cell.void { background: transparent; }
+  .cell.off, .lv.off { background: transparent; box-shadow: inset 0 0 0 1px var(--border); }
+  .cell.now, .lv.now { background: var(--surface); box-shadow: inset 0 0 0 2px var(--primary); }
+  .cell.d1, .lv.d1 { background: color-mix(in srgb, var(--ok) 35%, var(--bg-soft)); }
+  .cell.d2, .lv.d2 { background: color-mix(in srgb, var(--ok) 65%, var(--bg-soft)); }
+  .cell.d3, .lv.d3 { background: var(--ok); }
+  .cell.miss, .lv.miss { background: var(--miss-soft); box-shadow: inset 0 0 0 1px var(--miss); }
+  .cell:hover:not(:disabled) { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+  .picked { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .picked-head {
+    display: flex; align-items: center; gap: 12px; margin: 0 0 4px; padding-left: 44px;
+    font-weight: 600; font-size: 13px;
+  }
+  .picked-head button { margin-left: auto; }
+  .more { padding: 11px 16px; border-top: 1px solid var(--border); }
 
   .legend { display: flex; align-items: center; gap: 6px; font-size: 12px;
             color: var(--text-muted); margin-top: 12px; flex-wrap: wrap; }
@@ -263,18 +271,4 @@
     font-weight: 700;
   }
 
-  .detail { padding: 0 16px 12px 44px; border-top: 0; }
-  .detail ul { list-style: none; margin: 0; padding: 0; }
-  .detail li {
-    display: flex; gap: 12px; align-items: baseline;
-    padding: 5px 0; font-size: 13px;
-  }
-  .detail .what { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-  .detail .hrs { color: var(--text-muted); white-space: nowrap; }
-  .detail .sum { margin: 6px 0 0; color: var(--text-muted); font-size: 12.5px; }
-  .detail .empty { margin: 0; color: var(--text-muted); font-size: 13px; max-width: 62ch; }
-  .detail .moved-head {
-    margin: 10px 0 2px; color: var(--miss); font-size: 12.5px; font-weight: 600;
-  }
-  .detail ul.moved li { color: var(--text-muted); }
 </style>

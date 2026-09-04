@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
@@ -30,11 +30,23 @@ export default defineConfig({
   // в подкаталоге проекта, и с локального сервера в корне репозитория.
   base: "./",
   plugins: [svelte(), serveRepoRoot()],
+  /* Под vitest svelte по умолчанию резолвится в СЕРВЕРНУЮ сборку, и mount()
+     падает с lifecycle_function_unavailable. Условие browser возвращает ту же
+     сборку, что уходит в браузер. На прод-сборку это не влияет: переменная
+     VITEST выставляется только тестовым прогоном. */
+  resolve: process.env.VITEST ? { conditions: ["browser"] } : {},
   // shared/schedule.mjs лежит выше корня проекта — общее ядро на два приложения.
   server: { fs: { allow: [repoRoot] } },
   build: {
     outDir: fileURLToPath(new URL("../planner", import.meta.url)),
     emptyOutDir: true,
     target: "es2022"
+  },
+  /* Окружение по умолчанию — node, а не jsdom: map-ui.test.mjs конструирует
+     свой JSDOM сам, и глобальная подмена окружения ему мешает. Тестам экранов
+     jsdom включается построчной директивой в шапке файла. */
+  test: {
+    environment: "node",
+    include: ["test/**/*.test.mjs", "test-ui/**/*.test.js"]
   }
 });

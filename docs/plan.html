@@ -205,6 +205,19 @@ const WEEKDAYS_BY_MODE = {
   "5": [1, 2, 3, 4, 5]
 };
 
+/* Уровень английского задают на карте и в планнере; эта страница его только
+   ЧИТАЕТ. Правило «прикидка ничего не сохраняет» не нарушено: чтение не запись.
+   Без этого ссылка на Listening всегда вела бы на B1, что бы человек ни выбрал. */
+function englishLevel() {
+  try {
+    const saved = localStorage.getItem("asr:english-level");
+    if ((DATA.meta.englishLevels || []).includes(saved)) return saved;
+  } catch (e) {
+    /* Приватный режим запретил хранилище — берём значение по умолчанию. */
+  }
+  return DATA.meta.defaultEnglishLevel || "b1";
+}
+
 function readSetup() {
   const raw = $("start").value;
   const [y, m, d] = raw ? raw.split("-").map(Number) : [];
@@ -219,7 +232,7 @@ function readSetup() {
 
 function render() {
   const cfg = readSetup();
-  const units = buildUnits(DATA, cfg.profile);
+  const units = buildUnits(DATA, cfg.profile, englishLevel());
   const budget = dailyBudget(units, cfg.hours);
   const days = planDays(units, {
     hoursPerDay: cfg.hours,

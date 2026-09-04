@@ -1,6 +1,6 @@
 /* Русская типографика чисел и дат: то, что читатель видит буквально. */
 
-import test from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 
 import { ruNum, hoursNum, plural, dateDayMonth, dateLong } from "../src/lib/format.js";

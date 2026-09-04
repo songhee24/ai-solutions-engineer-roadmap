@@ -284,20 +284,31 @@
       </div>
     {/if}
 
+    <!-- Карточка про ТЕМП, а не про пропуски. Раньше отставание показывалось
+         только когда были дни с нулём часов, — а занимался меньше плана и день
+         с нулём не совпадают. На реальных данных это давало «ни одного» при
+         четырёх часах долга: цифра есть, а на экране её нет. -->
     <div class="card side">
-      <h3>Пропуски</h3>
-      {#if summary.missed === 0}
-        <p class="good mono">ни одного</p>
-        <p><small>Финиш при нынешнем темпе — {dateDayMonth(summary.finishIso)}.</small></p>
-      {:else}
+      <h3>Темп</h3>
+      {#if summary.behindHours > 0}
         <p class="bad mono">−{ruNum(summary.behindHours)} ч</p>
         <p><small>
-          {summary.missed}
-          {plural(summary.missed, "пропущенный день сдвинул", "пропущенных дня сдвинули", "пропущенных дней сдвинули")}
-          финиш на {dateDayMonth(summary.finishIso)}.
+          Отставание от объявленного расписания{#if summary.missed > 0},
+            из них {summary.missed}
+            {plural(summary.missed, "день", "дня", "дней")} без единой галочки{/if}.
+          Финиш сдвинулся на {dateDayMonth(summary.finishIso)}.
           Ничего не потеряно: план строится от того, что ещё не пройдено, поэтому непройденное
           просто всплывает завтра.
         </small></p>
+      {:else if summary.aheadHours > 0}
+        <p class="good mono">+{ruNum(summary.aheadHours)} ч</p>
+        <p><small>
+          Идёте с опережением расписания. Финиш при нынешнем темпе —
+          {dateDayMonth(summary.finishIso)}.
+        </small></p>
+      {:else}
+        <p class="good mono">ровно по плану</p>
+        <p><small>Финиш при нынешнем темпе — {dateDayMonth(summary.finishIso)}.</small></p>
       {/if}
     </div>
   </aside>

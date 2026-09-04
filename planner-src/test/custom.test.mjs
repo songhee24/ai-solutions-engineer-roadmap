@@ -3,7 +3,7 @@
  * переживают обновление карты. Ради этого они и хранятся отдельно.
  * ========================================================================== */
 
-import test from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
