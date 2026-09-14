@@ -164,7 +164,18 @@ test("обязательные ресурсы темы не длиннее са�
 test("сроки основного пути не уехали", () => {
   // Пин: 41 углублённая ссылка, добавленная 02.09, помечена required: false
   // и обязательный путь удлинить не должна была.
-  for (const [profile, expected] of [["novice", 1609], ["dev", 1246]]) {
+  //
+  // 14.09.2026: 1609 -> 1612 и 1246 -> 1248. Единственная сознательная добавка к
+  // обязательному пути за всё время — парабола в A2.3 (+3 ч новичку, +2 ч
+  // разработчику). Причина в коде рядом: слово «парабола» в карте не
+  // встречалось ни разу, а трек A5 опирается на неё трижды.
+  //
+  // Цена — РОВНО ОДИН день: при двух часах в день 1609 ч это 805 дней, 1612 ч —
+  // 806 (finishDate: 15.11.2028 -> 16.11.2028). ⚠ Считать «3 ч ÷ 18,4 мин на
+  // математику = 10 дней» НЕЛЬЗЯ: дневная доля потока выводится из его доли в
+  // остатке, поэтому вместе с объёмом математики растут и её минуты в дне.
+  // Делить надо общий объём на часы дня, а не тему на её нынешнюю долю.
+  for (const [profile, expected] of [["novice", 1612], ["dev", 1248]]) {
     const total = Object.values(streamTotals(buildUnits(DATA, profile)))
       .reduce((a, b) => a + b, 0);
     assert.equal(Math.round(total), expected, `${profile}: ${Math.round(total)} ч вместо ${expected}`);
@@ -173,7 +184,8 @@ test("сроки основного пути не уехали", () => {
 
 test("параллельные треки дают ожидаемые объёмы", () => {
   const totals = streamTotals(buildUnits(DATA, "novice"));
-  assert.equal(Math.round(totals.math), 277);
+  // 14.09.2026: 277 -> 280, парабола в A2.3. См. комментарий у пина сроков выше.
+  assert.equal(Math.round(totals.math), 280);
   assert.equal(Math.round(totals.english), 105);
   assert.equal(Math.round(totals.seq), 1227);
 });
@@ -235,14 +247,14 @@ const KHAN_БЕЗ_РУССКОГО = new Set([
 
 test("у каждого ресурса Khan есть русская ссылка, кроме непереведённых курсов", () => {
   const khan = resources.filter((r) => r.url.includes("khanacademy.org"));
-  assert.equal(khan.length, 45, "число ресурсов Khan изменилось — пересними замер русских версий");
+  assert.equal(khan.length, 47, "число ресурсов Khan изменилось — пересними замер русских версий");
 
   for (const r of khan) {
     const ожидаем = !KHAN_БЕЗ_РУССКОГО.has(r.url);
     assert.equal(Boolean(r.ru), ожидаем,
       ожидаем ? `${r.title}: нет русской ссылки` : `${r.title}: русской версии нет, ссылку надо убрать`);
   }
-  assert.equal(khan.filter((r) => r.ru).length, 41);
+  assert.equal(khan.filter((r) => r.ru).length, 43);
 });
 
 test("русская ссылка ведёт на ru.khanacademy.org и объясняет расхождение", () => {

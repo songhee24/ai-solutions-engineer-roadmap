@@ -437,7 +437,7 @@ window.ROADMAP.stages.push(
     {
       id: "track-math-a2", title: "A2.1 Переменные, выражения, линейные уравнения", en: "Variables, expressions, linear equations",
       track: "math", kind: "theory", hours: { novice: 30, dev: 26 }, required: true,
-      courseNote: "Курс Algebra basics — 8 юнитов, по треку нужны 6 (1, 2, 3, 4, 5, 6), из них здесь — первые три. Юниты 7 и 8 (квадратные уравнения и многочлены, геометрия) для ML не нужны. Курс Algebra 1 — 16 юнитов, целиком НЕ нужен: по треку берём 4 юнита (2, 5, 8, 12), здесь — юнит 2, и то как дополнение, если после Algebra basics осталась неуверенность.",
+      courseNote: "Курс Algebra basics — 8 юнитов, по треку нужны 6 (1, 2, 3, 4, 5, 6), из них здесь — первые три. ⚠ Правка 14.09.2026: из юнита 7 всё же берутся два урока — Multiply binomials и Perfect squares, это формулы сокращённого умножения; ссылка стоит ниже дополнительной. Остальное в юнитах 7 и 8 (решение квадратных уравнений, геометрия) для карты по-прежнему не нужно. Курс Algebra 1 — 16 юнитов, целиком НЕ нужен: по треку берём 4 юнита (2, 5, 8, 12), здесь — юнит 2, и то как дополнение, если после Algebra basics осталась неуверенность.",
       resources: [
         { title: "Khan Academy — Algebra basics, Unit 1: Foundations", url: "https://www.khanacademy.org/math/algebra-basics/basic-alg-foundations",
           ru: { url: "https://ru.khanacademy.org/math/algebra-basics/basic-alg-foundations" },
@@ -463,6 +463,12 @@ window.ROADMAP.stages.push(
           scope: "Unit 2 из 16 (Algebra 1) — дополнительно, если нужна практика",
           study: "Более сложные уравнения — берите, только если после Algebra basics осталась неуверенность.",
           skip: "Если базовый курс дался легко — пропускайте юнит целиком.", checked: "2026-08-23" },
+        { title: "Khan Academy — Algebra basics, Unit 7: Quadratics and polynomials", url: "https://www.khanacademy.org/math/algebra-basics/alg-basics-quadratics-and-polynomials",
+          ru: { url: "https://ru.khanacademy.org/math/algebra-basics/alg-basics-quadratics-and-polynomials" },
+          cost: "free", lang: "en", level: "Средний", hours: 2, required: false,
+          scope: "Unit 7 из 8 — только уроки Multiply binomials и Perfect squares",
+          study: "Формулы сокращённого умножения: (a + b)², (a − b)², a² − b². В задании темы A5.2 просят раскрыть (3x + 1)² — это делается и обычным раскрытием скобок, просто с формулой быстрее. Поэтому ссылка дополнительная, а не обязательная.",
+          skip: "Разложение на множители и квадратные уравнения из этого юнита — мимо. ⚠ Параболы и графика в нём НЕТ вовсе: проверено браузером 14.09.2026, ноль упоминаний. График параболы идёт обязательной ссылкой в теме A2.3.", checked: "2026-09-14" },
         { title: "Математика с нуля — буквенные выражения и уравнения (шаги 39–41, 48, 49)", url: "https://spacemath.xyz/bukvennye-vyrazheniya/",
           cost: "free", lang: "ru", level: "База", hours: 8, required: false,
           scope: "Шаги 39–41 (выражения, скобки), 48 и 49 (уравнения)",
@@ -498,8 +504,8 @@ window.ROADMAP.stages.push(
     },
     {
       id: "track-math-a2c", title: "A2.3 Функции и системы уравнений", en: "Functions and systems of equations",
-      track: "math", kind: "theory", hours: { novice: 20, dev: 17 }, required: true,
-      courseNote: "Ключевой юнит всего трека по алгебре — Algebra 1 юнит 8 (Functions): именно понятие функции лежит под всем машинным обучением. Плюс Algebra basics юнит 5.",
+      track: "math", kind: "theory", hours: { novice: 23, dev: 19 }, required: true,
+      courseNote: "Ключевой юнит всего трека по алгебре — Algebra 1 юнит 8 (Functions): именно понятие функции лежит под всем машинным обучением. Плюс Algebra basics юнит 5. ⚠ Правка 14.09.2026: сюда же добавлен третий, обязательный юнит — парабола. Причина простая и проверяемая: слово «парабола» в карте не встречалось ни разу, а трек A5 опирается на неё трижды (производная f(x) = x², раскрытие (3x + 1)², «модель скатывается в минимум»). Тема выросла с 20 до 23 часов — это единственное место, где срок сдвинулся сознательно.",
       resources: [
         { title: "Khan Academy — Algebra 1, Unit 8: Functions", url: "https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:functions",
           ru: { url: "https://ru.khanacademy.org/math/algebra/x2f8bb11595b61c86:functions" },
@@ -512,7 +518,13 @@ window.ROADMAP.stages.push(
           cost: "free", lang: "en", level: "База", hours: 8, required: true,
           scope: "Unit 5 из 8 — только этот юнит",
           study: "Решение подстановкой и графически.",
-          skip: "Метод сложения можно бегло.", checked: "2026-08-23" }
+          skip: "Метод сложения можно бегло.", checked: "2026-08-23" },
+        { title: "Khan Academy — Algebra 1, Unit 14: Quadratic functions & equations", url: "https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:quadratic-functions-equations",
+          ru: { url: "https://ru.khanacademy.org/math/algebra/x2f8bb11595b61c86:quadratic-functions-equations" },
+          cost: "free", lang: "en", level: "Средний", hours: 3, required: true,
+          scope: "Unit 14 (Algebra 1) — только уроки про параболу: Parabolas intro, Interpret a quadratic graph, Graph quadratics in vertex form",
+          study: "Единственное место в карте, где вводится парабола: график с одним дном. На эту картинку опирается весь трек A5 — производная от x², раскрытие (3x + 1)², «модель скатывается в минимум». Без неё градиентный спуск придётся учить наизусть вместо того, чтобы видеть.",
+          skip: "Всё про РЕШЕНИЕ квадратных уравнений пропускайте целиком: дискриминант, формула корней, разложение на множители, completing the square. Это школьная техника под экзамен, к машинному обучению она не ведёт. ⚠ Русская версия модуля открывается, но уроки внутри не переведены — названия английские (проверено браузером 14.09.2026).", checked: "2026-09-14" }
       ],
       task: "Напишите функцию Python, которая принимает список точек и возвращает k и b прямой через первые две точки. Постройте её вместе с точками."
     },
