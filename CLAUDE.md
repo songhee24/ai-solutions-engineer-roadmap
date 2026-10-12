@@ -16,6 +16,19 @@
 Локальный запуск карты: `python3 -m http.server 8765`. Планнер: `npm --prefix planner-src run dev`
 (или `npm run build` и открыть `/planner/` тем же сервером). Тесты планнера: `npm --prefix planner-src test`.
 
+## Сначала скиллы — главное правило (Akara, 2026-09-19; добавлено сюда 2026-10-12)
+Перед первым вызовом инструмента на шаге (код, дизайн, документ) загрузи скиллы этого шага, потом держи работу по
+Code yardstick из глобального `~/.claude/CLAUDE.md` (там же, в «MAIN RULE», полная карта). Что нужно здесь:
+- **Любой код:** `coding-standards` · `mattpocock-skills:codebase-design` · `mattpocock-skills:tdd` ·
+  `ai-regression-testing` · `verification-loop` (правило js-mechanics грузится само).
+- **Карта (`app.js`, `roadmap-data.js`, `styles.css`):** чистый JS без сборки. React-скиллы и React-заметка
+  роутера (она срабатывает и на `.css`) здесь не применяются.
+- **Планнер (`planner-src/`, Svelte 5 + Vite):** `vite-patterns` для сборки; доступность — `accessibility`
+  (`frontend-a11y` написан для React). Тесты планнера — Vitest.
+- **Ссылки на курсы:** `verification-loop`, фаза 7b: каждую ссылку открыть в настоящем браузере (curl отвечает 200 и на
+  выдуманный адрес).
+- **После шага:** агент `typescript-reviewer` (механика JS и типы).
+
 ## Проверки — четыре слоя, каждый своим инструментом
 
 | Что | Где | Как запустить | Зависимости |
